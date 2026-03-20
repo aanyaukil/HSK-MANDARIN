@@ -9,12 +9,9 @@
 <style>
 body { background-color: #ffe4ec; }
 
-/* Flashcard */
+/* Card */
 .flip-card { perspective: 1000px; }
-.flip-inner {
-    transition: transform 0.6s;
-    transform-style: preserve-3d;
-}
+.flip-inner { transition: transform 0.6s; transform-style: preserve-3d; }
 .flipped { transform: rotateY(180deg); }
 
 .front, .back {
@@ -24,6 +21,15 @@ body { background-color: #ffe4ec; }
     backface-visibility: hidden;
 }
 .back { transform: rotateY(180deg); }
+
+/* Buttons */
+.btn {
+    padding: 10px 16px;
+    border-radius: 999px;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+.btn:active { transform: scale(0.95); }
 
 canvas {
     border: 2px solid black;
@@ -39,7 +45,7 @@ canvas {
 <div id="home">
 <h1 class="text-3xl font-bold mb-6">My Flashcards</h1>
 
-<div onclick="openSet()" class="bg-white p-6 rounded-xl shadow cursor-pointer">
+<div onclick="openSet()" class="bg-white p-6 rounded-2xl shadow cursor-pointer hover:scale-105 transition">
 HSK 1
 </div>
 </div>
@@ -47,68 +53,76 @@ HSK 1
 <!-- FLASHCARDS -->
 <div id="flashPage" class="hidden">
 
-<button onclick="goHome()" class="mb-4 bg-white px-3 py-2 rounded">← Back</button>
+<button onclick="goHome()" class="btn bg-white mb-4">← Back</button>
 
-<select onchange="filterMode=this.value; resetSet();" class="mb-4 p-2 rounded">
+<select onchange="filterMode=this.value; resetSet();" class="mb-4 p-2 rounded-xl">
 <option value="all">All</option>
 <option value="unknown">Unknown Only</option>
 </select>
 
 <div class="flip-card w-80 h-60 mx-auto relative" onclick="flipCard()">
-    <div id="card" class="flip-inner w-full h-full relative">
+<div id="card" class="flip-inner w-full h-full relative">
 
-        <div class="front bg-white rounded-xl flex items-center justify-center text-5xl">
-            <span id="hanzi"></span>
-        </div>
-
-        <div class="back bg-pink-200 rounded-xl flex flex-col justify-center items-center">
-            <p id="pinyin" class="text-lg"></p>
-            <p id="english" class="italic"></p>
-        </div>
-
-    </div>
+<div class="front bg-white rounded-2xl flex items-center justify-center text-5xl">
+<span id="hanzi"></span>
 </div>
 
-<div class="flex justify-center gap-2 mt-4">
-<button onclick="prevCard()" class="bg-white px-3 py-2 rounded">⬅️</button>
-<button onclick="markKnown()" class="bg-green-400 px-3 py-2 rounded">Know</button>
-<button onclick="markUnknown()" class="bg-red-400 px-3 py-2 rounded">Don't</button>
-<button onclick="openInfo()" class="bg-blue-300 px-3 py-2 rounded">Info</button>
-<button onclick="openWrite()" class="bg-pink-400 px-3 py-2 rounded">Write</button>
-<button onclick="nextCard()" class="bg-white px-3 py-2 rounded">➡️</button>
+<div class="back bg-pink-200 rounded-2xl flex flex-col justify-center items-center">
+<p id="pinyin" class="text-lg"></p>
+<p id="english" class="italic"></p>
+</div>
+
+</div>
+</div>
+
+<div class="flex flex-wrap justify-center gap-2 mt-4">
+
+<button onclick="prevCard()" class="btn bg-white">⬅️</button>
+
+<button onclick="markKnown()" class="btn bg-green-300">Know</button>
+
+<button onclick="markUnknown()" class="btn bg-red-300">Don't</button>
+
+<button onclick="openInfo()" class="btn bg-blue-200">Info</button>
+
+<button onclick="openWrite()" class="btn bg-pink-300">Write</button>
+
+<button onclick="nextCard()" class="btn bg-white">➡️</button>
+
 </div>
 
 </div>
 
 <!-- INFO -->
-<div id="infoPopup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-<div class="bg-white p-6 rounded w-80 text-left">
+<div id="infoPopup" class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+<div class="bg-white p-6 rounded-2xl w-80 text-left">
 
 <h2 class="font-bold mb-2">Word Info</h2>
 
 <p><b>Pinyin:</b> <span id="infoPinyin"></span></p>
 <p><b>Meaning:</b> <span id="infoEnglish"></span></p>
 <p><b>Radical:</b> <span id="infoRadical"></span></p>
+<p><b>Radical Pinyin:</b> <span id="infoRadicalPinyin"></span></p>
 <p><b>Radical Meaning:</b> <span id="infoRadicalMeaning"></span></p>
 
 <img id="infoStroke" class="mx-auto my-3 w-32">
 
-<button onclick="closeInfo()" class="bg-pink-400 px-3 py-2 rounded w-full">Close</button>
+<button onclick="closeInfo()" class="btn bg-pink-300 w-full">Close</button>
 
 </div>
 </div>
 
 <!-- WRITE -->
-<div id="writePopup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-<div class="bg-white p-6 rounded w-80">
+<div id="writePopup" class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+<div class="bg-white p-6 rounded-2xl w-80">
 
 <img id="stroke" class="mx-auto mb-3 w-32">
 
 <canvas id="canvas" width="250" height="250"></canvas>
 
 <div class="flex justify-between mt-3">
-<button onclick="clearCanvas()" class="bg-gray-300 px-3 py-1 rounded">Clear</button>
-<button onclick="closeWrite()" class="bg-pink-400 px-3 py-1 rounded">Done</button>
+<button onclick="clearCanvas()" class="btn bg-gray-200">Clear</button>
+<button onclick="closeWrite()" class="btn bg-pink-300">Done</button>
 </div>
 
 </div>
@@ -117,63 +131,54 @@ HSK 1
 <!-- END -->
 <div id="endScreen" class="hidden">
 <h2 class="text-2xl font-bold">Well done 🎉</h2>
-<p>You've finished the set!</p>
-<button onclick="goHome()" class="mt-4 bg-pink-400 px-4 py-2 rounded">Back</button>
+<p>You finished the set!</p>
+
+<button onclick="goHome()" class="btn bg-pink-300 mt-4">Back to Home</button>
 </div>
 
 <script>
 
-// ===== RADICAL MEANINGS =====
+// ===== RADICAL DATA =====
 let radicals = {
-"女":"woman",
-"口":"mouth",
-"氵":"water",
-"木":"tree",
-"人":"person",
-"手":"hand"
+"女": {p:"nǚ", m:"woman"},
+"口": {p:"kǒu", m:"mouth"},
+"木": {p:"mù", m:"tree"},
+"人": {p:"rén", m:"person"}
 };
 
-// ===== DATA =====
+// ===== VOCAB =====
 let vocab = [
-{h:"好", p:"hǎo", e:"good", r:"女"},
-{h:"吃", p:"chī", e:"eat", r:"口"},
-{h:"喝", p:"hē", e:"drink", r:"口"},
-{h:"林", p:"lín", e:"forest", r:"木"}
+{h:"好", p:"hǎo", e:"good", r:"女", known:false},
+{h:"吃", p:"chī", e:"eat", r:"口", known:false},
+{h:"喝", p:"hē", e:"drink", r:"口", known:false},
+{h:"林", p:"lín", e:"forest", r:"木", known:false}
 ];
 
-let filtered = [];
 let index = 0;
 let filterMode = "all";
 
-// ===== NAV =====
-function openSet(){
-    document.getElementById("home").classList.add("hidden");
-    document.getElementById("flashPage").classList.remove("hidden");
-    resetSet();
-}
-
-function goHome(){ location.reload(); }
-
 // ===== FILTER =====
-function applyFilter(){
-    filtered = (filterMode==="unknown")
-    ? vocab.filter(v=>!v.known)
-    : vocab;
+function getFiltered(){
+    return (filterMode==="unknown")
+        ? vocab.filter(v=>!v.known)
+        : vocab;
 }
 
 // ===== SHOW CARD =====
 function showCard(){
-    applyFilter();
 
-    if(index>=filtered.length){
+    let list = getFiltered();
+
+    if(index >= list.length){
         document.getElementById("flashPage").classList.add("hidden");
         document.getElementById("endScreen").classList.remove("hidden");
         return;
     }
 
-    let w = filtered[index];
+    let w = list[index];
 
     document.getElementById("card").classList.remove("flipped");
+
     document.getElementById("hanzi").innerText = w.h;
     document.getElementById("pinyin").innerText = w.p;
     document.getElementById("english").innerText = w.e;
@@ -182,31 +187,40 @@ function showCard(){
     `https://cdn.jsdelivr.net/gh/skishore/makemeahanzi@master/graphics/${w.h.charCodeAt(0)}.gif`;
 }
 
-// ===== FLIP =====
-function flipCard(){
-    document.getElementById("card").classList.toggle("flipped");
-}
-
-document.addEventListener("keydown", e=>{
-    if(e.code==="Space") flipCard();
-});
-
-// ===== NAV CARDS =====
+// ===== NAV =====
 function nextCard(){ index++; showCard(); }
 function prevCard(){ if(index>0) index--; showCard(); }
 
+function resetSet(){
+    index = 0;
+    showCard();
+}
+
 // ===== MARK =====
-function markKnown(){ filtered[index].known=true; nextCard(); }
-function markUnknown(){ filtered[index].known=false; nextCard(); }
+function markKnown(){
+    let list = getFiltered();
+    let word = list[index];
+    word.known = true;
+    nextCard();
+}
+
+function markUnknown(){
+    let list = getFiltered();
+    let word = list[index];
+    word.known = false;
+    nextCard();
+}
 
 // ===== INFO =====
 function openInfo(){
-    let w = filtered[index];
+    let w = getFiltered()[index];
+    let r = radicals[w.r] || {p:"?", m:"unknown"};
 
     document.getElementById("infoPinyin").innerText = w.p;
     document.getElementById("infoEnglish").innerText = w.e;
     document.getElementById("infoRadical").innerText = w.r;
-    document.getElementById("infoRadicalMeaning").innerText = radicals[w.r] || "unknown";
+    document.getElementById("infoRadicalPinyin").innerText = r.p;
+    document.getElementById("infoRadicalMeaning").innerText = r.m;
 
     document.getElementById("infoStroke").src =
     `https://cdn.jsdelivr.net/gh/skishore/makemeahanzi@master/graphics/${w.h.charCodeAt(0)}.gif`;
@@ -219,8 +233,22 @@ function closeInfo(){
 }
 
 // ===== WRITE =====
-function openWrite(){ document.getElementById("writePopup").classList.remove("hidden"); }
-function closeWrite(){ document.getElementById("writePopup").classList.add("hidden"); }
+function openWrite(){
+    document.getElementById("writePopup").classList.remove("hidden");
+}
+
+function closeWrite(){
+    document.getElementById("writePopup").classList.add("hidden");
+}
+
+// ===== FLIP =====
+function flipCard(){
+    document.getElementById("card").classList.toggle("flipped");
+}
+
+document.addEventListener("keydown", e=>{
+    if(e.code==="Space") flipCard();
+});
 
 // ===== CANVAS =====
 let canvas=document.getElementById("canvas");
@@ -254,9 +282,14 @@ function clearCanvas(){
 }
 
 // ===== INIT =====
-function resetSet(){
-    index=0;
-    showCard();
+function openSet(){
+    document.getElementById("home").classList.add("hidden");
+    document.getElementById("flashPage").classList.remove("hidden");
+    resetSet();
+}
+
+function goHome(){
+    location.reload();
 }
 
 </script>
