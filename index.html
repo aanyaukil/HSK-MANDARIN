@@ -1,55 +1,164 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HSK Practice</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .flip-card { perspective: 1000px; }
-        .flip-card-inner { transition: transform 0.6s; transform-style: preserve-3d; cursor: pointer; position: relative; width: 100%; height: 100%; }
-        .flipped .flip-card-inner { transform: rotateY(180deg); }
-        .flip-card-front, .flip-card-back { backface-visibility: hidden; position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; border-radius: 1rem; }
-        .flip-card-back { transform: rotateY(180deg); flex-direction: column; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HSK Master App</title>
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+canvas {
+    border: 2px solid white;
+    border-radius: 10px;
+    touch-action: none;
+}
+</style>
 </head>
-<body class="bg-slate-900 flex flex-col items-center justify-center min-h-screen p-6 text-white">
-    <div class="w-full max-w-sm">
-        <h1 class="text-2xl font-bold text-center mb-8 text-blue-400">HSK 1 Vocabulary</h1>
-        <div id="card" class="flip-card w-full h-80 mb-8" onclick="this.classList.toggle('flipped')">
-            <div class="flip-card-inner">
-                <div class="flip-card-front bg-white text-slate-900 border-4 border-blue-500 shadow-2xl">
-                    <p id="hanzi" class="text-7xl font-bold">我</p>
-                </div>
-                <div class="flip-card-back bg-blue-600 text-white shadow-2xl p-6 text-center">
-                    <p id="pinyin" class="text-3xl font-medium mb-2">wǒ</p>
-                    <p id="english" class="text-2xl opacity-90 italic">I / me</p>
-                </div>
-            </div>
-        </div>
-        <button onclick="event.stopPropagation(); nextCard();" class="w-full bg-blue-500 hover:bg-blue-400 text-white py-4 rounded-2xl font-black text-xl shadow-lg transition-all active:scale-95">NEXT WORD</button>
-    </div>
-    <script>
-        const vocab = [
-            {h:"我", p:"wǒ", e:"I / me"}, {h:"你", p:"nǐ", e:"You"}, {h:"他", p:"tā", e:"He / Him"},
-            {h:"她", p:"tā", e:"She / Her"}, {h:"我们", p:"wǒ men", e:"We / Us"}, {h:"好", p:"hǎo", e:"Good / Well"},
-            {h:"是", p:"shì", e:"To be (am/is/are)"}, {h:"老师", p:"lǎo shī", e:"Teacher"}, {h:"学生", p:"xué sheng", e:"Student"},
-            {h:"人", p:"rén", e:"Person / People"}, {h:"中国", p:"zhōng guó", e:"China"}, {h:"美国", p:"měi guó", e:"USA"},
-            {h:"喝", p:"hē", e:"To drink"}, {h:"吃", p:"chī", e:"To eat"}, {h:"水", p:"shuǐ", e:"Water"},
-            {h:"米饭", p:"mǐ fàn", e:"Cooked rice"}, {h:"爸爸", p:"bà ba", e:"Dad"}, {h:"妈妈", p:"mā ma", e:"Mom"},
-            {h:"谢谢", p:"xiè xie", e:"Thank you"}, {h:"不客气", p:"bú kè qi", e:"You're welcome"}
-        ];
-        let index = 0;
-        function nextCard() {
-            const card = document.getElementById('card');
-            card.classList.remove('flipped');
-            setTimeout(() => {
-                index = Math.floor(Math.random() * vocab.length);
-                document.getElementById('hanzi').innerText = vocab[index].h;
-                document.getElementById('pinyin').innerText = vocab[index].p;
-                document.getElementById('english').innerText = vocab[index].e;
-            }, 150);
-        }
-    </script>
+
+<body class="bg-slate-900 text-white p-4">
+
+<h1 class="text-2xl font-bold text-blue-400 text-center mb-4">
+HSK Vocabulary Trainer
+</h1>
+
+<div id="wordList"></div>
+
+<!-- DETAIL VIEW -->
+<div id="detailView" class="hidden mt-6">
+
+<button onclick="goBack()" class="bg-gray-700 px-3 py-2 rounded mb-4">← Back</button>
+
+<div class="text-center">
+    <p id="pinyin" class="text-xl text-blue-300"></p>
+    <p id="hanzi" class="text-6xl font-bold"></p>
+    <p id="english" class="italic"></p>
+</div>
+
+<img id="strokeImg" class="mx-auto my-4 w-40">
+
+<canvas id="canvas" width="300" height="300"></canvas>
+
+<div class="flex justify-center gap-4 mt-4">
+    <button onclick="markKnown()" class="bg-green-500 px-4 py-2 rounded">Known</button>
+    <button onclick="markUnknown()" class="bg-red-500 px-4 py-2 rounded">Unknown</button>
+    <button onclick="clearCanvas()" class="bg-gray-600 px-4 py-2 rounded">Clear</button>
+</div>
+
+</div>
+
+<script>
+
+// ===== VOCAB (SAMPLE — I CAN EXPAND ALL 500) =====
+let vocab = [
+{h:"爱", p:"ài", e:"love", known:false},
+{h:"爱好", p:"ài hào", e:"hobby", known:false},
+{h:"八", p:"bā", e:"eight", known:false},
+{h:"爸爸", p:"bàba", e:"dad", known:false},
+{h:"吧", p:"ba", e:"particle", known:false},
+{h:"白", p:"bái", e:"white", known:false},
+{h:"白天", p:"bái tiān", e:"daytime", known:false},
+{h:"百", p:"bǎi", e:"hundred", known:false},
+{h:"班", p:"bān", e:"class", known:false},
+{h:"半", p:"bàn", e:"half", known:false},
+{h:"帮", p:"bāng", e:"help", known:false},
+{h:"杯子", p:"bēi zi", e:"cup", known:false},
+{h:"北京", p:"běi jīng", e:"Beijing", known:false},
+{h:"不", p:"bù", e:"no", known:false},
+{h:"吃", p:"chī", e:"eat", known:false},
+{h:"喝", p:"hē", e:"drink", known:false},
+{h:"老师", p:"lǎoshī", e:"teacher", known:false},
+{h:"学生", p:"xuésheng", e:"student", known:false},
+{h:"中国", p:"zhōngguó", e:"China", known:false},
+{h:"谢谢", p:"xièxie", e:"thank you", known:false}
+];
+
+// ===== STATE =====
+let currentIndex = null;
+
+// ===== SHOW LIST =====
+function showWords() {
+    document.getElementById("detailView").classList.add("hidden");
+
+    vocab.sort((a,b)=>a.known - b.known);
+
+    let html = "";
+    vocab.forEach((w,i)=>{
+        html += `
+        <div onclick="openWord(${i})"
+        class="bg-white text-black p-4 rounded mb-2 flex justify-between">
+            <span>${w.h}</span>
+            <span>${w.known ? "✅" : "❌"}</span>
+        </div>`;
+    });
+
+    document.getElementById("wordList").innerHTML = html;
+}
+
+// ===== OPEN WORD =====
+function openWord(i) {
+    currentIndex = i;
+    let w = vocab[i];
+
+    document.getElementById("hanzi").innerText = w.h;
+    document.getElementById("pinyin").innerText = w.p;
+    document.getElementById("english").innerText = w.e;
+
+    document.getElementById("strokeImg").src =
+    `https://cdn.jsdelivr.net/gh/skishore/makemeahanzi@master/graphics/${w.h.charCodeAt(0)}.gif`;
+
+    document.getElementById("detailView").classList.remove("hidden");
+}
+
+// ===== NAV =====
+function goBack() {
+    showWords();
+}
+
+// ===== MARK =====
+function markKnown() {
+    vocab[currentIndex].known = true;
+    showWords();
+}
+
+function markUnknown() {
+    vocab[currentIndex].known = false;
+    showWords();
+}
+
+// ===== DRAW =====
+let canvas = document.getElementById("canvas");
+let ctx = canvas.getContext("2d");
+
+let drawing = false;
+
+canvas.addEventListener("touchstart", ()=>drawing=true);
+canvas.addEventListener("touchend", ()=>drawing=false);
+canvas.addEventListener("touchmove", draw);
+
+function draw(e) {
+    if (!drawing) return;
+
+    let rect = canvas.getBoundingClientRect();
+    let x = e.touches[0].clientX - rect.left;
+    let y = e.touches[0].clientY - rect.top;
+
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = "white";
+
+    ctx.lineTo(x,y);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x,y);
+}
+
+function clearCanvas() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+}
+
+// ===== INIT =====
+showWords();
+
+</script>
+
 </body>
 </html>
