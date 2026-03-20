@@ -3,133 +3,189 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HSK Master App</title>
+<title>HSK App</title>
 <script src="https://cdn.tailwindcss.com"></script>
 
 <style>
+body { background-color: #ffe4ec; }
+
+/* Flashcard */
+.flip-card { perspective: 1000px; }
+.flip-inner {
+    transition: transform 0.6s;
+    transform-style: preserve-3d;
+}
+.flipped { transform: rotateY(180deg); }
+
+.front, .back {
+    backface-visibility: hidden;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+.back { transform: rotateY(180deg); }
+
+/* Canvas */
 canvas {
-    border: 2px solid white;
+    border: 2px solid black;
     border-radius: 10px;
     touch-action: none;
 }
 </style>
 </head>
 
-<body class="bg-slate-900 text-white p-4">
+<body class="p-6 text-center">
 
-<h1 class="text-2xl font-bold text-blue-400 text-center mb-4">
-HSK Vocabulary Trainer
-</h1>
+<!-- ===== MAIN PAGE ===== -->
+<div id="home">
+    <h1 class="text-3xl font-bold mb-6">My Flashcards</h1>
 
-<div id="wordList"></div>
+    <div id="sets" class="space-y-4">
+        <div onclick="openSet('HSK1')"
+        class="bg-white p-6 rounded-2xl shadow cursor-pointer">
+            HSK 1
+        </div>
+    </div>
 
-<!-- DETAIL VIEW -->
-<div id="detailView" class="hidden mt-6">
-
-<button onclick="goBack()" class="bg-gray-700 px-3 py-2 rounded mb-4">← Back</button>
-
-<div class="text-center">
-    <p id="pinyin" class="text-xl text-blue-300"></p>
-    <p id="hanzi" class="text-6xl font-bold"></p>
-    <p id="english" class="italic"></p>
+    <button onclick="addSet()" class="mt-6 bg-pink-400 px-4 py-2 rounded">
+        + Add Set
+    </button>
 </div>
 
-<img id="strokeImg" class="mx-auto my-4 w-40">
+<!-- ===== FLASHCARD PAGE ===== -->
+<div id="flashPage" class="hidden">
 
-<canvas id="canvas" width="300" height="300"></canvas>
+<button onclick="goHome()" class="mb-4 bg-white px-3 py-2 rounded">← Back</button>
 
-<div class="flex justify-center gap-4 mt-4">
-    <button onclick="markKnown()" class="bg-green-500 px-4 py-2 rounded">Known</button>
-    <button onclick="markUnknown()" class="bg-red-500 px-4 py-2 rounded">Unknown</button>
-    <button onclick="clearCanvas()" class="bg-gray-600 px-4 py-2 rounded">Clear</button>
+<div class="flip-card w-80 h-60 mx-auto relative">
+    <div id="card" class="flip-inner w-full h-full relative">
+
+        <div class="front bg-white rounded-2xl flex items-center justify-center text-5xl font-bold">
+            <span id="hanzi"></span>
+        </div>
+
+        <div class="back bg-pink-200 rounded-2xl flex flex-col justify-center items-center">
+            <p id="pinyin"></p>
+            <p id="english" class="italic"></p>
+        </div>
+
+    </div>
 </div>
 
+<div class="flex justify-center gap-4 mt-6">
+    <button onclick="prevCard()" class="bg-white px-4 py-2 rounded">⬅️</button>
+    <button onclick="openWrite()" class="bg-pink-400 px-4 py-2 rounded">Write</button>
+    <button onclick="nextCard()" class="bg-white px-4 py-2 rounded">➡️</button>
+</div>
+
+</div>
+
+<!-- ===== WRITE POPUP ===== -->
+<div id="writePopup"
+class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+
+<div class="bg-white p-6 rounded-xl w-80">
+
+    <h2 class="text-lg mb-2">Practice Writing</h2>
+
+    <img id="stroke" class="mx-auto mb-3 w-32">
+
+    <canvas id="canvas" width="250" height="250"></canvas>
+
+    <div class="flex justify-between mt-3">
+        <button onclick="clearCanvas()" class="bg-gray-300 px-3 py-1 rounded">Clear</button>
+        <button onclick="closeWrite()" class="bg-pink-400 px-3 py-1 rounded">Done</button>
+    </div>
+
+</div>
 </div>
 
 <script>
 
-// ===== VOCAB (SAMPLE — I CAN EXPAND ALL 500) =====
-let vocab = [
-{h:"爱", p:"ài", e:"love", known:false},
-{h:"爱好", p:"ài hào", e:"hobby", known:false},
-{h:"八", p:"bā", e:"eight", known:false},
-{h:"爸爸", p:"bàba", e:"dad", known:false},
-{h:"吧", p:"ba", e:"particle", known:false},
-{h:"白", p:"bái", e:"white", known:false},
-{h:"白天", p:"bái tiān", e:"daytime", known:false},
-{h:"百", p:"bǎi", e:"hundred", known:false},
-{h:"班", p:"bān", e:"class", known:false},
-{h:"半", p:"bàn", e:"half", known:false},
-{h:"帮", p:"bāng", e:"help", known:false},
-{h:"杯子", p:"bēi zi", e:"cup", known:false},
-{h:"北京", p:"běi jīng", e:"Beijing", known:false},
-{h:"不", p:"bù", e:"no", known:false},
-{h:"吃", p:"chī", e:"eat", known:false},
-{h:"喝", p:"hē", e:"drink", known:false},
-{h:"老师", p:"lǎoshī", e:"teacher", known:false},
-{h:"学生", p:"xuésheng", e:"student", known:false},
-{h:"中国", p:"zhōngguó", e:"China", known:false},
-{h:"谢谢", p:"xièxie", e:"thank you", known:false}
-];
+// ===== DATA =====
+let sets = {
+    HSK1: [
+        {h:"爱", p:"ài", e:"love"},
+        {h:"八", p:"bā", e:"eight"},
+        {h:"爸爸", p:"bàba", e:"dad"},
+        {h:"白", p:"bái", e:"white"},
+        {h:"北京", p:"běijīng", e:"Beijing"},
+        {h:"不", p:"bù", e:"no"},
+        {h:"吃", p:"chī", e:"eat"},
+        {h:"喝", p:"hē", e:"drink"},
+        {h:"老师", p:"lǎoshī", e:"teacher"},
+        {h:"学生", p:"xuésheng", e:"student"},
+        {h:"中国", p:"zhōngguó", e:"China"},
+        {h:"谢谢", p:"xièxie", e:"thank you"}
+    ]
+};
 
-// ===== STATE =====
-let currentIndex = null;
+let currentSet = [];
+let index = 0;
 
-// ===== SHOW LIST =====
-function showWords() {
-    document.getElementById("detailView").classList.add("hidden");
+// ===== NAVIGATION =====
+function openSet(name) {
+    document.getElementById("home").classList.add("hidden");
+    document.getElementById("flashPage").classList.remove("hidden");
 
-    vocab.sort((a,b)=>a.known - b.known);
-
-    let html = "";
-    vocab.forEach((w,i)=>{
-        html += `
-        <div onclick="openWord(${i})"
-        class="bg-white text-black p-4 rounded mb-2 flex justify-between">
-            <span>${w.h}</span>
-            <span>${w.known ? "✅" : "❌"}</span>
-        </div>`;
-    });
-
-    document.getElementById("wordList").innerHTML = html;
+    currentSet = sets[name];
+    index = 0;
+    showCard();
 }
 
-// ===== OPEN WORD =====
-function openWord(i) {
-    currentIndex = i;
-    let w = vocab[i];
+function goHome() {
+    document.getElementById("flashPage").classList.add("hidden");
+    document.getElementById("home").classList.remove("hidden");
+}
 
+// ===== FLASHCARD =====
+function showCard() {
+    let card = document.getElementById("card");
+    card.classList.remove("flipped");
+
+    let w = currentSet[index];
     document.getElementById("hanzi").innerText = w.h;
     document.getElementById("pinyin").innerText = w.p;
     document.getElementById("english").innerText = w.e;
 
-    document.getElementById("strokeImg").src =
+    document.getElementById("stroke").src =
     `https://cdn.jsdelivr.net/gh/skishore/makemeahanzi@master/graphics/${w.h.charCodeAt(0)}.gif`;
-
-    document.getElementById("detailView").classList.remove("hidden");
 }
 
-// ===== NAV =====
-function goBack() {
-    showWords();
+function nextCard() {
+    index = (index + 1) % currentSet.length;
+    showCard();
 }
 
-// ===== MARK =====
-function markKnown() {
-    vocab[currentIndex].known = true;
-    showWords();
+function prevCard() {
+    index = (index - 1 + currentSet.length) % currentSet.length;
+    showCard();
 }
 
-function markUnknown() {
-    vocab[currentIndex].known = false;
-    showWords();
+// ===== FLIP (SPACEBAR) =====
+document.addEventListener("keydown", (e)=>{
+    if (e.code === "Space") {
+        document.getElementById("card").classList.toggle("flipped");
+    }
+});
+
+// ===== WRITE POPUP =====
+function openWrite() {
+    document.getElementById("writePopup").classList.remove("hidden");
 }
 
-// ===== DRAW =====
+function closeWrite() {
+    document.getElementById("writePopup").classList.add("hidden");
+}
+
+// ===== CANVAS =====
 let canvas = document.getElementById("canvas");
 let ctx = canvas.getContext("2d");
-
 let drawing = false;
+
+canvas.addEventListener("mousedown", ()=>drawing=true);
+canvas.addEventListener("mouseup", ()=>drawing=false);
+canvas.addEventListener("mousemove", draw);
 
 canvas.addEventListener("touchstart", ()=>drawing=true);
 canvas.addEventListener("touchend", ()=>drawing=false);
@@ -139,11 +195,11 @@ function draw(e) {
     if (!drawing) return;
 
     let rect = canvas.getBoundingClientRect();
-    let x = e.touches[0].clientX - rect.left;
-    let y = e.touches[0].clientY - rect.top;
+    let x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+    let y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
 
     ctx.lineWidth = 4;
-    ctx.strokeStyle = "white";
+    ctx.lineCap = "round";
 
     ctx.lineTo(x,y);
     ctx.stroke();
@@ -155,8 +211,14 @@ function clearCanvas() {
     ctx.clearRect(0,0,canvas.width,canvas.height);
 }
 
-// ===== INIT =====
-showWords();
+// ===== ADD SET =====
+function addSet() {
+    let name = prompt("Set name:");
+    if (name) {
+        sets[name] = [];
+        alert("Set created (you can add words in code)");
+    }
+}
 
 </script>
 
