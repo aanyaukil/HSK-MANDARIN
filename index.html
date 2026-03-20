@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HSK Practice</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .flip-card { perspective: 1000px; }
+        .flip-card-inner { transition: transform 0.6s; transform-style: preserve-3d; cursor: pointer; position: relative; width: 100%; height: 100%; }
+        .flipped .flip-card-inner { transform: rotateY(180deg); }
+        .flip-card-front, .flip-card-back { backface-visibility: hidden; position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; border-radius: 1rem; }
+        .flip-card-back { transform: rotateY(180deg); flex-direction: column; }
+    </style>
+</head>
+<body class="bg-slate-900 flex flex-col items-center justify-center min-h-screen p-6 text-white">
+    <div class="w-full max-w-sm">
+        <h1 class="text-2xl font-bold text-center mb-8 text-blue-400">HSK 1 Vocabulary</h1>
+        <div id="card" class="flip-card w-full h-80 mb-8" onclick="this.classList.toggle('flipped')">
+            <div class="flip-card-inner">
+                <div class="flip-card-front bg-white text-slate-900 border-4 border-blue-500 shadow-2xl">
+                    <p id="hanzi" class="text-7xl font-bold">我</p>
+                </div>
+                <div class="flip-card-back bg-blue-600 text-white shadow-2xl p-6 text-center">
+                    <p id="pinyin" class="text-3xl font-medium mb-2">wǒ</p>
+                    <p id="english" class="text-2xl opacity-90 italic">I / me</p>
+                </div>
+            </div>
+        </div>
+        <button onclick="event.stopPropagation(); nextCard();" class="w-full bg-blue-500 hover:bg-blue-400 text-white py-4 rounded-2xl font-black text-xl shadow-lg transition-all active:scale-95">NEXT WORD</button>
+    </div>
+    <script>
+        const vocab = [
+            {h:"我", p:"wǒ", e:"I / me"}, {h:"你", p:"nǐ", e:"You"}, {h:"他", p:"tā", e:"He / Him"},
+            {h:"她", p:"tā", e:"She / Her"}, {h:"我们", p:"wǒ men", e:"We / Us"}, {h:"好", p:"hǎo", e:"Good / Well"},
+            {h:"是", p:"shì", e:"To be (am/is/are)"}, {h:"老师", p:"lǎo shī", e:"Teacher"}, {h:"学生", p:"xué sheng", e:"Student"},
+            {h:"人", p:"rén", e:"Person / People"}, {h:"中国", p:"zhōng guó", e:"China"}, {h:"美国", p:"měi guó", e:"USA"},
+            {h:"喝", p:"hē", e:"To drink"}, {h:"吃", p:"chī", e:"To eat"}, {h:"水", p:"shuǐ", e:"Water"},
+            {h:"米饭", p:"mǐ fàn", e:"Cooked rice"}, {h:"爸爸", p:"bà ba", e:"Dad"}, {h:"妈妈", p:"mā ma", e:"Mom"},
+            {h:"谢谢", p:"xiè xie", e:"Thank you"}, {h:"不客气", p:"bú kè qi", e:"You're welcome"}
+        ];
+        let index = 0;
+        function nextCard() {
+            const card = document.getElementById('card');
+            card.classList.remove('flipped');
+            setTimeout(() => {
+                index = Math.floor(Math.random() * vocab.length);
+                document.getElementById('hanzi').innerText = vocab[index].h;
+                document.getElementById('pinyin').innerText = vocab[index].p;
+                document.getElementById('english').innerText = vocab[index].e;
+            }, 150);
+        }
+    </script>
+</body>
+</html>
