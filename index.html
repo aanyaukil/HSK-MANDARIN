@@ -3,36 +3,33 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HSK App</title>
+<title>HSK Master</title>
 <script src="https://cdn.tailwindcss.com"></script>
 
 <style>
-body { background-color: #ffe4ec; }
+body { background:#ffe4ec; }
+.flip-card { perspective:1000px; }
+.flip-inner { transition:0.5s; transform-style:preserve-3d; }
+.flipped { transform:rotateY(180deg); }
 
-.flip-card { perspective: 1000px; }
-.flip-inner { transition: transform 0.5s; transform-style: preserve-3d; }
-.flipped { transform: rotateY(180deg); }
-
-.front, .back {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    backface-visibility: hidden;
+.front,.back {
+position:absolute;width:100%;height:100%;
+backface-visibility:hidden;
 }
-.back { transform: rotateY(180deg); }
+.back { transform:rotateY(180deg); }
 
 .btn {
-    padding: 12px;
-    border-radius: 999px;
-    font-weight: 600;
-    width: 100%;
+padding:12px;
+border-radius:999px;
+font-weight:600;
+width:100%;
 }
 
 canvas {
-    border: 2px solid black;
-    border-radius: 10px;
-    touch-action: none;
-    width: 100%;
+border:2px solid black;
+border-radius:10px;
+touch-action:none;
+width:100%;
 }
 </style>
 </head>
@@ -41,14 +38,11 @@ canvas {
 
 <!-- HOME -->
 <div id="home">
-<h1 class="text-2xl font-bold mb-6">Flashcards</h1>
-
-<div onclick="openSet()" class="bg-white p-6 rounded-2xl shadow">
-HSK 1
-</div>
+<h1 class="text-2xl font-bold mb-6">HSK Flashcards</h1>
+<div onclick="openSet()" class="bg-white p-6 rounded-2xl shadow">HSK 1</div>
 </div>
 
-<!-- FLASHCARDS -->
+<!-- FLASH -->
 <div id="flashPage" class="hidden">
 
 <button onclick="goHome()" class="btn bg-white mb-4">← Back</button>
@@ -58,39 +52,32 @@ HSK 1
 <option value="unknown">Unknown Only</option>
 </select>
 
-<div class="flip-card w-full max-w-sm h-64 mx-auto" onclick="flipCard()">
-<div id="card" class="flip-inner w-full h-full relative">
+<div id="swipeArea" class="flip-card w-full max-w-sm h-64 mx-auto">
+<div id="card" class="flip-inner w-full h-full relative" onclick="flipCard()">
 
 <div class="front bg-white rounded-2xl flex items-center justify-center text-5xl">
 <span id="hanzi"></span>
 </div>
 
-<div class="back bg-pink-200 rounded-2xl flex flex-col justify-center items-center p-4">
-<p id="pinyin" class="text-lg"></p>
+<div class="back bg-pink-200 rounded-2xl flex flex-col justify-center items-center">
+<p id="pinyin"></p>
 <p id="english"></p>
 </div>
 
 </div>
 </div>
 
-<div class="grid grid-cols-3 gap-2 mt-4 max-w-sm mx-auto">
-
-<button onclick="prevCard()" class="btn bg-white">⬅️</button>
-<button onclick="nextCard()" class="btn bg-white">➡️</button>
-
+<div class="grid grid-cols-2 gap-2 mt-4 max-w-sm mx-auto">
 <button onclick="markKnown()" class="btn bg-green-300">Know</button>
 <button onclick="markUnknown()" class="btn bg-red-300">Don't</button>
-
 <button onclick="openInfo()" class="btn bg-blue-200">Info</button>
 <button onclick="openWrite()" class="btn bg-pink-300">Write</button>
-
 </div>
 
 </div>
 
-<!-- INFO (FULL SCREEN) -->
-<div id="infoPopup" class="hidden fixed inset-0 bg-white p-6 overflow-y-auto">
-
+<!-- INFO -->
+<div id="infoPopup" class="hidden fixed inset-0 bg-white p-6">
 <h2 class="text-xl font-bold mb-4">Word Info</h2>
 
 <p><b>Pinyin:</b> <span id="infoPinyin"></span></p>
@@ -102,21 +89,17 @@ HSK 1
 <img id="infoStroke" class="mx-auto my-4 w-40">
 
 <button onclick="closeInfo()" class="btn bg-pink-300">Back</button>
-
 </div>
 
-<!-- WRITE (FULL SCREEN) -->
+<!-- WRITE -->
 <div id="writePopup" class="hidden fixed inset-0 bg-white p-4">
-
 <img id="stroke" class="mx-auto mb-4 w-40">
-
 <canvas id="canvas" height="300"></canvas>
 
-<div class="mt-4 grid grid-cols-2 gap-2">
+<div class="grid grid-cols-2 gap-2 mt-4">
 <button onclick="clearCanvas()" class="btn bg-gray-200">Clear</button>
 <button onclick="closeWrite()" class="btn bg-pink-300">Done</button>
 </div>
-
 </div>
 
 <!-- END -->
@@ -127,81 +110,112 @@ HSK 1
 
 <script>
 
-// RADICALS
-let radicals = {
-"女": {p:"nǚ", m:"woman"},
-"口": {p:"kǒu", m:"mouth"},
-"木": {p:"mù", m:"tree"}
+// ===== RADICALS =====
+let radicals={
+"女":{p:"nǚ",m:"woman"},
+"口":{p:"kǒu",m:"mouth"},
+"木":{p:"mù",m:"tree"}
 };
 
-// VOCAB
-let vocab = [
-{h:"好", p:"hǎo", e:"good", r:"女", known:false},
-{h:"吃", p:"chī", e:"eat", r:"口", known:false},
-{h:"林", p:"lín", e:"forest", r:"木", known:false}
+// ===== LOAD VOCAB (LOCAL STORAGE) =====
+let saved = JSON.parse(localStorage.getItem("hsk_progress"));
+
+let vocab = saved || [
+{h:"好",p:"hǎo",e:"good; well",r:"女",known:false},
+{h:"吃",p:"chī",e:"eat",r:"口",known:false},
+{h:"林",p:"lín",e:"forest",r:"木",known:false}
 ];
 
-let index=0, filterMode="all";
+// ===== SAVE =====
+function save(){
+localStorage.setItem("hsk_progress",JSON.stringify(vocab));
+}
 
-// FILTER
+// ===== FILTER =====
+let index=0,filterMode="all";
 function getFiltered(){
-    return filterMode==="unknown" ? vocab.filter(v=>!v.known) : vocab;
+return filterMode==="unknown"?vocab.filter(v=>!v.known):vocab;
 }
 
-// SHOW
+// ===== SHOW =====
 function showCard(){
-    let list = getFiltered();
+let list=getFiltered();
 
-    if(index>=list.length){
-        document.getElementById("flashPage").classList.add("hidden");
-        document.getElementById("endScreen").classList.remove("hidden");
-        return;
-    }
-
-    let w = list[index];
-
-    document.getElementById("card").classList.remove("flipped");
-    hanzi.innerText=w.h;
-    pinyin.innerText=w.p;
-    english.innerText=w.e;
-
-    stroke.src=`https://cdn.jsdelivr.net/gh/skishore/makemeahanzi@master/graphics/${w.h.charCodeAt(0)}.gif`;
+if(index>=list.length){
+flashPage.classList.add("hidden");
+endScreen.classList.remove("hidden");
+return;
 }
 
-// NAV
-function nextCard(){ index++; showCard(); }
-function prevCard(){ if(index>0) index--; showCard(); }
-function resetSet(){ index=0; showCard(); }
+let w=list[index];
 
-// MARK
-function markKnown(){ getFiltered()[index].known=true; nextCard(); }
-function markUnknown(){ getFiltered()[index].known=false; nextCard(); }
+card.classList.remove("flipped");
+hanzi.innerText=w.h;
+pinyin.innerText=w.p;
+english.innerText=w.e;
 
-// FLIP
-function flipCard(){ card.classList.toggle("flipped"); }
+stroke.src=`https://cdn.jsdelivr.net/gh/skishore/makemeahanzi@master/graphics/${w.h.charCodeAt(0)}.gif`;
+}
 
-// INFO
+// ===== NAV =====
+function nextCard(){index++;showCard();}
+function prevCard(){if(index>0)index--;showCard();}
+function resetSet(){index=0;showCard();}
+
+// ===== MARK =====
+function markKnown(){
+let w=getFiltered()[index];
+w.known=true;
+save();
+nextCard();
+}
+
+function markUnknown(){
+let w=getFiltered()[index];
+w.known=false;
+save();
+nextCard();
+}
+
+// ===== FLIP =====
+function flipCard(){card.classList.toggle("flipped");}
+
+// ===== SWIPE =====
+let startX=0;
+
+swipeArea.addEventListener("touchstart",e=>{
+startX=e.touches[0].clientX;
+});
+
+swipeArea.addEventListener("touchend",e=>{
+let endX=e.changedTouches[0].clientX;
+if(endX-startX>50) prevCard();
+if(startX-endX>50) nextCard();
+});
+
+// ===== INFO =====
 function openInfo(){
-    let w=getFiltered()[index];
-    let r=radicals[w.r];
+let w=getFiltered()[index];
+let r=radicals[w.r]||{p:"?",m:"?"};
 
-    infoPinyin.innerText=w.p;
-    infoEnglish.innerText=w.e;
-    infoRadical.innerText=w.r;
-    infoRadicalPinyin.innerText=r.p;
-    infoRadicalMeaning.innerText=r.m;
+infoPinyin.innerText=w.p;
+infoEnglish.innerText=w.e;
+infoRadical.innerText=w.r;
+infoRadicalPinyin.innerText=r.p;
+infoRadicalMeaning.innerText=r.m;
 
-    infoStroke.src=stroke.src;
+infoStroke.src=stroke.src;
 
-    infoPopup.classList.remove("hidden");
+infoPopup.classList.remove("hidden");
 }
-function closeInfo(){ infoPopup.classList.add("hidden"); }
 
-// WRITE
-function openWrite(){ writePopup.classList.remove("hidden"); }
-function closeWrite(){ writePopup.classList.add("hidden"); }
+function closeInfo(){infoPopup.classList.add("hidden");}
 
-// CANVAS
+// ===== WRITE =====
+function openWrite(){writePopup.classList.remove("hidden");}
+function closeWrite(){writePopup.classList.add("hidden");}
+
+// ===== CANVAS =====
 let canvas=document.getElementById("canvas");
 let ctx=canvas.getContext("2d");
 let drawing=false;
@@ -209,28 +223,29 @@ let drawing=false;
 canvas.addEventListener("touchstart",()=>drawing=true);
 canvas.addEventListener("touchend",()=>drawing=false);
 canvas.addEventListener("touchmove",e=>{
-    if(!drawing)return;
-    let rect=canvas.getBoundingClientRect();
-    let x=e.touches[0].clientX-rect.left;
-    let y=e.touches[0].clientY-rect.top;
+if(!drawing)return;
+let rect=canvas.getBoundingClientRect();
+let x=e.touches[0].clientX-rect.left;
+let y=e.touches[0].clientY-rect.top;
 
-    ctx.lineWidth=4;
-    ctx.lineCap="round";
-    ctx.lineTo(x,y);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(x,y);
+ctx.lineWidth=4;
+ctx.lineCap="round";
+ctx.lineTo(x,y);
+ctx.stroke();
+ctx.beginPath();
+ctx.moveTo(x,y);
 });
 
-function clearCanvas(){ ctx.clearRect(0,0,canvas.width,canvas.height); }
+function clearCanvas(){ctx.clearRect(0,0,canvas.width,canvas.height);}
 
-// NAV
+// ===== NAV =====
 function openSet(){
-    home.classList.add("hidden");
-    flashPage.classList.remove("hidden");
-    resetSet();
+home.classList.add("hidden");
+flashPage.classList.remove("hidden");
+resetSet();
 }
-function goHome(){ location.reload(); }
+
+function goHome(){location.reload();}
 
 </script>
 
