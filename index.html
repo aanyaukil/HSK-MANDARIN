@@ -9,9 +9,8 @@
 <style>
 body { background-color: #ffe4ec; }
 
-/* Card */
 .flip-card { perspective: 1000px; }
-.flip-inner { transition: transform 0.6s; transform-style: preserve-3d; }
+.flip-inner { transition: transform 0.5s; transform-style: preserve-3d; }
 .flipped { transform: rotateY(180deg); }
 
 .front, .back {
@@ -22,30 +21,29 @@ body { background-color: #ffe4ec; }
 }
 .back { transform: rotateY(180deg); }
 
-/* Buttons */
 .btn {
-    padding: 10px 16px;
+    padding: 12px;
     border-radius: 999px;
     font-weight: 600;
-    transition: all 0.2s;
+    width: 100%;
 }
-.btn:active { transform: scale(0.95); }
 
 canvas {
     border: 2px solid black;
     border-radius: 10px;
     touch-action: none;
+    width: 100%;
 }
 </style>
 </head>
 
-<body class="p-6 text-center">
+<body class="p-4 text-center">
 
 <!-- HOME -->
 <div id="home">
-<h1 class="text-3xl font-bold mb-6">My Flashcards</h1>
+<h1 class="text-2xl font-bold mb-6">Flashcards</h1>
 
-<div onclick="openSet()" class="bg-white p-6 rounded-2xl shadow cursor-pointer hover:scale-105 transition">
+<div onclick="openSet()" class="bg-white p-6 rounded-2xl shadow">
 HSK 1
 </div>
 </div>
@@ -55,49 +53,45 @@ HSK 1
 
 <button onclick="goHome()" class="btn bg-white mb-4">← Back</button>
 
-<select onchange="filterMode=this.value; resetSet();" class="mb-4 p-2 rounded-xl">
+<select onchange="filterMode=this.value; resetSet();" class="mb-4 p-3 rounded-xl w-full">
 <option value="all">All</option>
 <option value="unknown">Unknown Only</option>
 </select>
 
-<div class="flip-card w-80 h-60 mx-auto relative" onclick="flipCard()">
+<div class="flip-card w-full max-w-sm h-64 mx-auto" onclick="flipCard()">
 <div id="card" class="flip-inner w-full h-full relative">
 
 <div class="front bg-white rounded-2xl flex items-center justify-center text-5xl">
 <span id="hanzi"></span>
 </div>
 
-<div class="back bg-pink-200 rounded-2xl flex flex-col justify-center items-center">
+<div class="back bg-pink-200 rounded-2xl flex flex-col justify-center items-center p-4">
 <p id="pinyin" class="text-lg"></p>
-<p id="english" class="italic"></p>
+<p id="english"></p>
 </div>
 
 </div>
 </div>
 
-<div class="flex flex-wrap justify-center gap-2 mt-4">
+<div class="grid grid-cols-3 gap-2 mt-4 max-w-sm mx-auto">
 
 <button onclick="prevCard()" class="btn bg-white">⬅️</button>
+<button onclick="nextCard()" class="btn bg-white">➡️</button>
 
 <button onclick="markKnown()" class="btn bg-green-300">Know</button>
-
 <button onclick="markUnknown()" class="btn bg-red-300">Don't</button>
 
 <button onclick="openInfo()" class="btn bg-blue-200">Info</button>
-
 <button onclick="openWrite()" class="btn bg-pink-300">Write</button>
 
-<button onclick="nextCard()" class="btn bg-white">➡️</button>
-
 </div>
 
 </div>
 
-<!-- INFO -->
-<div id="infoPopup" class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-<div class="bg-white p-6 rounded-2xl w-80 text-left">
+<!-- INFO (FULL SCREEN) -->
+<div id="infoPopup" class="hidden fixed inset-0 bg-white p-6 overflow-y-auto">
 
-<h2 class="font-bold mb-2">Word Info</h2>
+<h2 class="text-xl font-bold mb-4">Word Info</h2>
 
 <p><b>Pinyin:</b> <span id="infoPinyin"></span></p>
 <p><b>Meaning:</b> <span id="infoEnglish"></span></p>
@@ -105,71 +99,60 @@ HSK 1
 <p><b>Radical Pinyin:</b> <span id="infoRadicalPinyin"></span></p>
 <p><b>Radical Meaning:</b> <span id="infoRadicalMeaning"></span></p>
 
-<img id="infoStroke" class="mx-auto my-3 w-32">
+<img id="infoStroke" class="mx-auto my-4 w-40">
 
-<button onclick="closeInfo()" class="btn bg-pink-300 w-full">Close</button>
+<button onclick="closeInfo()" class="btn bg-pink-300">Back</button>
 
 </div>
-</div>
 
-<!-- WRITE -->
-<div id="writePopup" class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-<div class="bg-white p-6 rounded-2xl w-80">
+<!-- WRITE (FULL SCREEN) -->
+<div id="writePopup" class="hidden fixed inset-0 bg-white p-4">
 
-<img id="stroke" class="mx-auto mb-3 w-32">
+<img id="stroke" class="mx-auto mb-4 w-40">
 
-<canvas id="canvas" width="250" height="250"></canvas>
+<canvas id="canvas" height="300"></canvas>
 
-<div class="flex justify-between mt-3">
+<div class="mt-4 grid grid-cols-2 gap-2">
 <button onclick="clearCanvas()" class="btn bg-gray-200">Clear</button>
 <button onclick="closeWrite()" class="btn bg-pink-300">Done</button>
 </div>
 
 </div>
-</div>
 
 <!-- END -->
 <div id="endScreen" class="hidden">
-<h2 class="text-2xl font-bold">Well done 🎉</h2>
-<p>You finished the set!</p>
-
-<button onclick="goHome()" class="btn bg-pink-300 mt-4">Back to Home</button>
+<h2 class="text-xl font-bold">Well done 🎉</h2>
+<button onclick="goHome()" class="btn bg-pink-300 mt-4">Home</button>
 </div>
 
 <script>
 
-// ===== RADICAL DATA =====
+// RADICALS
 let radicals = {
 "女": {p:"nǚ", m:"woman"},
 "口": {p:"kǒu", m:"mouth"},
-"木": {p:"mù", m:"tree"},
-"人": {p:"rén", m:"person"}
+"木": {p:"mù", m:"tree"}
 };
 
-// ===== VOCAB =====
+// VOCAB
 let vocab = [
 {h:"好", p:"hǎo", e:"good", r:"女", known:false},
 {h:"吃", p:"chī", e:"eat", r:"口", known:false},
-{h:"喝", p:"hē", e:"drink", r:"口", known:false},
 {h:"林", p:"lín", e:"forest", r:"木", known:false}
 ];
 
-let index = 0;
-let filterMode = "all";
+let index=0, filterMode="all";
 
-// ===== FILTER =====
+// FILTER
 function getFiltered(){
-    return (filterMode==="unknown")
-        ? vocab.filter(v=>!v.known)
-        : vocab;
+    return filterMode==="unknown" ? vocab.filter(v=>!v.known) : vocab;
 }
 
-// ===== SHOW CARD =====
+// SHOW
 function showCard(){
-
     let list = getFiltered();
 
-    if(index >= list.length){
+    if(index>=list.length){
         document.getElementById("flashPage").classList.add("hidden");
         document.getElementById("endScreen").classList.remove("hidden");
         return;
@@ -178,96 +161,58 @@ function showCard(){
     let w = list[index];
 
     document.getElementById("card").classList.remove("flipped");
+    hanzi.innerText=w.h;
+    pinyin.innerText=w.p;
+    english.innerText=w.e;
 
-    document.getElementById("hanzi").innerText = w.h;
-    document.getElementById("pinyin").innerText = w.p;
-    document.getElementById("english").innerText = w.e;
-
-    document.getElementById("stroke").src =
-    `https://cdn.jsdelivr.net/gh/skishore/makemeahanzi@master/graphics/${w.h.charCodeAt(0)}.gif`;
+    stroke.src=`https://cdn.jsdelivr.net/gh/skishore/makemeahanzi@master/graphics/${w.h.charCodeAt(0)}.gif`;
 }
 
-// ===== NAV =====
+// NAV
 function nextCard(){ index++; showCard(); }
 function prevCard(){ if(index>0) index--; showCard(); }
+function resetSet(){ index=0; showCard(); }
 
-function resetSet(){
-    index = 0;
-    showCard();
-}
+// MARK
+function markKnown(){ getFiltered()[index].known=true; nextCard(); }
+function markUnknown(){ getFiltered()[index].known=false; nextCard(); }
 
-// ===== MARK =====
-function markKnown(){
-    let list = getFiltered();
-    let word = list[index];
-    word.known = true;
-    nextCard();
-}
+// FLIP
+function flipCard(){ card.classList.toggle("flipped"); }
 
-function markUnknown(){
-    let list = getFiltered();
-    let word = list[index];
-    word.known = false;
-    nextCard();
-}
-
-// ===== INFO =====
+// INFO
 function openInfo(){
-    let w = getFiltered()[index];
-    let r = radicals[w.r] || {p:"?", m:"unknown"};
+    let w=getFiltered()[index];
+    let r=radicals[w.r];
 
-    document.getElementById("infoPinyin").innerText = w.p;
-    document.getElementById("infoEnglish").innerText = w.e;
-    document.getElementById("infoRadical").innerText = w.r;
-    document.getElementById("infoRadicalPinyin").innerText = r.p;
-    document.getElementById("infoRadicalMeaning").innerText = r.m;
+    infoPinyin.innerText=w.p;
+    infoEnglish.innerText=w.e;
+    infoRadical.innerText=w.r;
+    infoRadicalPinyin.innerText=r.p;
+    infoRadicalMeaning.innerText=r.m;
 
-    document.getElementById("infoStroke").src =
-    `https://cdn.jsdelivr.net/gh/skishore/makemeahanzi@master/graphics/${w.h.charCodeAt(0)}.gif`;
+    infoStroke.src=stroke.src;
 
-    document.getElementById("infoPopup").classList.remove("hidden");
+    infoPopup.classList.remove("hidden");
 }
+function closeInfo(){ infoPopup.classList.add("hidden"); }
 
-function closeInfo(){
-    document.getElementById("infoPopup").classList.add("hidden");
-}
+// WRITE
+function openWrite(){ writePopup.classList.remove("hidden"); }
+function closeWrite(){ writePopup.classList.add("hidden"); }
 
-// ===== WRITE =====
-function openWrite(){
-    document.getElementById("writePopup").classList.remove("hidden");
-}
-
-function closeWrite(){
-    document.getElementById("writePopup").classList.add("hidden");
-}
-
-// ===== FLIP =====
-function flipCard(){
-    document.getElementById("card").classList.toggle("flipped");
-}
-
-document.addEventListener("keydown", e=>{
-    if(e.code==="Space") flipCard();
-});
-
-// ===== CANVAS =====
+// CANVAS
 let canvas=document.getElementById("canvas");
 let ctx=canvas.getContext("2d");
 let drawing=false;
 
-canvas.addEventListener("mousedown",()=>drawing=true);
-canvas.addEventListener("mouseup",()=>drawing=false);
-canvas.addEventListener("mousemove",draw);
-
 canvas.addEventListener("touchstart",()=>drawing=true);
 canvas.addEventListener("touchend",()=>drawing=false);
-canvas.addEventListener("touchmove",draw);
-
-function draw(e){
+canvas.addEventListener("touchmove",e=>{
     if(!drawing)return;
     let rect=canvas.getBoundingClientRect();
-    let x=(e.touches?e.touches[0].clientX:e.clientX)-rect.left;
-    let y=(e.touches?e.touches[0].clientY:e.clientY)-rect.top;
+    let x=e.touches[0].clientX-rect.left;
+    let y=e.touches[0].clientY-rect.top;
 
     ctx.lineWidth=4;
     ctx.lineCap="round";
@@ -275,22 +220,17 @@ function draw(e){
     ctx.stroke();
     ctx.beginPath();
     ctx.moveTo(x,y);
-}
+});
 
-function clearCanvas(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-}
+function clearCanvas(){ ctx.clearRect(0,0,canvas.width,canvas.height); }
 
-// ===== INIT =====
+// NAV
 function openSet(){
-    document.getElementById("home").classList.add("hidden");
-    document.getElementById("flashPage").classList.remove("hidden");
+    home.classList.add("hidden");
+    flashPage.classList.remove("hidden");
     resetSet();
 }
-
-function goHome(){
-    location.reload();
-}
+function goHome(){ location.reload(); }
 
 </script>
 
