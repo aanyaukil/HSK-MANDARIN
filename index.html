@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        body { background: #000; color: #fff; font-family: 'Inter', sans-serif; margin: 0; overflow-x: hidden; }
+        body { background: #121212; color: #fff; font-family: 'Inter', sans-serif; margin: 0; overflow-x: hidden; }
         .glass-panel { background: #0a0a0a; border: 1px solid #222; border-radius: 2rem; }
         .flip-card { perspective: 1000px; height: 350px; width: 100%; }
         .flip-inner {
@@ -31,19 +31,33 @@
         .front {
             font-size: 6rem;
             font-weight: 900;
-            color: #fbbf24;
+            color: #d6d2c5;
             text-shadow: 0 0 20px rgba(251,191,36,0.6), 0 0 40px rgba(251,191,36,0.3);
         }
 
         
         .btn-ui { 
-            background: #fff; color: #000; height: 50px; border-radius: 1rem;
+            background: rgba(255, 255, 255, 0.1);  /* Semi-transparent */
+            backdrop-filter: blur(10px);  /* Frosted glass effect */
+            color: #fff;  /* Adjust text color */
+            height: 50px; 
+            border-radius: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);  /* Subtle border */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);  /* Soft shadow */
             font-weight: 800; text-transform: uppercase; font-size: 0.7rem;
-            display: flex; align-items: center; justify-content: center; transition: 0.2s;
+            display: flex; align-items: center; justify-content: center; 
+            transition: 0.2s;
         }
         .btn-ui:active { transform: scale(0.96); }
-        .btn-secondary { background: #1a1a1a; color: #fff; border: 1px solid #333; }
-        .btn-accent { background: #fbbf24; color: #000; }
+        .btn-secondary { 
+            background: rgba(255, 255, 255, 0.05);  /* More transparent */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .btn-accent { 
+            background: rgba(251, 191, 36, 0.2);  /* Glassmorphic accent */
+            color: #d6d2c5;
+            border: 1px solid rgba(251, 191, 36, 0.3);
+        }
         .modal { position: fixed; inset: 0; background: #000; z-index: 100; padding: 20px; display: flex; flex-direction: column; }
         .split-view { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; height: 400px; }
         canvas { background: #0a0a0a; border: 2px solid #333; border-radius: 1.5rem; touch-action: none; width: 100%; height: 100%; cursor: crosshair; }
@@ -51,7 +65,7 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         /* Fix for scrollable list under flashcard */
         #wordList { height: 250px; overflow-y: auto; scrollbar-width: none; }
-        .active-filter { border: 2px solid #fbbf24 !important; color: #fbbf24 !important; }
+        .active-filter { border: 2px solid #d6d2c5 !important; color: #d6d2c5 !important; }
     </style>
 </head>
 <body>
@@ -479,7 +493,7 @@ function renderList() {
         `;
 
         if (i === index) {
-            item.style.border = "1px solid #fbbf24";
+            item.style.border = "1px solid #d6d2c5";
         }
 
         item.innerHTML = `
