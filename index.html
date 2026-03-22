@@ -6,9 +6,8 @@
     <title>HSK 500: Absolute Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background: #000; color: #fff; font-family: 'Inter', sans-serif; margin: 0; padding: 0; }
+        body { background: #000; color: #fff; font-family: 'Inter', sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
         .app-container { max-width: 500px; margin: 0 auto; padding: 20px; min-height: 100vh; display: flex; flex-direction: column; }
-        .glass { background: #111; border: 1px solid #222; border-radius: 2rem; }
         .flip-card { perspective: 1000px; height: 300px; width: 100%; }
         .flip-inner { transition: 0.6s; transform-style: preserve-3d; cursor: pointer; height: 100%; width: 100%; position: relative; }
         .flipped { transform: rotateY(180deg); }
@@ -19,13 +18,14 @@
             background: #111; border: 1px solid #333;
         }
         .back { transform: rotateY(180deg); flex-direction: column; background: #181818; }
-        .action-grid { display: grid; grid-cols: 2; gap: 12px; width: 100%; }
         .btn-ui { 
-            background: #fff; color: #000; height: 60px; border-radius: 1.2rem;
-            font-weight: 900; text-transform: uppercase; font-size: 0.75rem;
+            background: #fff; color: #000; height: 55px; border-radius: 1.2rem;
+            font-weight: 900; text-transform: uppercase; font-size: 0.7rem;
             display: flex; align-items: center; justify-content: center; transition: 0.2s;
         }
-        .btn-secondary { background: #222; color: #fff; border: 1px solid #333; }
+        .btn-ui:active { transform: scale(0.95); opacity: 0.8; }
+        .btn-secondary { background: #111; color: #fff; border: 1px solid #333; }
+        .btn-scramble { background: #222; color: #fbbf24; border: 1px solid #fbbf24; }
         .nav-btn { background: #111; border: 1px solid #333; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
         .modal { position: fixed; inset: 0; background: #0a0a0a; z-index: 100; padding: 30px; display: flex; flex-direction: column; }
         canvas { background: #000; border: 2px solid #333; border-radius: 1.5rem; touch-action: none; width: 100%; height: 350px; }
@@ -35,130 +35,113 @@
 <body>
 
 <div class="app-container" id="mainApp">
-    <div class="flex justify-between items-center mb-8">
-        <h1 class="font-black text-xl tracking-tighter">HSK 500</h1>
-        <div class="text-[10px] font-bold bg-zinc-900 px-3 py-1 rounded-full text-zinc-500" id="counter">1 / 500</div>
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="font-black text-xl tracking-tighter">HSK 500 <span class="text-zinc-500 text-xs">3.0</span></h1>
+        <div class="text-[10px] font-bold bg-zinc-900 px-3 py-1 rounded-full text-zinc-400" id="counter">1 / 500</div>
     </div>
 
-    <div class="w-full h-1 bg-zinc-900 rounded-full mb-10 overflow-hidden">
+    <div class="w-full h-1 bg-zinc-900 rounded-full mb-8 overflow-hidden">
         <div id="progressBar" class="h-full bg-white w-0 transition-all duration-500"></div>
     </div>
 
-    <div class="flex items-center gap-4 mb-10">
+    <div class="flex items-center gap-4 mb-8">
         <button onclick="prev()" class="nav-btn">←</button>
         <div class="flip-card">
             <div id="card" class="flip-inner" onclick="flip()">
-                <div class="front text-8xl font-black" id="h-main"></div>
+                <div class="front text-7xl font-black" id="h-main"></div>
                 <div class="back text-center p-6">
-                    <div id="p-main" class="text-3xl font-black mb-2 text-white"></div>
-                    <div id="e-main" class="text-zinc-500 font-medium italic"></div>
+                    <div id="p-main" class="text-2xl font-black mb-2 text-white"></div>
+                    <div id="e-main" class="text-zinc-400 font-medium italic text-sm"></div>
                 </div>
             </div>
         </div>
         <button onclick="next()" class="nav-btn">→</button>
     </div>
 
-    <div class="grid grid-cols-2 gap-4 mb-12">
+    <div class="grid grid-cols-2 gap-3 mb-8">
         <button onclick="mark('mastered')" class="btn-ui">Mastered</button>
         <button onclick="mark('review')" class="btn-ui btn-secondary">Review</button>
-        <button onclick="openInfo()" class="btn-ui btn-secondary">Information</button>
-        <button onclick="openDraw()" class="btn-ui btn-secondary">Practice</button>
+        <button onclick="openInfo()" class="btn-ui btn-secondary text-blue-400">Info</button>
+        <button onclick="openDraw()" class="btn-ui btn-secondary text-green-400">Draw</button>
+        <button onclick="scramble()" class="btn-ui btn-scramble col-span-2">Scramble Deck</button>
     </div>
 
-    <div id="wordList" class="flex flex-col gap-2 max-h-40 overflow-y-auto no-scrollbar border-t border-zinc-900 pt-4"></div>
+    <div id="wordList" class="flex flex-col gap-2 max-h-48 overflow-y-auto no-scrollbar border-t border-zinc-900 pt-4"></div>
 </div>
 
 <div id="infoModal" class="modal hidden">
-    <div class="flex justify-between items-start mb-8">
+    <div class="flex justify-between items-start mb-6">
         <h2 class="text-6xl font-black" id="i-h"></h2>
         <button onclick="closeModals()" class="text-4xl text-zinc-600">&times;</button>
     </div>
-    
-    <div class="space-y-6 flex-1">
-        <div class="bg-zinc-900 p-8 rounded-[2rem] border border-zinc-800 flex justify-center items-center">
-            <img id="strokeGif" src="" class="w-32 h-32 invert contrast-150">
+    <div class="space-y-4 flex-1 overflow-y-auto no-scrollbar">
+        <div class="bg-zinc-900 p-6 rounded-[2rem] border border-zinc-800 flex justify-center items-center">
+            <img id="strokeGif" src="" class="w-32 h-32 invert contrast-125">
         </div>
-        
-        <div class="grid grid-cols-1 gap-4">
-            <div class="bg-zinc-900 p-6 rounded-[2rem] border border-zinc-800">
-                <p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-2">Radical / Origin</p>
-                <div class="flex items-baseline gap-2">
-                    <span id="i-r" class="text-3xl font-bold text-white"></span>
-                    <span id="i-rp" class="text-sm text-zinc-400 font-bold" id="i-rp"></span>
-                </div>
-                <p id="i-rm" class="text-sm text-zinc-500 mt-1"></p>
+        <div class="bg-zinc-900 p-6 rounded-[2rem] border border-zinc-800">
+            <p class="text-[10px] font-black text-zinc-500 uppercase mb-1">Meaning</p>
+            <p id="i-m" class="text-lg font-bold text-white"></p>
+        </div>
+        <div class="bg-zinc-900 p-6 rounded-[2rem] border border-zinc-800">
+            <p class="text-[10px] font-black text-zinc-500 uppercase mb-1">Radical Info</p>
+            <div class="flex items-baseline gap-2">
+                <span id="i-r" class="text-3xl font-bold text-white"></span>
+                <span id="i-rp" class="text-sm text-zinc-400 font-bold"></span>
             </div>
-            
-            <div class="bg-zinc-900 p-6 rounded-[2rem] border border-zinc-800">
-                <p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-2">Full Meaning</p>
-                <p id="i-m" class="text-lg font-bold text-white"></p>
-            </div>
+            <p id="i-rm" class="text-sm text-zinc-500 mt-1"></p>
         </div>
     </div>
-    <button onclick="closeModals()" class="btn-ui w-full mt-8">Back to Study</button>
+    <button onclick="closeModals()" class="btn-ui w-full mt-4">Back</button>
 </div>
 
 <div id="drawModal" class="modal hidden">
     <div class="flex justify-between items-center mb-6">
-        <h2 class="text-xl font-black uppercase">Draw Character: <span id="drawT" class="text-zinc-500"></span></h2>
+        <h2 class="text-xl font-black uppercase">Draw: <span id="drawT" class="text-white"></span></h2>
         <button onclick="closeModals()" class="text-4xl text-zinc-600">&times;</button>
     </div>
     <canvas id="canvas"></canvas>
-    <div id="drawStatus" class="mt-4 text-center font-black text-xs tracking-widest h-6 uppercase"></div>
+    <div id="drawStatus" class="mt-4 text-center font-black text-xs h-6 uppercase tracking-widest"></div>
     <div class="grid grid-cols-2 gap-4 mt-auto">
         <button onclick="clearCanvas()" class="btn-ui btn-secondary">Clear</button>
-        <button onclick="verify()" class="btn-ui">Check Work</button>
+        <button onclick="verify()" class="btn-ui">Verify</button>
     </div>
 </div>
 
 <div id="endModal" class="modal hidden items-center justify-center text-center">
-    <h2 class="text-4xl font-black mb-2">SET COMPLETE</h2>
-    <p class="text-zinc-500 mb-10">All 500 words processed.</p>
+    <h2 class="text-4xl font-black mb-2">COMPLETE</h2>
+    <p class="text-zinc-500 mb-10">You've reached the end of the 500 words.</p>
     <div class="w-full space-y-4">
-        <button onclick="restart('all')" class="btn-ui w-full">Restart All Words</button>
-        <button onclick="restart('review')" class="btn-ui btn-secondary w-full">Recap Review Words</button>
-        <button onclick="closeModals()" class="text-zinc-600 font-bold">Go Back</button>
+        <button onclick="location.reload()" class="btn-ui w-full">Restart Session</button>
+        <button onclick="closeModals()" class="text-zinc-600 font-bold">Back to List</button>
     </div>
 </div>
 
 <script>
-// Verified Radical Data & 500 Word Set Logic
 const radData = {
     "爱": ["爫", "zhǎo", "Claw / Hand"], "八": ["八", "bā", "Eight"], "爸": ["父", "fù", "Father"],
-    "杯": ["木", "mù", "Wood"], "北": ["匕", "bǐ", "Spoon / Ladle"], "本": ["木", "mù", "Wood"],
+    "杯": ["木", "mù", "Wood"], "北": ["匕", "bǐ", "Spoon"], "本": ["木", "mù", "Wood"],
     "不": ["一", "yī", "One"], "菜": ["艹", "cǎo", "Grass"], "茶": ["艹", "cǎo", "Grass"],
-    "吃": ["口", "kǒu", "Mouth"], "车": ["车", "chē", "Cart / Vehicle"], "大": ["大", "dà", "Big"],
-    "点": ["灬", "huǒ", "Fire"], "电": ["田", "tián", "Field"], "读": ["讠", "yán", "Speech"],
-    "对": ["寸", "cùn", "Inch / Rule"], "多": ["夕", "xī", "Evening"], "二": ["二", "èr", "Two"],
-    "儿": ["儿", "ér", "Son / Legs"], "饭": ["饣", "shí", "Food"], "飞": ["飞", "fēi", "Fly"],
-    "高": ["高", "gāo", "Tall"], "个": ["人", "rén", "Person"], "工作": ["工", "gōng", "Work"],
-    "好": ["女", "nǚ", "Woman"], "喝": ["口", "kǒu", "Mouth"], "回": ["囗", "wéi", "Enclosure"],
-    "会": ["人", "rén", "Person"], "几": ["几", "jǐ", "Table"], "家": ["宀", "mián", "Roof"],
-    "叫": ["口", "kǒu", "Mouth"], "看": ["目", "mù", "Eye"], "口": ["口", "kǒu", "Mouth"],
-    "来": ["木", "mù", "Wood"], "老": ["耂", "lǎo", "Old"], "妈": ["女", "nǚ", "Woman"],
-    "买": ["乛", "yǐ", "Hook"], "猫": ["豸", "zhì", "Beast"], "没": ["氵", "shuǐ", "Water"],
-    "米": ["米", "mǐ", "Rice"], "明": ["日", "rì", "Sun"], "你": ["人", "rén", "Person"],
-    "年": ["干", "gàn", "Shield"], "女": ["女", "nǚ", "Woman"], "朋": ["月", "yuè", "Moon"],
-    "气": ["气", "qì", "Steam / Air"], "前": ["刂", "dāo", "Knife"], "请": ["讠", "yán", "Speech"],
-    "去": ["厶", "sī", "Private"], "热": ["灬", "huǒ", "Fire"], "人": ["人", "rén", "Person"],
-    "日": ["日", "rì", "Sun"], "三": ["一", "yī", "One"], "山": ["山", "shān", "Mountain"],
-    "上": ["一", "yī", "One"], "少": ["小", "xiǎo", "Small"], "十": ["十", "shí", "Ten"],
-    "是": ["日", "rì", "Sun"], "书": ["丨", "gǔn", "Line"], "水": ["水", "shuǐ", "Water"],
-    "说": ["讠", "yán", "Speech"], "四": ["囗", "wéi", "Enclosure"], "他": ["人", "rén", "Person"],
-    "她": ["女", "nǚ", "Woman"], "天气": ["天", "tiān", "Sky"], "听": ["口", "kǒu", "Mouth"],
-    "我": ["戈", "gē", "Spear"], "五": ["二", "èr", "Two"], "下": ["一", "yī", "One"],
-    "小": ["小", "xiǎo", "Small"], "校": ["木", "mù", "Wood"], "写": ["冖", "mì", "Cover"],
+    "吃": ["口", "kǒu", "Mouth"], "车": ["车", "chē", "Cart"], "大": ["大", "dà", "Big"],
+    "点": ["灬", "huǒ", "Fire"], "电": ["田", "tián", "Field"], "对": ["寸", "cùn", "Inch"],
+    "儿": ["儿", "ér", "Son"], "飞": ["飞", "fēi", "Fly"], "高": ["高", "gāo", "Tall"],
+    "好": ["女", "nǚ", "Woman"], "回": ["囗", "wéi", "Enclosure"], "家": ["宀", "mián", "Roof"],
+    "看": ["目", "mù", "Eye"], "来": ["木", "mù", "Wood"], "妈": ["女", "nǚ", "Woman"],
+    "买": ["乛", "yǐ", "Hook"], "米": ["米", "mǐ", "Rice"], "明": ["日", "rì", "Sun"],
+    "你": ["人", "rén", "Person"], "女": ["女", "nǚ", "Woman"], "前": ["刂", "dāo", "Knife"],
+    "请": ["讠", "yán", "Speech"], "人": ["人", "rén", "Person"], "日": ["日", "rì", "Sun"],
+    "山": ["山", "shān", "Mountain"], "上": ["一", "yī", "One"], "十": ["十", "shí", "Ten"],
+    "水": ["水", "shuǐ", "Water"], "说": ["讠", "yán", "Speech"], "四": ["囗", "wéi", "Enclosure"],
+    "他": ["人", "rén", "Person"], "她": ["女", "nǚ", "Woman"], "我": ["戈", "gē", "Spear"],
+    "下": ["一", "yī", "One"], "小": ["小", "xiǎo", "Small"], "写": ["冖", "mì", "Cover"],
     "谢": ["讠", "yán", "Speech"], "一": ["一", "yī", "One"], "衣": ["衣", "yī", "Clothes"],
-    "医": ["匚", "fāng", "Box"], "有": ["月", "yuè", "Moon"], "再": ["冂", "jiōng", "Down"],
-    "在": ["土", "tǔ", "Earth"], "这": ["辶", "chuò", "Walk"], "中": ["丨", "gǔn", "Line"],
-    "住": ["人", "rén", "Person"], "子": ["子", "zǐ", "Son"], "坐": ["土", "tǔ", "Earth"],
-    "做": ["人", "rén", "Person"]
+    "有": ["月", "yuè", "Moon"], "在": ["土", "tǔ", "Earth"], "中": ["丨", "gǔn", "Line"],
+    "坐": ["土", "tǔ", "Earth"]
 };
 
-// Vocabulary Array (Simulating 500 entry expansion logic)
-const vocabRaw = [["爱","ài","love"],["八","bā","eight"],["爸爸","bàba","dad"],["杯子","bēi zi","cup"],["北京","běi jīng","Beijing"],["本","běn","book/measure"],["不客气","bú kè qì","you're welcome"],["不","bù","not/no"],["菜","cài","vegetable/dish"],["茶","chá","tea"],["吃","chī","eat"],["出租车","chū zū chē","taxi"],["打电话","dǎ diàn huà","to call"],["大","dà","big"],["的","de","(possessive)"],["点","diǎn","o'clock"],["电脑","diàn nǎo","computer"],["电视","diàn shì","TV"],["电影","diàn yǐng","movie"],["东西","dōng xi","thing"],["都","dōu","all/both"],["读","dú","read"],["对不起","duì bu qǐ","sorry"],["多","duō","many/much"],["多少","duō shao","how many"],["儿子","ér zi","son"],["二","èr","two"],["饭店","fàn diàn","restaurant"],["飞机","fēijī","airplane"],["分钟","fēnzhōng","minute"],["高兴","gāoxìng","happy"],["个","gè","(measure)"],["工作","gōngzuò","work"],["狗","gǒu","dog"],["汉语","hànyǔ","Chinese"],["好","hǎo","good"],["喝","hē","drink"],["和","hé","and"],["很","hěn","very"],["后面","hòumiàn","behind"],["回","huí","return"],["会","huì","can/will"],["几","jǐ","how many"],["家","jiā","home/family"],["叫","jiào","be called"],["今天","jīntiān","today"],["九","jiǔ","nine"],["看","kàn","look/read"],["看见","kànjiàn","see"],["块","kuài","piece/yuan"],["来","lái","come"],["老师","lǎoshī","teacher"],["了","le","(particle)"],["冷","lěng","cold"],["里","lǐ","inside"],["零","líng","zero"],["六","liù","six"],["妈妈","mā ma","mom"],["吗","ma","(question)"],["买","mǎi","buy"],["猫","māo","cat"],["没关系","méi guān xi","it's okay"],["没有","méiyǒu","don't have"],["米饭","mǐfàn","rice"],["明天","míngtiān","tomorrow"],["名字","míngzi","name"],["哪","nǎ","which"],["哪儿","nǎr","where"],["那","nà","that"],["呢","ne","(question)"],["能","néng","can"],["你","nǐ","you"],["年","nián","year"],["女儿","nǚ'ér","daughter"],["朋友","péngyou","friend"],["漂亮","piàoliang","pretty"],["苹果","píngguǒ","apple"],["七","qī","seven"],["前面","qiánmiàn","front"],["钱","qián","money"],["请","qǐng","please"],["去","qù","go"],["热","rè","hot"],["人","rén","person"],["认识","rènshi","know"],["三","sān","three"],["商店","shāngdiàn","shop"],["上","shàng","up/above"],["上午","shàngwǔ","morning"],["少","shǎo","few/little"],["谁","shéi","who"],["什么","shénme","what"],["十","shí","ten"],["时候","shíhou","time"],["是","shì","be (is/am/are)"],["书","shū","book"],["水","shuǐ","water"],["水果","shuǐguǒ","fruit"],["睡觉","shuìjiào","sleep"],["说话","shuōhuà","speak"],["四","sì","four"],["岁","suì","years old"],["他","tā","he/him"],["她","tā","she/her"],["太","tài","too/extremely"],["天气","tiānqì","weather"],["听","tīng","listen"],["同学","tóngxué","classmate"],["喂","wèi","hello (on phone)"],["我","wǒ","I/me"],["我们","wǒmen","we"],["五","wǔ","five"],["喜欢","xǐhuan","like"],["下","xià","down/below"],["下午","xiàwǔ","afternoon"],["下雨","xiàyǔ","rain"],["先生","xiānsheng","Mr."],["现在","xiànzài","now"],["想","xiǎng","want/think"],["小","xiǎo","small"],["小姐","xiǎojiě","Miss"],["些","xiē","some"],["写","xiě","write"],["谢谢","xièxie","thanks"],["星期","xīngqī","week"],["学生","xuésheng","student"],["学习","xuéxí","study"],["学校","xuéxiào","school"],["一","yī","one"],["衣服","yīfu","clothes"],["医生","yīshēng","doctor"],["医院","yīyuàn","hospital"],["椅子","yǐzi","chair"],["有","yǒu","have"],["月","yuè","month"],["再见","zàijiàn","goodbye"],["在","zài","at/in"],["怎么","zěnme","how"],["怎么样","zěnmeyàng","how is it"],["这","zhè","this"],["中国","zhōngguó","China"],["中午","zhōngwǔ","noon"],["住","zhù","live/dwell"],["桌子","zhuōzi","table"],["字","zì","character"],["昨天","zuótiān","yesterday"],["坐","zuò","sit"],["做","zuò","do"]];
+const vocabRaw = [
+    ["爱","ài","love"],["爱好","ài hào","hobby"],["八","bā","eight"],["爸爸｜爸","bàba ｜ bà","dad"],["吧","ba","(interjection particle)"],["白","bái","white"],["白天","bái tiān","day"],["百","bǎi","hundred"],["班","bān","class"],["半","bàn","half"],["半年","bàn nián","half a year"],["半天","bàn tiānhalf day"],["帮","bāng","help"],["帮忙","bāng máng","help"],["包","bāo","package"],["包子","bāo zi","bun"],["杯","bēi","cup"],["杯子","bēi zi","cup"],["北","běi","north"],["北边","běi biān","North side"],["北京","běi jīng","Beijing"],["本","běn","(measure word)"],["本子","běn zi","book"],["比","bǐ","than (comparison)"],["别","bié","Don’t"],["别的","bié de","other"],["别人","bié·rén","other people"],["病","bìng","disease"],["病人","bìng rén","patient"],["不大","bú dà","not big"],["不对","bú duì","wrong"],["不客气","bú kè qì","You’re welcome"],["不用","bú yòng","No need to"],["不","bù","No"],["菜","cài","dish"],["茶","chá","tea"],["差","chà","short of"],["常","cháng","often"],["常常","cháng cháng","often"],["唱","chàng","sing"],["唱歌","chàng gē","sing"],["车","chē","car"],["车票","chē piào","ticket"],["车上","chē shàng","in the car"],["车站","chē zhàn","station"],["吃","chī","eat"],["吃饭","chī fàn","have meal"],["出","chū","out"],["出来","chū láicome"],["出去","chū qù","go out"],["穿","chuān","wear"],["床","chuáng","bed"],["次","cì","(measure word)"],["从","cóng","from"],["错","cuò","wrong"],["打","dǎ","hit, take"],["打车","dǎ chē","take a taxi"],["打电话","dǎ diàn huà","make call"],["打开","dǎ kāi","turn on"],["打球","dǎ qiú","play ball"],["大","dà","large, big"],["大学","dà xué","university"],["大学生","dà xué shēng","student"],["到","dào","reach"],["得到","dé dào","get"],["地","de","(auxiliary)"],["的","de","(possessive)"],["等","děng","wait"],["地","dì","ground"],["地点","dìdiǎn","location"],["地方","dìfang","local"],["地上","dì shàng","on ground"],["地图","dìtú","Map"],["弟弟｜弟","dì di ｜ dì","younger brother"],["第","dì","(ordinal)"],["点","diǎn","spot"],["电","diàn","electricity"],["电话","diàn huà","phone"],["电脑","diànnǎo","Computer"],["电视","diànshì","TV"],["电视机","diàn shì jī","TV"],["电影","diànyǐng","Film"],["电影院","diàn yǐng yuàn","cinema"],["东","dōng","east"],["东边","dōng biān","east side"],["东西","dōngxì","thing"],["动","dòng","move"],["动作","dòngzuò","action"],["都","dōu","all"],["读","dú","read"],["读书","dú shū","study"],["对","duì","right"],["对不起","duìbuqǐ","sorry"],["多","duō","many"],["多少","duōshao","how much"],["饿","è","hungry"],["儿子","érzi","Son"],["二","èr","Two"],["饭","fàn","meal"],["饭店","fàndiàn","restaurant"],["房间","fángjiān","Room"],["房子","fáng zi","house"],["放","fàng","discharge"],["放假","fàng jià","holiday"],["放学","fàng xué","off school"],["飞","fēifly"],["飞机","fēijī","aircraft"],["非常","fēicháng","very"],["分","fēn","minute"],["风","fēng","wind"],["干","gāndry"],["干净","gānjìng","clean"],["干","gàn","do"],["干什么","gàn shén me","what to do"],["高","gāohigh"],["高兴","gāoxìng","happy"],["告诉","gàosutell"],["哥哥｜哥","gē ge ｜ gē","elder brother"],["歌","gēsong"],["个","gè","individual"],["给","gěigive"],["跟","gēnwith"],["工人","gōngrén","Worker"],["工作","gōngzuò","work"],["关","guān","close"],["关上","guān shàng","shut"],["贵","guìnoble"],["国","guó","country"],["国家","guójiā","Country"],["国外","guó wài","abroad"],["过","guòpass"],["还","háialso"],["还是","háishistill"],["还有","hái yǒu","besides"],["孩子","háizi","Children"],["汉语","hànyǔ","Chinese"],["汉字","hàn zì","character"],["好","hǎogood"],["好吃","hǎochī","Yummy"],["好看","hǎo kàn","good looking"],["好听","hǎo tīng","pleasant"],["好玩儿","hǎo wánr","fun"],["号","hào","Number"],["喝","hē","drink"],["和","hé","and"],["很","hěn","very"],["后","hòuafter"],["后边","hòu biān","behind"],["后天","hòu tiān","day after tomorrow"],["花","huā","flower"],["话","huà","word"],["坏","huàibad"],["还","huán","return"],["回","huí","return"],["回答","huídá","Answer"],["回到","huí dào","back to"],["回家","huí jiā","go home"],["回来","huí lái","come back"],["回去","huí qù","go back"],["会","huì","can"],["火车","huǒ chē","train"],["机场","jīchǎng","Airport"],["机票","jī piào","ticket"],["鸡蛋","jīdàn","Egg"],["几","jǐ","several"],["记","jì","remember"],["记得","jìdé","remember"],["记住","jì zhù","keep in mind"],["家","jiā","home"],["家里","jiā lǐ","in home"],["家人","jiā rén","family"],["间","jiān","between"],["见","jiàn","see"],["见面","jiànmiàn","meet"],["教","jiāoteach"],["叫","jiào","call"],["教学楼","jiào xué lóu","teaching building"],["姐姐｜姐","jiě jie ｜ jiě","elder sister"],["介绍","jièshào","introduce"],["今年","jīn nián","this year"],["今天","jīntiān","Today"],["进","jìn","enter"],["进来","jìn lái","come in"],["进去","jìn qù","go in"],["九","jiǔ","Nine"],["就","jiù","then"],["觉得","juéde","Think"],["开","kāi","open"],["开车","kāi chē","drive"],["开会","kāi huì","meeting"],["开玩笑","kāiwánxiào","joke"],["看","kàn","see"],["看病","kàn bìng","see doctor"],["看到","kàn dào","see"],["看见","kànjiàn","seeing"],["考","kǎotest"],["考试","kǎoshì","Exam"],["渴","kěthirsty"],["课","kècourse"],["课本","kè běn","textbook"],["课文","kè wén","text"],["口","kǒumouth"],["块","kuàiblock"],["快","kuàifast"],["来","láicome"],["来到","lái dào","arrive"],["老","lǎo","old"],["老人","lǎo rén","old people"],["老师","lǎoshī","Teacher"],["了","le","(particle)"],["累","lèitired"],["冷","lěng","cold"],["里","lǐ","in"],["里边","lǐ biān","inside"],["两","liǎng","two"],["零｜〇","líng ｜ líng","zero"],["六","liù","Six"],["楼","lóufloor"],["楼上","lóu shàng","upstairs"],["楼下","lóu xià","downstairs"],["路","lù","road"],["路口","lù kǒu","crossing"],["路上","lù shàng","on road"],["妈妈｜妈","mā ma ｜ mā","mom"],["马路","mǎ lù","street"],["马上","mǎshàng","right away"],["吗","ma","(question)"],["买","mǎibuy"],["慢","mànslow"],["忙","máng","busy"],["毛","máo","(cent)"],["没","méino"],["没关系","méiguānxi","no problem"],["没什么","méi shén me","nothing"],["没事儿","méi shìr","okay"],["没有","méi yǒuhave","not"],["妹妹｜妹","mèi mei ｜ mèiyounger","sister"],["门","méndoor"],["门口","mén kǒudoorway"],["门票","mén piàotickets"],["们","men","(plural)"],["米饭","mǐfàn","Rice"],["面包","miànbāo","Bread"],["面条儿","miàn tiáornoodles"],["名字","míngzi","Name"],["明白","míngbaiclear"],["明年","míng nián","next year"],["明天","míngtiān","Tomorrow"],["拿","nátake"],["哪","nǎ","which"],["哪里","nǎ lǐ","where"],["哪儿","nǎr","where"],["哪些","nǎ xiē","which"],["那","nà","that"],["那边","nà biān","there"],["那里","nà lǐ","there"],["那儿","nàr","there"],["那些","nà xiē","those"],["奶","nǎimilk"],["奶奶","nǎinaigrandma"],["男","nán","Man"],["男孩儿","nán háir","boy"],["男朋友","nán péng yǒu","boyfriend"],["男人","nán ren","man"],["男生","nán shēng","boy"],["南","nán","south"],["南边","nán biān","south side"],["难","nán","hard"],["呢","ne","(particle)"],["能","néng","can"],["你","nǐ","you"],["你们","nǐ men","you"],["年","nián","year"],["您","nínyou"],["牛奶","niúnǎimilk"],["女","nǚ","woman"],["女儿","nǚ’ér","daughter"],["女孩儿","nǚ háir","girl"],["女朋友","nǚ péng yǒu","girlfriend"],["女人","nǚ ren","woman"],["男生","nǚ shēng","girl"],["旁边","pángbiān","Side"],["跑","pǎorun"],["朋友","péngyou","Friend"],["票","piàoticket"],["七","qī","Seven"],["起","qǐ","rise"],["起床","qǐchuáng","Get up"],["起来","qǐlái","get up"],["汽车","qì chē","car"],["前","qián","front"],["前边","qián biān","in front"],["前天","qián tiān","before yesterday"],["钱","qián","money"],["钱包","qián bāowallet"],["请","qǐng","please"],["请假","qǐngjià","ask for leave"],["请进","qǐng jìn","come in"],["请问","qǐng wèn","excuse me"],["请坐","qǐng zuò","sit down"],["球","qiú","ball"],["去","qù","go"],["去年","qùnián","Last year"],["热","rè","heat"],["人","rén","people"],["认识","rènshiknow"],["认真","rènzhēnearnest"],["日","rì","date"],["日期","rìqī","Date"],["肉","ròumeat"],["三","sān","Three"],["山","shānmountain"],["商场","shāng chǎng","mall"],["商店","shāngdiàn","Shop"],["上","shàng","upper"],["上班","shàngbāngo","to work"],["上边","shàng biān","above"],["上车","shàng chē","get on"],["上次","shàng cì","last time"],["上课","shàng kè","attend class"],["上网","shàngwǎng","Surf Internet"],["上午","shàngwǔ","morning"],["上学","shàng xué","go to school"],["少","shǎoless"],["谁","shéi","who"],["身上","shēn shàng","on body"],["身体","shēntǐbody"],["什么","shénme","What"],["生病","shēngbìng","ill"],["生气","shēngqì","angry"],["生日","shēngrì","Birthday"],["十","shí","Ten"],["时候","shíhoutime"],["时间","shíjiāntime"],["事","shì","thing"],["试","shìtry"],["是","shì","is/am/are"],["是不是","shì bú shì","isn't it?"],["手","shǒuhand"],["手机","shǒujī","Mobile phone"],["书","shū","book"],["书包","shū bāoschool","bag"],["书店","shū diànbookstore"],["树","shùtree"],["水","shuǐ","water"],["水果","shuǐguǒ","Fruits"],["睡","shuìsleep"],["睡觉","shuìjiàosleep"],["说","shuōspeak"],["说话","shuōhuàtalk"],["四","sì","Four"],["送","sònggive"],["岁","suì","age"],["他","tā","he"],["他们","tā men","they"],["她","tā","she"],["她们","tā menthey"],["太","tàitoo"],["天","tiānday"],["天气","tiānqì","weather"],["听","tīng","hear"],["听到","tīng dào","hear"],["听见","tīng jiàn","hear"],["听写","tīng xiě","dictation"],["同学","tóngxué","Classmate"],["图书馆","túshūguǎn","Library"],["外","wài","outside"],["外边","wài biān","outside"],["外国","wài guó","foreign country"],["外语","wài yǔ","foreign language"],["玩儿","wánrplay"],["晚","wǎnlate"],["晚饭","wǎn fàn","dinner"],["晚上","wǎnshang","Night"],["网上","wǎng shàng","online"],["网友","wǎng yǒu","net friend"],["忘","wàngforget"],["忘记","wàngjì","forget"],["问","wènask"],["我","wǒ","I"],["我们","wǒmen","We"],["五","wǔ","Five"],["午饭","wǔ fàn","lunch"],["西","xī","west"],["西边","xī biān","west side"],["洗","xǐwash"],["洗手间","xǐshǒujiān","Restroom"],["喜欢","xǐhuan","like"],["下","xià","below"],["下班","xià bān","off work"],["下边","xià biān","below"],["下车","xià chē","get off"],["下次","xià cì","next time"],["下课","xià kè","finish class"],["下午","xiàwǔ","Afternoon"],["下雨","xiàyǔrain"],["先","xiānbefore"],["先生","xiānsheng","Sir"],["现在","xiànzài","Now"],["想","xiǎngthink"],["小","xiǎo","Small"],["小孩儿","xiǎo háir","child"],["小姐","xiǎojiě","Miss"],["小朋友","xiǎo péng","yǒu","kid"],["小时","xiǎoshí","hour"],["小学","xiǎo xué","primary school"],["小学生","xiǎo xué","shēng","student"],["笑","xiàolaugh"],["写","xiěwrite"],["谢谢","xièxie","Thank you"],["新","xīnnew"],["新年","xīn nián","New Year"],["星期","xīngqī","week"],["星期日","xīng qī","rì","Sunday"],["星期天","xīng qī","tiān","Sunday"],["行","xíng","ok"],["休息","xiūxiRest"],["学","xuélearn"],["学生","xuésheng","Student"],["学习","xuéxíStudy"],["学校","xuéxiào","School"],["学院","xué yuàn","college"],["要","yàowant"],["爷爷","yéyegrandpa"],["也","yěalso"],["页","yèpage"],["一","yī","One"],["衣服","yīfu","clothes"],["医生","yīshēng","Doctor"],["医院","yīyuàn","Hospital"],["一半","yí bànhalf"],["一会儿","yíhuìr","a while"],["一块儿","yí kuàirtogether"],["一下儿","yí xiàra","bit"],["一样","yíyàngequally"],["一边","yìbiān","One side"],["一点儿","yīdiǎnra","bit"],["一起","yìqǐtogether"],["一些","yì xiēsome"],["用","yònguse"],["有","yǒuhave"],["有的","yǒu desome"],["有名","yǒumíng","Famous"],["有时候","yǒu shí hòu","sometimes"],["有（一）些","yǒu xiē","some"],["有用","yǒu yòng","useful"],["右","yòuright"],["右边","yòubian","Right"],["雨","yǔrain"],["元","yuán","Yuan"],["远","yuǎnfar"],["月","yuèmonth"],["再","zàiagain"],["再见","zàijiàn","Bye"],["在","zàistay"],["在家","zài jiā","at home"],["早","zǎoearly"],["早饭","zǎo fàn","breakfast"],["早上","zǎoshang","Morning"],["怎么","zěnme","How"],["站","zhàn","station"],["找","zhǎolook for"],["找到","zhǎo dào","find"],["这","zhè","this"],["这边","zhè biān","here"],["这里","zhè lǐ","here"],["这儿","zhèr","here"],["这些","zhè xiē","these"],["着","zhe","(process)"],["真","zhēnreally"],["真的","zhēn dereally"],["正","zhèng","just"],["正在","zhèngzài","in process"],["知道","zhīdàoknow"],["知识","zhīshiknowledge"],["中","zhōngmiddle"],["中国","zhōngguó","China"],["中间","zhōngjiān","Middle"],["中文","zhōngwén","Chinese"],["中午","zhōngwǔ","Noon"],["中学","zhōng xué","middle school"],["中学生","zhōng xué","shēng","student"],["重","zhòngheavy"],["重要","zhòngyào","important"],["住","zhùlive"],["准备","zhǔnbèi","Get ready"],["桌子","zhuōzi","Table"],["字","zì","character"],["子","zi","(suffix)"],["走","zǒugo"],["走路","zǒu lù","walk"],["最","zuìmost"],["最好","zuìhǎo","Best"],["最后","zuìhòu","Last"],["昨天","zuótiān","Yesterday"],["左","zuǒleft"],["左边","zuǒbian","left"],["坐","zuòsit"],["坐下","zuò xià","sit down"],["做","zuò","do"]
+];
 
-// Add filler to ensure set reaches 500 for demonstration or full production
 let wordSet = [];
 let index = 0;
 let drawing = false;
@@ -177,6 +160,7 @@ function updateUI() {
     document.getElementById('h-main').innerText = w.h;
     document.getElementById('p-main').innerText = w.p;
     document.getElementById('e-main').innerText = w.e;
+    // Ensuring the counter displays 1-500
     document.getElementById('counter').innerText = `${index + 1} / ${wordSet.length}`;
     document.getElementById('progressBar').style.width = ((index + 1) / wordSet.length * 100) + '%';
     document.getElementById('card').classList.remove('flipped');
@@ -184,12 +168,33 @@ function updateUI() {
 }
 
 function next() {
-    if(index < wordSet.length - 1) { index++; updateUI(); } 
-    else { document.getElementById('endModal').classList.remove('hidden'); }
+    if(index < wordSet.length - 1) { 
+        index++; 
+        updateUI(); 
+    } else { 
+        document.getElementById('endModal').classList.remove('hidden'); 
+    }
 }
 
-function prev() { if(index > 0) { index--; updateUI(); } }
-function flip() { document.getElementById('card').classList.toggle('flipped'); }
+function prev() { 
+    if(index > 0) { 
+        index--; 
+        updateUI(); 
+    } 
+}
+
+function flip() { 
+    document.getElementById('card').classList.toggle('flipped'); 
+}
+
+function scramble() {
+    for (let i = wordSet.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [wordSet[i], wordSet[j]] = [wordSet[j], wordSet[i]];
+    }
+    index = 0;
+    updateUI();
+}
 
 function mark(s) {
     wordSet[index].status = s;
@@ -236,9 +241,10 @@ function getXY(e) {
 
 canvas.addEventListener('mousedown', start);
 canvas.addEventListener('mousemove', draw);
-canvas.addEventListener('touchstart', start);
-canvas.addEventListener('touchmove', draw);
+canvas.addEventListener('touchstart', (e) => { e.preventDefault(); start(e); });
+canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); });
 window.addEventListener('mouseup', () => drawing = false);
+window.addEventListener('touchend', () => drawing = false);
 
 function start(e) {
     drawing = true;
@@ -251,26 +257,35 @@ function start(e) {
 function draw(e) {
     if(!drawing) return;
     const p = getXY(e);
-    ctx.lineWidth = 10; ctx.lineCap = 'round'; ctx.strokeStyle = '#fff'; // White pen
+    ctx.lineWidth = 12; ctx.lineCap = 'round'; ctx.strokeStyle = '#fff';
     ctx.lineTo(p.x, p.y);
     ctx.stroke();
     const s = strokes[strokes.length-1];
     s[0].push(p.x); s[1].push(p.y); s[2].push(Date.now());
-    e.preventDefault();
 }
 
-function clearCanvas() { ctx.clearRect(0,0,400,350); strokes = []; document.getElementById('drawStatus').innerText = ""; }
+function clearCanvas() { 
+    ctx.clearRect(0,0,400,350); 
+    strokes = []; 
+    document.getElementById('drawStatus').innerText = ""; 
+    document.getElementById('drawStatus').className = "mt-4 text-center font-black text-xs h-6 uppercase tracking-widest";
+}
 
 function verify() {
     const target = wordSet[index].h[0];
     const status = document.getElementById('drawStatus');
-    status.innerText = "CHECKING...";
+    status.innerText = "Checking...";
     fetch("https://www.google.com.tw/inputtools/request?ime=handwriting&app=autofill&hl=zh-CN&oe=UTF-8", {
         method: 'POST', body: JSON.stringify({"options": "enable_pre_space", "requests": [{"writing_guide": {"writing_area_width": 400, "writing_area_height": 350}, "ink": strokes}]})
     }).then(r => r.json()).then(data => {
         const results = data[1][0][1];
-        if(results.includes(target)) { status.innerText = "MATCH FOUND ✓"; status.classList.add('text-green-500'); }
-        else { status.innerText = `LOOKS LIKE: ${results[0]}`; status.classList.add('text-red-500'); }
+        if(results.includes(target)) { 
+            status.innerText = "Correct! Match: " + target; 
+            status.classList.add('text-green-500'); 
+        } else { 
+            status.innerText = `Try again. Best guess: ${results[0]}`; 
+            status.classList.add('text-red-500'); 
+        }
     });
 }
 
@@ -279,19 +294,12 @@ function renderList() {
     list.innerHTML = '';
     wordSet.forEach((v, i) => {
         const item = document.createElement('div');
-        item.className = `p-3 flex justify-between rounded-xl text-[10px] font-bold uppercase ${v.status === 'mastered' ? 'bg-green-900/20' : v.status === 'review' ? 'bg-red-900/20' : 'bg-zinc-900'}`;
+        item.className = `p-3 flex justify-between rounded-xl text-[10px] font-bold uppercase cursor-pointer ${v.status === 'mastered' ? 'bg-green-900/20' : v.status === 'review' ? 'bg-red-900/20' : 'bg-zinc-900'}`;
         if(i === index) item.style.border = "1px solid #fff";
-        item.innerHTML = `<span>${v.h}</span> <span class="text-zinc-600">${v.p}</span>`;
+        item.innerHTML = `<span>${v.h}</span> <span class="text-zinc-500">${v.p}</span>`;
         item.onclick = () => { index = i; updateUI(); };
         list.appendChild(item);
     });
-}
-
-function restart(mode) {
-    index = 0;
-    if(mode === 'review') wordSet = wordSet.filter(v => v.status === 'review');
-    closeModals();
-    updateUI();
 }
 
 init();
