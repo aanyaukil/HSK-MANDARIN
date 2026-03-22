@@ -68,9 +68,10 @@
         <button id="filterReview" onclick="setFilter('review')" class="flex-1 py-2 text-[10px] font-black uppercase border border-zinc-800 rounded-lg">Unknown Words</button>
     </div>
 
-    <div class="w-full h-1 bg-zinc-900 rounded-full mb-8 overflow-hidden">
-        <div id="progressBar" class="h-full bg-white w-0 transition-all"></div>
-    </div>
+<div class="w-full h-1 bg-zinc-900 rounded-full mb-2 overflow-hidden">
+    <div id="progressBar" class="h-full bg-white w-0 transition-all"></div>
+</div>
+<div id="progressPercentage" class="text-center text-sm font-bold text-zinc-400 mb-8">0%</div>
 
     <div class="flex items-center gap-4 mb-8">
         <button onclick="prev()" class="w-12 h-12 rounded-full border border-zinc-800 flex items-center justify-center">←</button>
@@ -339,6 +340,7 @@ function updateUI() {
     document.getElementById('e-main').innerText = w.e;
     document.getElementById('counter').innerText = `${index + 1} / ${currentDeck.length}`;
     document.getElementById('progressBar').style.width = ((index + 1) / currentDeck.length * 100) + '%';
+    document.getElementById('progressPercentage').innerText = Math.round(((index + 1) / currentDeck.length * 100)) + '%';
     document.getElementById('card').classList.remove('flipped');
     renderList();
 }
