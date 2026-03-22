@@ -71,8 +71,11 @@
         <button id="filterReview" onclick="setFilter('review')" class="flex-1 py-2 text-[10px] font-black uppercase border border-zinc-800 rounded-lg">Unknown Words</button>
     </div>
 
-    <div class="w-full h-1 bg-zinc-900 rounded-full mb-8 overflow-hidden">
-        <div id="progressBar" class="h-full bg-white w-0 transition-all"></div>
+    <div class="flex items-center gap-2 mb-8">
+        <div class="flex-1 h-1 bg-zinc-900 rounded-full overflow-hidden">
+            <div id="progressBar" class="h-full bg-white w-0 transition-all"></div>
+        </div>
+        <span id="percent" class="text-xs text-zinc-400 w-8 text-right" aria-label="Progress percentage">0%</span>
     </div>
 
     <div class="flex items-center gap-4 mb-8">
@@ -4887,13 +4890,11 @@ function openInfo() {
             </div>
 
             <div class="mt-4">
-                <div class="text-xs text-zinc-500 uppercase">Etymology</div>
-                <div class="text-xs text-zinc-300">${data.etymology}</div>
-            </div>
-
-            <div class="mt-4">
-                <div class="text-xs text-zinc-500 uppercase">Traditional</div>
-                <div>${data.traditional}</div>
+                <div class="text-xs text-zinc-500 uppercase">Origin &amp; Traditional Form</div>
+                <div class="flex items-start gap-4 mt-2">
+                    <div class="text-3xl leading-none">${data.traditional}</div>
+                    <div class="text-xs text-zinc-300">${data.etymology}</div>
+                </div>
             </div>
         `;
 
