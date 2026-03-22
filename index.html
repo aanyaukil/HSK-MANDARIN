@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        body { background: #121212; color: #fff; font-family: 'Inter', sans-serif; margin: 0; overflow-x: hidden; }
+        body { background: #2d2d2d; color: #fff; font-family: 'Inter', sans-serif; margin: 0; overflow-x: hidden; }
         .glass-panel { background: #0a0a0a; border: 1px solid #222; border-radius: 2rem; }
         .flip-card { perspective: 1000px; height: 350px; width: 100%; }
         .flip-inner {
@@ -31,7 +31,7 @@
         .front {
             font-size: 6rem;
             font-weight: 900;
-            color: #d6d2c5;
+            color: #FFD700;
             text-shadow: 0 0 20px rgba(251,191,36,0.6), 0 0 40px rgba(251,191,36,0.3);
         }
 
@@ -55,7 +55,7 @@
         }
         .btn-accent { 
             background: rgba(251, 191, 36, 0.2);  /* Glassmorphic accent */
-            color: #d6d2c5;
+            color: #FFD700;
             border: 1px solid rgba(251, 191, 36, 0.3);
         }
         .modal { position: fixed; inset: 0; background: #000; z-index: 100; padding: 20px; display: flex; flex-direction: column; }
@@ -65,7 +65,7 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         /* Fix for scrollable list under flashcard */
         #wordList { height: 250px; overflow-y: auto; scrollbar-width: none; }
-        .active-filter { border: 2px solid #d6d2c5 !important; color: #d6d2c5 !important; }
+        .active-filter { border: 2px solid #FFD700 !important; color: #FFD700 !important; }
     </style>
 </head>
 <body>
@@ -493,7 +493,7 @@ function renderList() {
         `;
 
         if (i === index) {
-            item.style.border = "1px solid #d6d2c5";
+            item.style.border = "1px solid #FFD700";
         }
 
         item.innerHTML = `
