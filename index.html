@@ -53,6 +53,15 @@
                     <div class="text-2xl">→</div>
                 </div>
             </div>
+            <button onclick="resetProgress()" class="glass-panel p-6 cursor-pointer hover:border-zinc-500 transition-all border-1 border-red-500/30 hover:border-red-500">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h3 class="text-xl font-bold text-red-400">Reset Progress</h3>
+                        <p class="text-xs text-zinc-500 uppercase font-black mt-1">Clear All Marked Words</p>
+                    </div>
+                    <div class="text-2xl">⟲</div>
+                </div>
+            </button>
         </div>
     </div>
 </div>
@@ -298,6 +307,13 @@ let currentFilter = 'all';
 let currentDeck = [];
 let index = 0;
 let isScrambled = false;
+
+function resetProgress() {
+    if(confirm("Are you sure you want to reset all progress? This cannot be undone.")) {
+        localStorage.removeItem('hsk_progress');
+        alert("Progress reset successfully!");
+    }
+}
 
 function startSet(setId) {
     const progress = JSON.parse(localStorage.getItem('hsk_progress')) || {};
