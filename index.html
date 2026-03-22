@@ -41,7 +41,6 @@
     <div class="max-w-md mx-auto">
         <h1 class="text-4xl font-black mb-2 tracking-tighter">STUDY HUB</h1>
         <p class="text-zinc-500 mb-8 text-sm">Select a vocabulary pack to begin.</p>
-        
         <div class="grid gap-4">
             <div onclick="startSet('hsk1')" class="glass-panel p-6 cursor-pointer hover:border-zinc-500 transition-all">
                 <div class="flex justify-between items-center">
@@ -51,11 +50,6 @@
                     </div>
                     <div class="text-2xl">→</div>
                 </div>
-            </div>
-            
-            <div class="glass-panel p-6 opacity-40 border-dashed border-zinc-700">
-                <h3 class="text-xl font-bold">HSK 2</h3>
-                <p class="text-xs text-zinc-500 uppercase font-black mt-1">Locked</p>
             </div>
         </div>
     </div>
@@ -69,7 +63,7 @@
 
     <div class="flex gap-2 mb-6">
         <button id="filterAll" onclick="setFilter('all')" class="flex-1 py-2 text-[10px] font-black uppercase border border-zinc-800 rounded-lg active-filter">All Words</button>
-        <button id="filterReview" onclick="setFilter('review')" class="flex-1 py-2 text-[10px] font-black uppercase border border-zinc-800 rounded-lg">Review Only</button>
+        <button id="filterReview" onclick="setFilter('review')" class="flex-1 py-2 text-[10px] font-black uppercase border border-zinc-800 rounded-lg">Unknown Words</button>
     </div>
 
     <div class="w-full h-1 bg-zinc-900 rounded-full mb-8 overflow-hidden">
@@ -92,8 +86,8 @@
 
     <div class="grid grid-cols-2 gap-3 mb-6">
         <button onclick="mark('mastered')" class="btn-ui">Mastered</button>
-        <button onclick="mark('review')" class="btn-ui btn-secondary">Review</button>
-        <button onclick="openInfo()" class="btn-ui btn-secondary">Radicals</button>
+        <button onclick="mark('review')" class="btn-ui btn-secondary">Review (Unknown)</button>
+        <button onclick="openInfo()" class="btn-ui btn-secondary">Information</button>
         <button onclick="openDraw()" class="btn-ui btn-secondary">Practice</button>
         <button id="scrambleBtn" onclick="toggleScramble()" class="btn-ui btn-secondary col-span-2">Scramble Deck</button>
     </div>
@@ -103,10 +97,10 @@
 
 <div id="infoModal" class="modal hidden">
     <div class="flex justify-between items-center mb-8">
-        <h2 class="text-sm font-black text-zinc-500 uppercase tracking-widest">Composition</h2>
+        <h2 class="text-sm font-black text-zinc-500 uppercase tracking-widest">Word Information</h2>
         <button onclick="closeModals()" class="text-3xl">&times;</button>
     </div>
-    <div id="radicalContainer" class="space-y-4 overflow-y-auto"></div>
+    <div id="infoContainer" class="space-y-4 overflow-y-auto pb-10"></div>
     <button onclick="closeModals()" class="btn-ui w-full mt-auto">Return</button>
 </div>
 
@@ -131,34 +125,181 @@
     <div class="w-full space-y-3">
         <button onclick="setFilter('review')" class="btn-ui w-full btn-accent">Study Unknown Words</button>
         <button onclick="location.reload()" class="btn-ui w-full btn-secondary">Restart All</button>
-        <button onclick="goHome()" class="btn-ui w-full btn-secondary">Switch Set</button>
+        <button onclick="goHome()" class="btn-ui w-full btn-secondary">Back to Hub</button>
     </div>
 </div>
 
 <script>
-// --- DATA: RADICALS (Embedded Research) ---
-const radicalMap = {
-    "爱": [{c:"爫", p:"zhǎo", m:"Claw"}, {c:"友", p:"yǒu", m:"Friend"}],
-    "爸": [{c:"父", p:"fù", m:"Father"}, {c:"巴", p:"bā", m:"Crust/Hope"}],
-    "杯": [{c:"木", p:"mù", m:"Wood"}, {c:"不", p:"bù", m:"Negative"}],
-    "北": [{c:"匕", p:"bǐ", m:"Spoon"}, {c:"北", p:"běi", m:"North"}],
-    "京": [{c:"亠", p:"tóu", m:"Lid"}, {c:"小", p:"xiǎo", m:"Small"}],
-    "电": [{c:"田", p:"tián", m:"Field"}, {c:"乚", p:"yǐn", m:"Hook"}],
-    "话": [{c:"讠", p:"yán", m:"Speech"}, {c:"舌", p:"shé", m:"Tongue"}],
-    "学": [{c:"子", p:"zǐ", m:"Child"}, {c:"宀", p:"mián", m:"Roof"}],
-    "校": [{c:"木", p:"mù", m:"Wood"}, {c:"交", p:"jiāo", m:"Interact"}],
-    "常": [{c:"巾", p:"jīn", m:"Turban"}, {c:"口", p:"kǒu", m:"Mouth"}],
-    "唱": [{c:"口", p:"kǒu", m:"Mouth"}, {c:"昌", p:"chāng", m:"Prosperous"}],
-    "饭": [{c:"饣", p:"shí", m:"Food"}, {c:"反", p:"fǎn", m:"Reverse"}],
-    "店": [{c:"广", p:"guǎng", m:"Shelter"}, {c:"占", p:"zhàn", m:"Occupy"}]
-    // Logic will default to primary radical for other characters
+// --- DATA: DETAILED CHARACTER INFORMATION ---
+const radicalData = {
+    "爱": {rad: "爫", radP: "zhǎo", radM: "Claw", meaning: "To love / affection", parts: "Claw + Friend (友)"},
+    "父": {rad: "父", radP: "fù", radM: "Father", meaning: "Father", parts: "Pictograph of hand holding tool"},
+    "巴": {rad: "己", radP: "jǐ", radM: "Self", meaning: "To hope / crust", parts: "Simplified tail/self"},
+    "北": {rad: "匕", radP: "bǐ", radM: "Spoon", meaning: "North", parts: "Two people sitting back to back"},
+    "京": {rad: "亠", radP: "tóu", radM: "Lid", meaning: "Capital city", parts: "Lid + Mouth + Small"},
+    "木": {rad: "木", radP: "mù", radM: "Wood", meaning: "Tree / wood", parts: "Pictograph of a tree"},
+    "不": {rad: "一", radP: "yī", radM: "One", meaning: "Not / negative", parts: "Bird flying to sky"},
+    "子": {rad: "子", radP: "zǐ", radM: "Child", meaning: "Child / seed", parts: "Baby in swaddling"},
+    "电": {rad: "田", radP: "tián", radM: "Field", meaning: "Electricity / lightning", parts: "Field + Hook"},
+    "话": {rad: "讠", radP: "yán", radM: "Speech", meaning: "Speech / word", parts: "Speech + Tongue (舌)"},
+    "学": {rad: "子", radP: "zǐ", radM: "Child", meaning: "Learn / study", parts: "Hands over a building with a child inside"},
+    "校": {rad: "木", radP: "mù", radM: "Wood", meaning: "School", parts: "Wood + Exchange (交)"},
+    "唱": {rad: "口", radP: "kǒu", radM: "Mouth", meaning: "To sing", parts: "Mouth + Prosper (昌)"},
+    "店": {rad: "广", radP: "guǎng", radM: "Shelter", meaning: "Shop / store", parts: "Shelter + Occupy (占)"},
+    "饭": {rad: "饣", radP: "shí", radM: "Food", meaning: "Cooked rice / meal", parts: "Food + Reverse (反)"},
+    "茶": {rad: "艹", radP: "cǎo", radM: "Grass", meaning: "Tea", parts: "Grass + Human + Wood"},
+    "吃": {rad: "口", radP: "kǒu", radM: "Mouth", meaning: "To eat", parts: "Mouth + Beg (乞)"},
+    "喝": {rad: "口", radP: "kǒu", radM: "Mouth", meaning: "To drink", parts: "Mouth + Scold (曷)"},
+    "书": {rad: "丨", radP: "gǔn", radM: "Line", meaning: "Book", parts: "Hand holding a brush"},
+    "包": {rad: "勹", radP: "bāo", radM: "Wrap", meaning: "Bag / wrap", parts: "Person wrapping something"},
+    "杯": {rad: "木", radP: "mù", radM: "Wood", meaning: "Cup", parts: "Wood + No (不)"}
 };
 
-const basicRadicals = {"口":"Mouth","人":"Person","火":"Fire","水":"Water","木":"Wood","女":"Woman","讠":"Speech","饣":"Food","辶":"Walk","宀":"Roof","艹":"Grass","刂":"Knife"};
-
-// --- VOCABULARY DATA ---
-const rawData = [
-    ["爱","ài","love"],["爱好","ài hào","hobby"],["八","bā","eight"],["爸爸｜爸","bàba ｜ bà","dad"],["吧","ba","particle"],["白","bái","white"],["白天","bái tiān","daytime"],["百","bǎihundred"],["班","bān","class"],["半","bànhalf"],["半年","bàn niánhalf year"],["半天","bàn tiānhalf day"],["帮","bānghelp"],["帮忙","bāng máng","help"],["包","bāopackage"],["包子","bāo zi","bun"],["杯","bēicup"],["杯子","bēi zi","cup"],["北","běinorth"],["北边","běi biān","north side"],["北京","běi jīng","Beijing"],["本","běn","measure word"],["本子","běn zi","notebook"],["比","bǐ","than"],["别","bié","don't"],["别的","bié de","others"],["别人","bié rén","other people"],["病","bìng","illness"],["病人","bìng rén","patient"],["不大","bú dà","not big"],["不对","bú duì","wrong"],["不客气","bú kè qì","welcome"],["不用","bú yòng","no need"],["不","bù","no"],["菜","cài","dish"],["茶","chá","tea"],["差","chà","poor/bad"],["常","cháng","often"],["常常","cháng cháng","regularly"],["唱","chàng","sing"],["唱歌","chàng gē","singing"],["车","chē","car"],["车票","chē piào","ticket"],["车上","chē shàng","in the car"],["车站","chē zhàn","station"],["吃","chī","eat"],["吃饭","chī fàn","eat meal"],["出","chū","exit"],["出来","chū láicome out"],["出去","chū qù","go out"],["穿","chuān","wear"],["床","chuáng","bed"],["次","cì","times"],["从","cóng","from"],["错","cuò","wrong"],["打","dǎ","hit"],["打车","dǎ chē","take taxi"],["打电话","dǎ diàn huà","call"],["打开","dǎ kāi","open"],["打球","dǎ qiú","play ball"],["大","dà","big"],["大学","dà xué","uni"],["大学生","dà xué shēng","student"],["到","dào","arrive"],["得到","dé dào","obtain"],["地","de","particle"],["的","de","possessive"],["等","děng","wait"],["地","dì","ground"],["地点","dì diǎn","location"],["地方","dì fang","place"],["地上","dì shàng","on ground"],["地图","dì tú","map"],["弟弟｜弟","dì di","brother"],["第","dì","ordinal"],["点","diǎn","point"],["电","diàn","electric"],["电话","diàn huà","phone"],["电脑","diàn nǎo","PC"],["电视","diàn shì","TV"],["电视机","diàn shì jī","TV set"],["电影","diàn yǐng","movie"],["电影院","diàn yǐng yuàn","cinema"],["东","dōng","east"],["东边","dōng biān","east side"],["东西","dōng xi","thing"],["动","dòng","move"],["动作","dòng zuò","action"],["都","dōu","all"],["读","dú","read"],["读书","dú shū","study"],["对","duì","correct"],["对不起","duì bu qǐ","sorry"],["多","duō","many"],["多少","duō shao","how many"],["饿","è","hungry"],["儿子","ér zi","son"],["二","èr","two"],["饭","fàn","meal"],["饭店","fàn diàn","hotel/rest."],["房间","fáng jiān","room"],["房子","fáng zi","house"],["放","fàng","put"],["放假","fàng jià","holiday"],["放学","fàng xué","finish school"],["飞","fēifly"],["飞机","fēijī","plane"],["非常","fēicháng","extremely"],["分","fēn","minute"],["风","fēng","wind"],["干","gāndry"],["干净","gānjìng","clean"],["干","gàndo"],["干什么","gàn shén me","doing what"],["高","gāohigh"],["高兴","gāoxìng","happy"],["告诉","gàosutell"],["哥哥｜哥","gē ge","brother"],["歌","gēsong"],["个","gè","measure"],["给","gěigive"],["跟","gēnwith"],["工人","gōngrén","worker"],["工作","gōngzuò","work"],["关","guān","close"],["关上","guān shàng","shut"],["贵","guìnoble"],["国","guó","country"],["国家","guójiā","nation"],["国外","guó wài","abroad"],["过","guòpass"],["还","háialso"],["还是","háishior/still"],["还有","hái yǒu","else"],["孩子","háizi","child"],["汉语","hànyǔ","Chinese"],["汉字","hàn zì","characters"],["好","hǎogood"],["好吃","hǎochī","tasty"],["好看","hǎo kàn","pretty"],["好听","hǎo tīng","nice sound"],["好玩儿","hǎo wánr","fun"],["号","hào","date"],["喝","hē","drink"],["和","hé","and"],["很","hěn","very"],["后","hòuback"],["后边","hòu biān","behind"],["后天","hòu tiān","day after tomorrow"],["花","huā","flower"],["话","huà","speech"],["坏","huàibad"],["还","huán","return obj"],["回","huí","return"],["回答","huídá","answer"],["回到","huí dào","return to"],["回家","huí jiā","go home"],["回来","huí lái","come back"],["回去","huí qù","go back"],["会","huì","can"],["火车","huǒ chē","train"],["机场","jīchǎng","airport"],["机票","jī piào","air ticket"],["鸡蛋","jīdàn","egg"],["几","jǐ","how many"],["记","jì","note"],["记得","jìdé","remember"],["记住","jì zhù","memorize"],["家","jiā","home"],["家里","jiā lǐ","at home"],["家人","jiā rén","family"],["间","jiān","room space"],["见","jiàn","see"],["见面","jiànmiàn","meet"],["教","jiāoteach"],["叫","jiào","called"],["教学楼","jiào xué lóu","school bldg"],["姐姐｜姐","jiě jie","sister"],["介绍","jièshào","intro"],["今年","jīn nián","this year"],["今天","jīntiān","today"],["进","jìn","enter"],["进来","jìn lái","come in"],["进去","jìn qù","go in"],["九","jiǔ","nine"],["就","jiù","then"],["觉得","juéde","feel"],["开","kāi","open"],["开车","kāi chē","drive"],["开会","kāi huì","meeting"],["开玩笑","kāi wán xiào","joke"],["看","kàn","look"],["看病","kàn bìng","doctor visit"],["看到","kàn dào","saw"],["看见","kànjiàn","see"],["考","kǎotest"],["考试","kǎoshì","exam"],["渴","kěthirsty"],["课","kèlesson"],["课本","kè běn","textbook"],["课文","kè wén","text"],["口","kǒumouth"],["块","kuàiblock"],["快","kuàifast"],["来","láicome"],["来到","lái dào","arrive"],["老","lǎo","old"],["老人","lǎo rén","senior"],["老师","lǎoshī","teacher"],["了","le","particle"],["累","lèitired"],["冷","lěng","cold"],["里","lǐ","inside"],["里边","lǐ biān","inside of"],["两","liǎng","two"],["零","líng","zero"],["六","liù","six"],["楼","lóufloor"],["楼上","lóu shàng","upstairs"],["楼下","lóu xià","downstairs"],["路","lù","road"],["路口","lù kǒu","junction"],["路上","lù shàng","en route"],["妈妈｜妈","mā ma","mom"],["马路","mǎ lù","street"],["马上","mǎshàng","immediately"],["吗","ma","question"],["买","mǎibuy"],["慢","mànslow"],["忙","máng","busy"],["毛","máo","cent"],["没","méino"],["没关系","méiguānxi","it's ok"],["没什么","méi shén me","nothing"],["没事儿","méi shìr","no big deal"],["没有","méiyǒu","not have"],["妹妹｜妹","mèi mei","sister"],["门","méndoor"],["门口","mén kǒudoorway"],["门票","mén piào","ticket"],["们","men","plural"],["米饭","mǐfàn","rice"],["面包","miànbāo","bread"],["面条儿","miàn tiáor","noodles"],["名字","míngzi","name"],["明白","míngbaiclear"],["明年","míng nián","next year"],["明天","míngtiān","tomorrow"],["拿","nátake"],["哪","nǎ","which"],["哪里","nǎ lǐ","where"],["哪儿","nǎr","where"],["哪些","nǎ xiē","which ones"],["那","nà","that"],["那边","nà biān","there"],["那里","nà lǐ","there"],["那儿","nàr","there"],["那些","nà xiē","those"],["奶","nǎimilk"],["奶奶","nǎinaigrandma"],["男","nán","man"],["男孩儿","nán háir","boy"],["男朋友","nán péng yǒu","boyfriend"],["男人","nán ren","man"],["男生","nán shēng","male student"],["南","nán","south"],["南边","nán biān","south side"],["难","nán","hard"],["呢","ne","particle"],["能","néng","can"],["你","nǐ","you"],["你们","nǐ men","you all"],["年","nián","year"],["您","nínyou pol."],["牛奶","niúnǎimilk"],["女","nǚ","female"],["女儿","nǚ’ér","daughter"],["女孩儿","nǚ háir","girl"],["女朋友","nǚ péng yǒu","girlfriend"],["女人","nǚ ren","woman"],["男生","nǚ shēng","female student"],["旁边","pángbiān","beside"],["跑","pǎorun"],["朋友","péngyou","friend"],["票","piàoticket"],["七","qī","seven"],["起","qǐ","rise"],["起床","qǐchuáng","get up"],["起来","qǐlái","stand up"],["汽车","qì chē","car"],["前","qián","front"],["前边","qián biān","in front"],["前天","qián tiān","day before yesterday"],["钱","qián","money"],["钱包","qián bāo","wallet"],["请","qǐng","please"],["请假","qǐng jià","leave of absence"],["请进","qǐng jìn","come in"],["请问","qǐng wèn","may I ask"],["请坐","qǐng zuò","sit down"],["球","qiú","ball"],["去","qù","go"],["去年","qùnián","last year"],["热","rè","hot"],["人","rén","person"],["认识","rènshi","recognize"],["认真","rènzhēnearnest"],["日","rì","day"],["日期","rìqī","date"],["肉","ròumeat"],["三","sān","three"],["山","shānmountain"],["商场","shāng chǎng","mall"],["商店","shāngdiàn","shop"],["上","shàng","up"],["上班","shàng bān","work"],["上边","shàng biān","on top"],["上车","shàng chē","get on"],["上次","shàng cì","last time"],["上课","shàng kè","class start"],["上网","shàngwǎng","surf web"],["上午","shàngwǔ","morning"],["上学","shàng xué","go to school"],["少","shǎofew"],["谁","shéi","who"],["身上","shēn shàng","on body"],["身体","shēntǐbody"],["什么","shénme","what"],["生病","shēngbìng","sick"],["生气","shēngqì","angry"],["生日","shēngrì","b-day"],["十","shí","ten"],["时候","shíhoutime"],["时间","shíjiāntime"],["事","shì","matter"],["试","shìtry"],["是","shì","be"],["是不是","shì bú shì","isn't it"],["手","shǒuhand"],["手机","shǒujī","phone"],["书","shū","book"],["书包","shū bāo","schoolbag"],["书店","shū diàn","bookstore"],["树","shùtree"],["水","shuǐ","water"],["水果","shuǐguǒ","fruit"],["睡","shuìsleep"],["睡觉","shuìjiàosleep"],["说","shuōspeak"],["说话","shuōhuàtalk"],["四","sì","four"],["送","sòng","deliver/give"],["岁","suì","age"],["他","tā","he"],["他们","tā men","they"],["她","tā","she"],["她们","tā men","they(f)"],["太","tàitoo"],["天","tiānday/sky"],["天气","tiānqì","weather"],["听","tīng","listen"],["听到","tīng dào","heard"],["听见","tīng jiàn","heard"],["听写","tīng xiě","dictation"],["同学","tóngxué","classmate"],["图书馆","túshūguǎn","library"],["外","wài","outer"],["外边","wài biān","outside"],["外国","wài guó","foreign"],["外语","wài yǔ","foreign lang"],["玩儿","wánrplay"],["晚","wǎnlate"],["晚饭","wǎn fàn","dinner"],["晚上","wǎnshang","evening"],["网上","wǎng shàng","online"],["网友","wǎng yǒu","e-friend"],["忘","wàngforget"],["忘记","wàngjì","forget"],["问","wènask"],["我","wǒ","I"],["我们","wǒmen","we"],["五","wǔ","five"],["午饭","wǔ fàn","lunch"],["西","xī","west"],["西边","xī biān","west side"],["洗","xǐwash"],["洗手间","xǐshǒujiān","toilet"],["喜欢","xǐhuan","like"],["下","xià","down"],["下班","xià bān","off work"],["下边","xià biān","below"],["下车","xià chē","get off"],["下次","xià cì","next time"],["下课","xià kè","class finish"],["下午","xiàwǔ","afternoon"],["下雨","xiàyǔrain"],["先","xiānbefore"],["先生","xiānsheng","Mr."],["现在","xiànzài","now"],["想","xiǎngthink/want"],["小","xiǎo","small"],["小孩儿","xiǎo háir","child"],["小姐","xiǎojiě","Miss"],["小朋友","xiǎo péng","yǒu","kid"],["小时","xiǎoshí","hour"],["小学","xiǎo xué","primary school"],["小学生","xiǎo xué","shēng","pupil"],["笑","xiàolaugh"],["写","xiěwrite"],["谢谢","xièxie","thanks"],["新","xīnnew"],["新年","xin nián","new year"],["星期","xīngqī","week"],["星期日","xīng qī rì","Sunday"],["星期天","xīng qī tiān","Sunday"],["行","xíng","ok"],["休息","xiūxi","rest"],["学","xué","learn"],["学生","xuésheng","student"],["学习","xuéxí","study"],["学校","xuéxiào","school"],["学院","xué yuàn","college"],["要","yàowant"],["爷爷","yéye","grandpa"],["也","yěalso"],["页","yèpage"],["一","yī","one"],["衣服","yīfu","clothes"],["医生","yīshēng","doctor"],["医院","yīyuàn","hospital"],["一半","yí bànhalf"],["一会儿","yíhuìr","a bit"],["一块儿","yí kuàir","together"],["一下儿","yí xiàr","a while"],["一样","yí yàng","same"],["一边","yì biān","simultaneously"],["一点儿","yì diǎnr","a little"],["一起","yì qǐ","together"],["一些","yì xiē","some"],["用","yònguse"],["有","yǒuhave"],["有的","yǒu desome"],["有名","yǒumíng","famous"],["有时候","yǒu shí hòu","sometimes"],["有（一）些","yǒu xiē","some"],["有用","yǒu yòng","useful"],["右","yòuright"],["右边","yòubian","right side"],["雨","yǔrain"],["元","yuán","yuan"],["远","yuǎnfar"],["月","yuèmonth"],["再","zàiagain"],["再见","zàijiàn","bye"],["在","zàiat"],["在家","zài jiā","at home"],["早","zǎoearly"],["早饭","zǎo fàn","breakfast"],["早上","zǎoshang","morning"],["怎么","zěnme","how"],["站","zhàn","station"],["找","zhǎoseek"],["找到","zhǎo dào","found"],["这","zhè","this"],["这边","zhè biān","this side"],["这里","zhè lǐ","here"],["这儿","zhèr","here"],["这些","zhè xiē","these"],["着","zhe","particle"],["真","zhēnreally"],["真的","zhēn dereally"],["正","zhèng","exactly"],["正在","zhèngzài","currently"],["知道","zhīdàoknow"],["知识","zhīshiknowledge"],["中","zhōngmiddle"],["中国","zhōngguó","China"],["中间","zhōngjiān","center"],["中文","zhōngwén","Chinese lang"],["中午","zhōngwǔ","noon"],["中学","zhōng xué","mid-school"],["中学生","zhōng xué shēng","student"],["重","zhòngheavy"],["重要","zhòngyào","important"],["住","zhùlive"],["准备","zhǔnbèi","prepare"],["桌子","zhuōzi","table"],["字","zì","character"],["子","zi","suffix"],["走","zǒugo"],["走路","zǒu lù","walk"],["最","zuìmost"],["最好","zuìhǎo","best"],["最后","zuìhòu","last"],["昨天","zuótiān","yesterday"],["左","zuǒleft"],["左边","zuǒbian","left side"],["坐","zuòsit"],["坐下","zuò xià","sit down"],["做","zuò","do"]
+// --- DATA: CLEANED VOCABULARY ---
+const hsk1Data = [
+    ["爱","ài","Love / To be fond of"],
+    ["爱好","ài hào","Hobby / Interest"],
+    ["八","bā","Eight"],
+    ["爸爸","bà ba","Dad / Father"],
+    ["吧","ba","Particle (suggestion/surmise)"],
+    ["白","bái","White / Plain"],
+    ["白天","bái tiān","Daytime"],
+    ["百","bǎi","Hundred"],
+    ["班","bān","Class / Team"],
+    ["半","bàn","Half"],
+    ["半年","bàn nián","Half a year"],
+    ["半天","bàn tiān","Half a day / A long time"],
+    ["帮","bāng","To help / To assist"],
+    ["帮忙","bāng máng","To lend a hand"],
+    ["包","bāo","To wrap / Bag"],
+    ["包子","bāo zi","Steamed stuffed bun"],
+    ["杯","bēi","Cup / Glass (measure word)"],
+    ["杯子","bēi zi","Cup / Glass"],
+    ["北","běi","North"],
+    ["北边","běi biān","North side"],
+    ["北京","běi jīng","Beijing"],
+    ["本","běn","Book (measure word)"],
+    ["本子","běn zi","Notebook / Book"],
+    ["比","bǐ","To compare / Than"],
+    ["别","bié","Don't / Other"],
+    ["别的","bié de","Other / Else"],
+    ["别人","bié rén","Other people"],
+    ["病","bìng","Illness / Sickness"],
+    ["病人","bìng rén","Patient / Sick person"],
+    ["不大","bú dà","Not big / Not often"],
+    ["不对","bú duì","Incorrect / Wrong"],
+    ["不客气","bú kè qi","You're welcome"],
+    ["不用","bú yòng","No need to"],
+    ["不","bù","No / Not"],
+    ["菜","cài","Dish / Vegetable"],
+    ["茶","chá","Tea"],
+    ["差","chà","Poor / Bad / To lack"],
+    ["常","cháng","Often / Frequent"],
+    ["常常","cháng cháng","Frequently"],
+    ["唱","chàng","To sing"],
+    ["唱歌","chàng gē","To sing a song"],
+    ["车","chē","Vehicle / Car"],
+    ["车票","chē piào","Ticket"],
+    ["车上","chē shang","In the car"],
+    ["车站","chē zhàn","Station / Stop"],
+    ["吃","chī","To eat"],
+    ["吃饭","chī fàn","To have a meal"],
+    ["出","chū","To go out / To exit"],
+    ["出来","chū lái","To come out"],
+    ["出去","chū qù","To go out"],
+    ["穿","chuān","To wear / To dress"],
+    ["床","chuáng","Bed"],
+    ["次","cì","Time / Frequency"],
+    ["从","cóng","From / Through"],
+    ["错","cuò","Mistake / Wrong"],
+    ["打","dǎ","To hit / To take"],
+    ["打车","dǎ chē","To take a taxi"],
+    ["打电话","dǎ diàn huà","To make a phone call"],
+    ["打开","dǎ kāi","To open / To turn on"],
+    ["打球","dǎ qiú","To play ball"],
+    ["大","dà","Big / Large"],
+    ["大学","dà xué","University"],
+    ["大学生","dà xué shēng","University student"],
+    ["到","dào","To reach / To arrive"],
+    ["得到","dé dào","To get / To obtain"],
+    ["等","děng","To wait"],
+    ["地","dì","Ground / Floor"],
+    ["地点","dì diǎn","Location / Site"],
+    ["地方","dì fang","Place / Region"],
+    ["地上","dì shang","On the ground"],
+    ["地图","dì tú","Map"],
+    ["弟弟","dì di","Younger brother"],
+    ["第","dì","Prefix for ordinals"],
+    ["点","diǎn","O'clock / Spot"],
+    ["电","diàn","Electricity"],
+    ["电话","diàn huà","Telephone"],
+    ["电脑","diàn nǎo","Computer"],
+    ["电视","diàn shì","Television"],
+    ["电视机","diàn shì jī","TV Set"],
+    ["电影","diàn yǐng","Movie / Film"],
+    ["电影院","diàn yǐng yuàn","Cinema"],
+    ["东","dōng","East"],
+    ["东边","dōng bian","East side"],
+    ["东西","dōng xi","Thing / Stuff"],
+    ["动","dòng","To move"],
+    ["动作","dòng zuò","Action / Movement"],
+    ["都","dōu","All / Both"],
+    ["读","dú","To read / To study"],
+    ["读书","dú shū","Reading / Studying"],
+    ["对","duì","Correct / Right"],
+    ["对不起","duì bu qǐ","I'm sorry"],
+    ["多","duō","Many / Much"],
+    ["多少","duō shao","How many / How much"],
+    ["饿","è","Hungry"],
+    ["儿子","ér zi","Son"],
+    ["二","èr","Two"],
+    ["饭","fàn","Meal / Rice"],
+    ["饭店","fàn diàn","Restaurant / Hotel"],
+    ["房间","fáng jiān","Room"],
+    ["房子","fáng zi","House / Building"],
+    ["放","fàng","To put / To release"],
+    ["放假","fàng jià","To have a holiday"],
+    ["放学","fàng xué","Finish school"],
+    ["飞","fēi","To fly"],
+    ["飞机","fēijī","Airplane"],
+    ["非常","fēicháng","Extremely / Very"],
+    ["分","fēn","Minute / Point"],
+    ["风","fēng","Wind"],
+    ["干净","gānjìng","Clean"],
+    ["高兴","gāoxìng","Happy / Glad"],
+    ["告诉","gàosu","To tell"],
+    ["哥哥","gē ge","Elder brother"],
+    ["歌","gē","Song"],
+    ["个","gè","General measure word"],
+    ["给","gěi","To give"],
+    ["跟","gēn","With / To follow"],
+    ["工人","gōngrén","Worker"],
+    ["工作","gōngzuò","Work / Job"],
+    ["关","guān","To close"],
+    ["贵","guì","Expensive / Noble"],
+    ["国","guó","Country / Nation"],
+    ["国家","guójiā","Nation / State"],
+    ["国外","guó wài","Abroad"],
+    ["过","guò","To pass / To cross"],
+    ["还","hái","Still / Also"],
+    ["还是","háishi","Or / Still"],
+    ["孩子","háizi","Child"],
+    ["汉语","hànyǔ","Chinese language"],
+    ["汉字","hàn zì","Chinese character"],
+    ["好","hǎo","Good / Well"],
+    ["好吃","hǎochī","Delicious"],
+    ["号","hào","Date / Number"],
+    ["喝","hē","To drink"],
+    ["和","hé","And / With"],
+    ["很","hěn","Very"],
+    ["后","hòu","Back / Behind"],
+    ["后天","hòu tiān","Day after tomorrow"],
+    ["花","huā","Flower / To spend"],
+    ["回","huí","To return / To go back"],
+    ["回答","huídá","To answer"],
+    ["回家","huí jiā","Go home"],
+    ["会","huì","Can / To meet"],
+    ["火车站","huǒ chē zhàn","Train station"]
 ];
 
 // --- APP LOGIC ---
@@ -167,11 +308,10 @@ let currentFilter = 'all';
 let currentDeck = [];
 let index = 0;
 let isScrambled = false;
-let savedOrder = [];
 
 function startSet(setId) {
     const progress = JSON.parse(localStorage.getItem('hsk_progress')) || {};
-    fullSet = rawData.map(v => ({
+    fullSet = hsk1Data.map(v => ({
         h: v[0], p: v[1], e: v[2], status: progress[v[0]] || 'normal'
     }));
     document.getElementById('lobbyScreen').classList.add('hidden');
@@ -192,8 +332,8 @@ function setFilter(type) {
     if(type === 'all') currentDeck = [...fullSet];
     else currentDeck = fullSet.filter(v => v.status === 'review');
     
-    if(currentDeck.length === 0) {
-        alert("No words in review list!");
+    if(currentDeck.length === 0 && type === 'review') {
+        alert("No unknown words yet! Mark some words for Review first.");
         return setFilter('all');
     }
 
@@ -225,7 +365,7 @@ function toggleScramble() {
     } else {
         btn.classList.remove('btn-accent');
         btn.innerText = "Scramble Deck";
-        setFilter(currentFilter); // Resets order
+        setFilter(currentFilter); 
     }
     updateUI();
 }
@@ -248,10 +388,8 @@ function flip() { document.getElementById('card').classList.toggle('flipped'); }
 function mark(s) {
     const word = currentDeck[index];
     word.status = s;
-    // Update master data
     const masterIdx = fullSet.findIndex(f => f.h === word.h);
     fullSet[masterIdx].status = s;
-    
     const progress = JSON.parse(localStorage.getItem('hsk_progress')) || {};
     progress[word.h] = s;
     localStorage.setItem('hsk_progress', JSON.stringify(progress));
@@ -260,31 +398,36 @@ function mark(s) {
 
 function openInfo() {
     const word = currentDeck[index].h;
-    const container = document.getElementById('radicalContainer');
+    const container = document.getElementById('infoContainer');
     container.innerHTML = '';
     
-    // Process up to 2 characters
-    const chars = word.replace(/[｜\s]/g, '').split('').slice(0, 2);
+    // Clean string of separators and split into individual characters
+    const chars = word.replace(/[｜\s\/]/g, '').split('').slice(0, 3);
     
     chars.forEach(char => {
-        const data = radicalMap[char] || [{c: char, p: "?", m: basicRadicals[char] || "Component"}];
+        const data = radicalData[char] || {rad: "N/A", radP: "?", radM: "N/A", meaning: "Component", parts: "Simple/Unique"};
         const card = document.createElement('div');
         card.className = "glass-panel p-6";
-        let inner = `<h3 class="text-4xl font-black mb-4">${char}</h3><div class="space-y-3">`;
-        
-        data.forEach(rad => {
-            inner += `
-                <div class="flex justify-between items-center border-b border-zinc-900 pb-2">
-                    <div>
-                        <span class="text-xl font-bold text-white">${rad.c}</span>
-                        <span class="text-xs text-zinc-500 font-black ml-2 uppercase">${rad.p}</span>
-                    </div>
-                    <span class="text-xs font-medium text-zinc-400">${rad.m}</span>
-                </div>`;
-        });
-        
-        inner += `</div>`;
-        card.innerHTML = inner;
+        card.innerHTML = `
+            <div class="flex items-center gap-6 mb-4">
+                <div class="text-6xl font-black text-white">${char}</div>
+                <div>
+                    <div class="text-[10px] text-zinc-500 uppercase font-black">Radical</div>
+                    <div class="text-xl font-bold">${data.rad} <span class="text-xs text-zinc-400 font-normal">(${data.radP})</span></div>
+                    <div class="text-xs text-zinc-400">${data.radM}</div>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4 mt-6 border-t border-zinc-900 pt-4">
+                <div>
+                    <div class="text-[8px] text-zinc-500 uppercase font-black">Composition</div>
+                    <div class="text-xs text-zinc-300">${data.parts}</div>
+                </div>
+                <div>
+                    <div class="text-[8px] text-zinc-500 uppercase font-black">Core Meaning</div>
+                    <div class="text-xs text-zinc-300">${data.meaning}</div>
+                </div>
+            </div>
+        `;
         container.appendChild(card);
     });
     
@@ -296,18 +439,20 @@ function openDraw() {
     document.getElementById('charRefDisplay').innerText = char;
     document.getElementById('drawHeader').innerText = "Draw: " + char;
     document.getElementById('drawModal').classList.remove('hidden');
+    resizeCanvas();
     clearCanvas();
 }
 
 function renderList() {
     const list = document.getElementById('wordList');
     list.innerHTML = '';
-    currentDeck.forEach((v, i) => {
+    currentDeck.slice(index, index + 20).forEach((v, i) => {
         const item = document.createElement('div');
+        const relativeIdx = index + i;
         item.className = `p-3 flex justify-between rounded-xl text-[10px] font-bold uppercase cursor-pointer ${v.status === 'mastered' ? 'bg-green-900/10 text-green-500' : v.status === 'review' ? 'bg-red-900/20 text-red-500' : 'bg-zinc-900 text-zinc-400'}`;
-        if(i === index) item.style.border = "1px solid #fff";
+        if(relativeIdx === index) item.style.border = "1px solid #fff";
         item.innerHTML = `<span>${v.h}</span> <span>${v.p}</span>`;
-        item.onclick = () => { index = i; updateUI(); };
+        item.onclick = () => { index = relativeIdx; updateUI(); };
         list.appendChild(item);
     });
 }
@@ -324,7 +469,6 @@ function resizeCanvas() {
     canvas.width = container.clientWidth;
     canvas.height = container.clientHeight;
 }
-window.addEventListener('resize', resizeCanvas);
 
 function startD(e) {
     drawing = true;
@@ -339,7 +483,7 @@ function drawD(e) {
     const rect = canvas.getBoundingClientRect();
     const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
     const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
-    ctx.lineWidth = 8; ctx.lineCap = 'round'; ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 10; ctx.lineCap = 'round'; ctx.strokeStyle = '#fff';
     ctx.lineTo(x, y); ctx.stroke();
 }
 
@@ -353,7 +497,9 @@ window.addEventListener('touchend', () => drawing = false);
 function clearCanvas() { ctx.clearRect(0,0,canvas.width,canvas.height); }
 
 // Bootstrap
-resizeCanvas();
+window.addEventListener('load', () => {
+    // Initial start
+});
 </script>
 </body>
 </html>
