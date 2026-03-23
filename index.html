@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -669,11 +668,19 @@ function openDrawWithStroke() {
     clearCanvas();
 }
 
-chars.forEach(char => { 
-    const data = radicalData[char] || { 
-        rad: "N/A", radP: "?", radM: "N/A", meaning: "Component", 
-        parts: "Simple/Unique", etymology: "Modern character", traditional: 
-        char, origin: "N/A" };
+// ========== ENHANCED INFO MODAL WITH ETYMOLOGY ==========
+function openInfo() {
+    const word = currentDeck[index].h;
+    const container = document.getElementById('infoContainer');
+    container.innerHTML = '';
+    
+    const chars = word.replace(/[｜\s\/]/g, '').split('');
+    
+    chars.forEach(char => {
+        const data = radicalData[char] || {
+            rad: "N/A", radP: "?", radM: "N/A", meaning: "Component", 
+            parts: "Simple/Unique", etymology: "Modern character", traditional: char, origin: "N/A"
+        };
         
         const card = document.createElement('div');
         card.className = "glass-panel p-6 space-y-4";
