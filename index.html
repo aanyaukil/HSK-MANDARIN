@@ -192,6 +192,7 @@
 </div>
 
 <!-- STROKE PRACTICE MODAL -->
+<!-- STROKE PRACTICE MODAL -->
 <div id="drawModal" class="modal hidden">
     <div class="flex justify-between items-center mb-6">
         <h2 id="drawHeader" class="font-black uppercase text-sm">Practice Writing</h2>
@@ -202,8 +203,10 @@
         <canvas id="canvas"></canvas>
     </div>
     <div id="strokeControls" class="flex gap-2 mt-4 justify-center"></div>
+    <div id="allCharactersDisplay" class="mt-8 space-y-4 overflow-y-auto max-h-96"></div>
     <div class="flex gap-4 mt-8">
         <button onclick="clearCanvas()" class="btn-ui btn-secondary flex-1">Clear</button>
+        <button id="showAllBtn" onclick="toggleShowAll()" class="btn-ui btn-secondary flex-1">📋 Show All</button>
         <button onclick="closeModals()" class="btn-ui flex-1">Done</button>
     </div>
 </div>
@@ -764,8 +767,19 @@ function showCharacterDrawing(char) {
 function openDrawWithStroke() {
     drawingWord = currentDeck[index].h;
     drawingCharIndex = 0;
+    showingAll = false;
     
     document.getElementById('drawModal').classList.remove('hidden');
+    document.getElementById('allCharactersDisplay').innerHTML = '';
+    
+    const showAllBtn = document.getElementById('showAllBtn');
+    if (drawingWord.length > 1) {
+        showAllBtn.style.display = 'block';
+        showAllBtn.classList.remove('btn-accent');
+        showAllBtn.innerText = "📋 Show All";
+    } else {
+        showAllBtn.style.display = 'none';
+    }
     
     const container = document.getElementById('charRefDisplay');
     container.innerHTML = '';
@@ -1061,6 +1075,66 @@ window.addEventListener('touchend', () => drawing = false);
 
 function clearCanvas() { 
     ctx.clearRect(0, 0, canvas.width, canvas.height); 
+}
+let showingAll = false;
+
+function toggleShowAll() {
+    const word = drawingWord;
+    if (word.length <= 1) return; // Only for multi-character words
+    
+    showingAll = !showingAll;
+    const btn = document.getElementById('showAllBtn');
+    const container = document.getElementById('allCharactersDisplay');
+    
+    if (showingAll) {
+        btn.classList.add('btn-accent');
+        btn.innerText = "📋 Hide All";
+        displayAllCharacters(word, container);
+    } else {
+        btn.classList.remove('btn-accent');
+        btn.innerText = "📋 Show All";
+        container.innerHTML = '';
+    }
+}
+
+function displayAllCharacters(word, container) {
+    container.innerHTML = '';
+    
+    for (let i = 0; i < word.length; i++) {
+        const char = word[i];
+        const charDiv = document.createElement('div');
+        charDiv.className = 'glass-panel p-4';
+        charDiv.style.marginBottom = '16px';
+        
+        const title = document.createElement('div');
+        title.className = 'text-sm font-bold mb-3 text-zinc-400';
+        title.innerText = `Character ${i + 1}/${word.length}`;
+        charDiv.appendChild(title);
+        
+        const writerDiv = document.createElement('div');
+        writerDiv.style.width = '100%';
+        writerDiv.style.height = '200px';
+        writerDiv.style.marginBottom = '12px';
+        writerDiv.className = 'border-2 border-zinc-700 rounded-lg';
+        charDiv.appendChild(writerDiv);
+        
+        try {
+            const writer = HanziWriter.create(writerDiv, char, {
+                width: 300,
+                height: 200,
+                padding: 5,
+                strokeAnimationSpeed: 1,
+                delayBetweenStrokes: 200,
+                showOutline: true,
+                showStroke: true
+            });
+            writer.animateCharacter();
+        } catch (err) {
+            console.error('Error creating writer for character:', char, err);
+        }
+        
+        container.appendChild(charDiv);
+    }
 }
 </script>
 </body>
