@@ -719,7 +719,8 @@ document.addEventListener('keydown', (e) => {
 
 // ========== STROKE ORDER WITH ANIMATION ==========
 function openDrawWithStroke() {
-    const char = currentDeck[index].h[0];
+    const word = currentDeck[index].h;
+    let charIndex = 0;
     
     document.getElementById('drawModal').classList.remove('hidden');
     
@@ -732,7 +733,7 @@ function openDrawWithStroke() {
     writerDiv.style.height = '100%';
     container.appendChild(writerDiv);
     
-    setTimeout(() => {
+    function showCharacter(char) {
         try {
             strokeWriter = HanziWriter.create('hanzi-writer-container', char, {
                 width: container.clientWidth,
@@ -750,14 +751,22 @@ function openDrawWithStroke() {
             buttonContainer.innerHTML = `
                 <button onclick="if(strokeWriter) strokeWriter.animateCharacter()" class="btn-ui btn-secondary">▶ Play</button>
                 <button onclick="if(strokeWriter) strokeWriter.reset()" class="btn-ui btn-secondary">⟲ Reset</button>
+                ${word.length > 1 ? `
+                    <button onclick="charIndex = (charIndex - 1 + word.length) % word.length; showCharacter(word[charIndex])" class="btn-ui btn-secondary">← Prev Char</button>
+                    <button onclick="charIndex = (charIndex + 1) % word.length; showCharacter(word[charIndex])" class="btn-ui btn-secondary">Next Char →</button>
+                    <span class="text-zinc-400 text-xs pt-2">${charIndex + 1}/${word.length}</span>
+                ` : ''}
             `;
         } catch (err) {
             console.error('Stroke writer error:', err);
         }
-    }, 100);
+    }
     
-    resizeCanvas();
-    clearCanvas();
+    setTimeout(() => {
+        showCharacter(word[charIndex]);
+        resizeCanvas();
+        clearCanvas();
+    }, 100);
 }
 
 // ========== ENHANCED INFO MODAL WITH ETYMOLOGY ==========
