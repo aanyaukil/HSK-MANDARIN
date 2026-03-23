@@ -669,19 +669,47 @@ function openDrawWithStroke() {
     clearCanvas();
 }
 
-// ========== ENHANCED INFO MODAL WITH ETYMOLOGY ==========
-function openInfo() {
-    const word = currentDeck[index].h;
-    const container = document.getElementById('infoContainer');
-    container.innerHTML = '';
+    // ========== ENHANCED INFO MODAL WITH ETYMOLOGY ==========
+    function openInfo() {
+        const word = currentDeck[index].h;
+        const container = document.getElementById('infoContainer');
+        container.innerHTML = '';
+        
+        const chars = word.replace(/[｜\s\/]/g, '').split('');
+        
+    const fallback = {
+        rad: "N/A",
+        radP: "?",
+        radM: "N/A",
+        meaning: "Component",
+        parts: "Simple/Unique",
+        etymology: "Modern character",
+        traditional: "?",
+        origin: "N/A"
+    };
     
-    const chars = word.replace(/[｜\s\/]/g, '').split('');
+    container.innerHTML = ""; // IMPORTANT: clear once before loop
     
     chars.forEach(char => {
-        const data = radicalData[char] || {
-            rad: "N/A", radP: "?", radM: "N/A", meaning: "Component", 
-            parts: "Simple/Unique", etymology: "Modern character", traditional: char, origin: "N/A"
-        };
+        const cleanChar = char.trim(); // removes hidden spaces
+    
+        const data = radicalData[cleanChar];
+    
+        if (!data) {
+            console.warn("Missing character:", cleanChar);
+        }
+    
+        const finalData = data || fallback;
+    
+        container.innerHTML += `
+            <div class="char-box">
+                <h3>${cleanChar}</h3>
+                <p><strong>Radical:</strong> ${finalData.rad} (${finalData.radP})</p>
+                <p><strong>Meaning:</strong> ${finalData.meaning}</p>
+                <p><strong>Parts:</strong> ${finalData.parts}</p>
+            </div>
+        `;
+    });
         
         const card = document.createElement('div');
         card.className = "glass-panel p-6 space-y-4";
