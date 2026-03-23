@@ -725,6 +725,15 @@ let drawingCharIndex = 0;
 function showCharacterDrawing(char) {
     try {
         const container = document.getElementById('charRefDisplay');
+        
+        // Clear old container and create new one
+        container.innerHTML = '';
+        const writerDiv = document.createElement('div');
+        writerDiv.id = 'hanzi-writer-container';
+        writerDiv.style.width = '100%';
+        writerDiv.style.height = '100%';
+        container.appendChild(writerDiv);
+        
         strokeWriter = HanziWriter.create('hanzi-writer-container', char, {
             width: container.clientWidth,
             height: container.clientHeight,
