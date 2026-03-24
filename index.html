@@ -1100,16 +1100,11 @@ function toggleShowAll() {
 function displayAllCharacters(word, container) {
     container.innerHTML = '';
     
-    // Create a grid wrapper
-    const gridWrapper = document.createElement('div');
-    gridWrapper.style.display = 'grid';
-    gridWrapper.style.gridTemplateColumns = 'repeat(auto-fit, minmax(250px, 1fr))';
-    gridWrapper.style.gap = '16px';
-    
     for (let i = 0; i < word.length; i++) {
         const char = word[i];
         const charDiv = document.createElement('div');
         charDiv.className = 'glass-panel p-4';
+        charDiv.style.marginBottom = '16px';
         
         const title = document.createElement('div');
         title.className = 'text-sm font-bold mb-3 text-zinc-400';
@@ -1138,9 +1133,7 @@ function displayAllCharacters(word, container) {
             console.error('Error creating writer for character:', char, err);
         }
         
-              gridWrapper.appendChild(charDiv);
-    }
-    container.appendChild(gridWrapper);
+        container.appendChild(charDiv);
     }
 }
 </script>
