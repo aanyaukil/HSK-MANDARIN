@@ -17,7 +17,15 @@
         .glass-panel { background: #0a0a0a; border: 1px solid #222; border-radius: 2rem; }
         .light-mode .glass-panel { background: #fff; border: 1px solid #ddd; }
         
-        .flip-card { perspective: 1000px; height: 350px; width: 100%; }
+        .flip-card { 
+            perspective: 1000px; 
+            height: 350px; 
+            width: 100%; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
         .flip-inner {
             box-shadow: none;
             transition: 0.6s; 
@@ -155,10 +163,10 @@
     </div>
     <div id="progressPercentage" class="text-center text-sm font-bold text-zinc-400 mb-4">0%</div>
 
-    <div class="flex items-center gap-4 mb-8">
-        <button onclick="prev()" class="w-12 h-12 rounded-full border border-zinc-800 flex items-center justify-center">←</button>
-        <div class="flip-card">
-            <div id="card" class="flip-inner" onclick="flip()">
+  <div class="flex items-center gap-4 mb-8">
+    <button onclick="prev()" class="w-12 h-12 rounded-full border border-zinc-800 flex items-center justify-center">←</button>
+    <div class="flip-card flex-1">
+        <div id="card" class="flip-inner" onclick="flip()">
                 <div class="front glass-panel" id="h-main" style="position: relative;">
                     <button onclick="speakWord(currentDeck[index].h); event.stopPropagation();" class="btn-ui btn-secondary" style="position: absolute; top: 10px; right: 10px; width: 40px; height: 40px; padding: 0;">🔊</button>
                 </div>
