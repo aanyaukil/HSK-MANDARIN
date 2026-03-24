@@ -19,7 +19,7 @@
         
         .flip-card { perspective: 1000px; height: 350px; width: 100%; }
         .flip-inner {
-            box-shadow: 0 0 30px rgba(255,255,255,0.05);
+            box-shadow: none;
             transition: 0.6s; 
             transform-style: preserve-3d; 
             cursor: pointer; 
@@ -42,7 +42,7 @@
             font-size: 6rem;
             font-weight: 900;
             color: #FFD700;
-            text-shadow: 0 0 20px rgba(251,191,36,0.6), 0 0 40px rgba(251,191,36,0.3);
+            text-shadow: none;
         }
 
         .btn-ui { 
@@ -159,8 +159,11 @@
         <button onclick="prev()" class="w-12 h-12 rounded-full border border-zinc-800 flex items-center justify-center">←</button>
         <div class="flip-card">
             <div id="card" class="flip-inner" onclick="flip()">
-                <div class="front glass-panel" id="h-main"></div>
+                <div class="front glass-panel" id="h-main" style="position: relative;">
+                    <button onclick="speakWord(currentDeck[index].h); event.stopPropagation();" class="btn-ui btn-secondary" style="position: absolute; top: 10px; right: 10px; width: 40px; height: 40px; padding: 0;">🔊</button>
+                </div>
                 <div class="back p-8 text-center">
+                    <button onclick="speakWord(currentDeck[index].h)" class="btn-ui btn-secondary mb-4" style="width: 100%;">🔊 Pronounce</button>
                     <div id="p-main" class="text-3xl font-black mb-2"></div>
                     <div id="e-main" class="text-zinc-500 italic"></div>
                 </div>
@@ -820,6 +823,11 @@ function openInfo() {
             </div>
             
             <div class="border-b border-zinc-800 pb-3">
+                <div class="text-[10px] text-zinc-500 uppercase font-black">Stroke Order</div>
+                <div id="stroke-${char}" style="width: 100%; height: 160px; border-radius: 8px;"></div>
+            </div>
+            
+            <div class="border-b border-zinc-800 pb-3">
                 <div class="text-[10px] text-zinc-500 uppercase font-black">Traditional Form</div>
                 <div class="text-2xl font-bold text-zinc-200">${data.traditional}</div>
             </div>
@@ -848,6 +856,19 @@ function openInfo() {
             </div>
         `;
         container.appendChild(card);
+        setTimeout(() => {
+            try {
+                HanziWriter.create(`stroke-${char}`, char, {
+                    width: 160,
+                    height: 160,
+                    padding: 5,
+                    strokeAnimationSpeed: 0.5,
+                    delayBetweenStrokes: 100,
+                    showOutline: true,
+                    showStroke: true
+                }).animateCharacter();
+            } catch (err) {}
+        }, 50);
     });
     
     document.getElementById('infoModal').classList.remove('hidden');
@@ -1004,11 +1025,16 @@ function renderList() {
         }
 
         item.innerHTML = `
-            <div class="flex justify-between">
-                <span class="font-semibold">${v.e}</span>
-                <span class="text-zinc-400 text-[10px]">${v.p}</span>
+            <div class="flex justify-between items-start">
+                <div class="flex-1">
+                    <div class="flex justify-between">
+                        <span class="font-semibold">${v.e}</span>
+                        <span class="text-zinc-400 text-[10px]">${v.p}</span>
+                    </div>
+                    <div class="text-lg font-bold text-center mt-1">${v.h}</div>
+                </div>
+                ${v.status !== 'normal' ? `<button class="ml-2 px-2 py-1 text-[10px] rounded bg-opacity-50 hover:bg-opacity-100 transition">↶</button>` : ''}
             </div>
-            <div class="text-lg font-bold text-center mt-1">${v.h}</div>
         `;
 
         item.onclick = () => {
@@ -1016,10 +1042,27 @@ function renderList() {
             updateUI();
         };
 
+        if (v.status !== 'normal') {
+            const undoBtn = item.querySelector('button');
+            undoBtn.onclick = (e) => {
+                e.stopPropagation();
+                const fullSetIdx = fullSet.findIndex(f => f.h === v.h);
+                fullSet[fullSetIdx].status = 'normal';
+                fullSet[fullSetIdx].interval = 1;
+                fullSet[fullSetIdx].ease = 2.5;
+                fullSet[fullSetIdx].reviewCount = 0;
+                fullSet[fullSetIdx].consecutiveCorrect = 0;
+                localStorage.setItem('hsk_srs_data', JSON.stringify(fullSet));
+                localStorage.setItem('hsk_progress', JSON.stringify(
+                    fullSet.reduce((acc, w) => ({...acc, [w.h]: w.status}), {})
+                ));
+                setFilter(currentFilter);
+            };
+        }
+
         list.appendChild(item);
     });
 }
-
 function closeModals() { 
     document.querySelectorAll('.modal').forEach(m => m.classList.add('hidden')); 
 }
@@ -1099,12 +1142,14 @@ function toggleShowAll() {
 
 function displayAllCharacters(word, container) {
     container.innerHTML = '';
+    container.style.display = 'grid';
+    container.style.gridTemplateColumns = 'repeat(2, 1fr)';
+    container.style.gap = '16px';
     
     for (let i = 0; i < word.length; i++) {
         const char = word[i];
         const charDiv = document.createElement('div');
         charDiv.className = 'glass-panel p-4';
-        charDiv.style.marginBottom = '16px';
         
         const title = document.createElement('div');
         title.className = 'text-sm font-bold mb-3 text-zinc-400';
