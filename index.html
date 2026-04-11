@@ -1,1220 +1,313 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HSK 3.0 Ultimate Study Tool</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/hanzi-writer@2.2.2/dist/hanzi-writer.min.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        
-        * { transition: background-color 0.3s ease, color 0.3s ease; }
-        
-        body { background: #2d2d2d; color: #fff; font-family: 'Inter', sans-serif; margin: 0; overflow-x: hidden; }
-        body.light-mode { background: #f5f5f5; color: #000; }
-        
-        .glass-panel { background: #0a0a0a; border: 1px solid #222; border-radius: 2rem; }
-        .light-mode .glass-panel { background: #fff; border: 1px solid #ddd; }
-        
-        .flip-card { 
-            perspective: 1200px; 
-            height: 350px; 
-            width: 100%; 
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-        
-        .flip-inner {
-            box-shadow: none;
-            transition: transform 0.7s cubic-bezier(0.68, -0.55, 0.265, 1.55); 
-            transform-style: preserve-3d; 
-            cursor: pointer; 
-            height: 100%; 
-            width: 100%; 
-            position: relative;
-            transform-origin: center center;
-            will-change: transform;
-            transform: translateZ(0);  /* FIX: Prevents layout shift */
-        }
-        
-        .flipped { transform: rotateY(180deg) translateZ(0); }
-        
-        .front, .back {
-            position: absolute; 
-            width: 100%; 
-            height: 100%;
-            backface-visibility: hidden; 
-            border-radius: 2.5rem;
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            background: #111; 
-            border: 1px solid #333;
-            top: 0;
-            left: 0;
-        }
-        
-        .light-mode .front, .light-mode .back { 
-            background: #f0f0f0; 
-            border: 1px solid #ccc; 
-            color: #000; 
-        }
-        
-        .back { 
-            transform: rotateY(180deg); 
-            flex-direction: column; 
-            background: #151515; 
-            overflow: hidden; 
-        }
-        
-        .light-mode .back { background: #fff; }
-        
-        .front {
-            font-size: 6rem;
-            font-weight: 900;
-            color: #FFD700;
-            text-shadow: none;
-        }
-
-        .btn-ui { 
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            color: #fff;
-            height: 50px; 
-            border-radius: 1rem;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-            font-weight: 800; text-transform: uppercase; font-size: 0.7rem;
-            display: flex; align-items: center; justify-content: center; 
-            transition: 0.2s;
-            cursor: pointer;
-        }
-        .light-mode .btn-ui {
-            background: rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(0, 0, 0, 0.2);
-            color: #000;
-        }
-        .btn-ui:active { transform: scale(0.96); }
-        .btn-secondary { 
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .light-mode .btn-secondary {
-            background: rgba(0, 0, 0, 0.05);
-            border: 1px solid rgba(0, 0, 0, 0.1);
-        }
-        .btn-accent { 
-            background: rgba(251, 191, 36, 0.2);
-            color: #FFD700;
-            border: 1px solid rgba(251, 191, 36, 0.3);
-        }
-        .modal { position: fixed; inset: 0; background: #000; z-index: 100; padding: 20px; display: flex; flex-direction: column; overflow-y: auto; }
-        .light-mode .modal { background: rgba(255,255,255,0.95); }
-        .split-view { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; height: 400px; }
-        canvas { background: #0a0a0a; border: 2px solid #333; border-radius: 1.5rem; touch-action: none; width: 100%; height: 100%; cursor: crosshair; }
-        .light-mode canvas { background: #f0f0f0; border: 2px solid #ddd; }
-        .char-ref { background: #111; border: 2px solid #222; border-radius: 1.5rem; display: flex; align-items: center; justify-content: center; font-size: 10rem; color: #333; position: relative; }
-        .light-mode .char-ref { background: #f0f0f0; border: 2px solid #ddd; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        #wordList { height: 250px; overflow-y: auto; scrollbar-width: none; }
-        .active-filter { border: 2px solid #FFD700 !important; color: #FFD700 !important; }
-        
-        .settings-btn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            cursor: pointer;
-            transition: 0.3s;
-            z-index: 50;
-        }
-        .settings-btn:hover { transform: scale(1.1); background: rgba(255, 255, 255, 0.3); }
-        .light-mode .settings-btn { background: rgba(0, 0, 0, 0.2); border: 2px solid rgba(0, 0, 0, 0.3); }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HSK Study Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/hanzi-writer@2.2.2/dist/hanzi-writer.min.js"></script>
+  <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
+  <div class="app-shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">HSK 3.0 Study System</p>
+        <h1>Build Mandarin fluency with structure, streaks, and smarter review.</h1>
+        <p class="hero-copy">
+          Study by level, choose what appears on the front of each flashcard, track your streak,
+          and keep HSK 2 locked until HSK 1 is truly finished.
+        </p>
+      </div>
+      <div class="hero-actions">
+        <button class="primary-btn" id="openSettingsBtn">Study Settings</button>
+        <button class="secondary-btn" id="openStreakBtn">View Streak</button>
+      </div>
+    </header>
 
-<!-- LOBBY SCREEN -->
-<div id="lobbyScreen" class="p-8 min-h-screen">
-    <div class="max-w-md mx-auto">
-        <h1 class="text-4xl font-black mb-2 tracking-tighter">STUDY HUB</h1>
-        <p class="text-zinc-500 mb-8 text-sm">Select a vocabulary pack to begin.</p>
-        <div class="grid gap-4">
-            <div class="glass-panel p-6 cursor-pointer hover:border-zinc-500 transition-all">
-                <div class="flex justify-between items-center mb-4" onclick="startSet('hsk1')">
-                    <div>
-                        <h3 class="text-xl font-bold">HSK 1 (3.0)</h3>
-                        <p class="text-xs text-zinc-500 uppercase font-black mt-1">500+ Words • Beginner</p>
+    <main class="layout">
+      <section id="lobbyScreen" class="screen active">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Flashcard Sets</p>
+            <h2>Choose a level</h2>
+          </div>
+          <button class="secondary-btn" id="openStatsBtn">Progress</button>
+        </div>
+
+        <div id="setGrid" class="set-grid"></div>
+      </section>
+
+      <section id="studyScreen" class="screen">
+        <div class="section-heading compact">
+          <button class="text-btn" id="goHomeBtn">← Back to sets</button>
+          <div class="top-actions">
+            <button class="secondary-btn" id="toggleShuffleBtn">Shuffle Off</button>
+            <button class="secondary-btn" id="studyStatsBtn">Stats</button>
+          </div>
+        </div>
+
+        <div class="study-header card-panel">
+          <div>
+            <p class="eyebrow" id="activeSetLabel">HSK 1</p>
+            <h2 id="studyTitle">Study Session</h2>
+          </div>
+          <div class="study-meta">
+            <span id="cardCounter">0 / 0</span>
+            <span id="cardFaceBadge">Front: Mandarin</span>
+          </div>
+        </div>
+
+        <div class="progress-wrap">
+          <div class="progress-rail">
+            <div id="progressBar" class="progress-fill"></div>
+          </div>
+          <div id="progressText" class="progress-text">0%</div>
+        </div>
+
+        <div class="toolbar card-panel">
+          <div class="segmented">
+            <button class="segmented-btn active" data-filter="all">All words</button>
+            <button class="segmented-btn" data-filter="review">Needs review</button>
+            <button class="segmented-btn" data-filter="due">Due now</button>
+          </div>
+          <div class="segmented">
+            <button class="segmented-btn active" data-front="hanzi">Mandarin</button>
+            <button class="segmented-btn" data-front="pinyin">Pinyin</button>
+            <button class="segmented-btn" data-front="english">Translation</button>
+          </div>
+        </div>
+
+        <div class="study-stage">
+          <button class="nav-btn" id="prevBtn" aria-label="Previous card">←</button>
+
+          <article class="flashcard-shell">
+            <div class="flip-card" id="flashcard">
+              <div class="flip-inner" id="cardInner">
+                <div class="card-face front-face">
+                  <div class="card-face-top">
+                    <span class="badge" id="wordStatusBadge">New</span>
+                    <button class="icon-btn" id="speakBtn" aria-label="Pronounce current card">🔊</button>
+                  </div>
+                  <div class="front-content">
+                    <div id="frontDisplay" class="front-display"></div>
+                    <div id="frontHint" class="front-hint"></div>
+                  </div>
+                  <button class="card-flip-hint" id="flipFrontBtn">Tap to reveal</button>
+                </div>
+
+                <div class="card-face back-face">
+                  <div class="back-stack">
+                    <div class="back-main">
+                      <div id="backHanzi" class="back-hanzi"></div>
+                      <div id="backPinyin" class="back-pinyin"></div>
+                      <div id="backEnglish" class="back-english"></div>
                     </div>
-                    <div class="text-2xl">→</div>
+                    <div class="back-example-block">
+                      <p class="eyebrow">Examples</p>
+                      <pre id="backExamples" class="examples"></pre>
+                    </div>
+                    <div class="back-actions">
+                      <button class="secondary-btn" id="infoBtn">Character info</button>
+                      <button class="secondary-btn" id="practiceBtn">Stroke practice</button>
+                    </div>
+                  </div>
                 </div>
-                <div class="flex gap-2 pt-4 border-t border-zinc-900">
-                    <button onclick="resetProgress()" class="flex-1 text-xs font-black uppercase py-2 px-3 rounded-lg border border-red-500/30 hover:border-red-500 text-red-400 transition-all hover:bg-red-500/5">
-                        Reset ⟲
-                    </button>
-                    <button onclick="openStats()" class="flex-1 text-xs font-black uppercase py-2 px-3 rounded-lg border border-blue-500/30 hover:border-blue-500 text-blue-400 transition-all hover:bg-blue-500/5">
-                        Stats 📊
-                    </button>
-                </div>
+              </div>
             </div>
+          </article>
+
+          <button class="nav-btn" id="nextBtn" aria-label="Next card">→</button>
         </div>
-    </div>
-</div>
 
-<!-- APP SCREEN -->
-<div id="appScreen" class="hidden min-h-screen flex flex-col p-6 max-w-md mx-auto">
-    <div class="flex justify-between items-center mb-4">
-        <button onclick="goHome()" class="text-xs font-black text-zinc-500 uppercase">← All Sets</button>
-        <div id="counter" class="text-[10px] font-bold bg-zinc-900 px-3 py-1 rounded-full text-zinc-400">0 / 0</div>
-    </div>
-
-    <div class="flex gap-2 mb-6">
-        <button id="filterAll" onclick="setFilter('all')" class="flex-1 py-2 text-[10px] font-black uppercase border border-zinc-800 rounded-lg active-filter">All Words</button>
-        <button id="filterReview" onclick="setFilter('review')" class="flex-1 py-2 text-[10px] font-black uppercase border border-zinc-800 rounded-lg">Unknown Words</button>
-    </div>
-
-    <div class="w-full h-1 bg-zinc-900 rounded-full mb-2 overflow-hidden mt-4">
-        <div id="progressBar" class="h-full bg-white w-0 transition-all"></div>
-    </div>
-    <div id="progressPercentage" class="text-center text-sm font-bold text-zinc-400 mb-4">0%</div>
-
-  <div class="flex items-center gap-4 mb-8">
-    <button onclick="prev()" class="w-12 h-12 rounded-full border border-zinc-800 flex items-center justify-center">←</button>
-    <div class="flip-card flex-1">
-        <div id="card" class="flip-inner" onclick="flip()">
-                <div class="front glass-panel" id="h-main" style="position: relative;">
-                    <button onclick="speakWord(currentDeck[index].h); event.stopPropagation();" class="btn-ui btn-secondary" style="position: absolute; top: 10px; right: 10px; width: 40px; height: 40px; padding: 0;">🔊</button>
-                </div>
-                <div class="back p-8 text-center">
-                    <button onclick="speakWord(currentDeck[index].h)" class="btn-ui btn-secondary mb-4" style="width: 100%;">🔊 Pronounce</button>
-                    <div id="p-main" class="text-3xl font-black mb-2"></div>
-                    <div id="e-main" class="text-zinc-500 italic"></div>
-                </div>
-            </div>
+        <div class="rating-grid">
+          <button class="rating-btn good" data-rating="4">Mastered</button>
+          <button class="rating-btn okay" data-rating="3">Good</button>
+          <button class="rating-btn soft" data-rating="2">Still learning</button>
+          <button class="rating-btn alert" data-rating="1">Review again</button>
         </div>
-        <button onclick="next()" class="w-12 h-12 rounded-full border border-zinc-800 flex items-center justify-center">→</button>
-    </div>
 
-    <div class="grid grid-cols-2 gap-3 mb-6">
-        <button onclick="mark('mastered', 4)" class="btn-ui">✓ Mastered</button>
-        <button onclick="mark('review', 1)" class="btn-ui btn-secondary">? Review</button>
-        <button onclick="openInfo()" class="btn-ui btn-secondary">📖 Info</button>
-        <button onclick="openDrawWithStroke()" class="btn-ui btn-secondary">✏️ Practice</button>
-        <button onclick="openStats()" class="btn-ui btn-secondary">📊 Stats</button>
-        <button id="scrambleBtn" onclick="toggleScramble()" class="btn-ui btn-secondary">🔀 Scramble</button>
-    </div>
-
-    <div id="wordList" class="no-scrollbar border-t border-zinc-900 pt-4 space-y-2"></div>
-</div>
-
-<!-- INFO MODAL -->
-<div id="infoModal" class="modal hidden">
-    <div class="flex justify-between items-center mb-8">
-        <h2 class="text-sm font-black text-zinc-500 uppercase tracking-widest">Word Information</h2>
-        <button onclick="closeModals()" class="text-3xl">&times;</button>
-    </div>
-    <div id="infoContainer" class="space-y-4 overflow-y-auto pb-10"></div>
-    <button onclick="closeModals()" class="btn-ui w-full mt-auto">Return</button>
-</div>
-
-<!-- STROKE PRACTICE MODAL -->
-<!-- STROKE PRACTICE MODAL -->
-<div id="drawModal" class="modal hidden">
-    <div class="flex justify-between items-center mb-6">
-        <h2 id="drawHeader" class="font-black uppercase text-sm">Practice Writing</h2>
-        <button onclick="closeModals()" class="text-3xl">&times;</button>
-    </div>
-    <div class="split-view">
-        <div id="charRefDisplay" style="position: relative;"></div>
-        <canvas id="canvas"></canvas>
-    </div>
-    <div id="strokeControls" class="flex gap-2 mt-4 justify-center"></div>
-    <div id="allCharactersDisplay" class="mt-8 space-y-4 overflow-y-auto max-h-96"></div>
-    <div class="flex gap-4 mt-8">
-        <button onclick="clearCanvas()" class="btn-ui btn-secondary flex-1">Clear</button>
-        <button id="showAllBtn" onclick="toggleShowAll()" class="btn-ui btn-secondary flex-1">📋 Show All</button>
-        <button onclick="closeModals()" class="btn-ui flex-1">Done</button>
-    </div>
-</div>
-
-<!-- STATS MODAL -->
-<div id="statsModal" class="modal hidden">
-    <div class="flex justify-between items-center mb-8">
-        <h2 class="text-sm font-black text-zinc-500 uppercase tracking-widest">📊 Learning Statistics</h2>
-        <button onclick="closeModals()" class="text-3xl">&times;</button>
-    </div>
-    
-    <div class="space-y-4">
-        <div class="grid grid-cols-2 gap-4">
-            <div class="glass-panel p-4 text-center">
-                <div class="text-3xl font-black text-yellow-400" id="totalWords">0</div>
-                <div class="text-xs text-zinc-400 uppercase mt-2">Total Words</div>
-            </div>
-            
-            <div class="glass-panel p-4 text-center">
-                <div class="text-3xl font-black text-green-400" id="masteredWords">0</div>
-                <div class="text-xs text-zinc-400 uppercase mt-2">Mastered</div>
-            </div>
-            
-            <div class="glass-panel p-4 text-center">
-                <div class="text-3xl font-black text-blue-400" id="learningWords">0</div>
-                <div class="text-xs text-zinc-400 uppercase mt-2">In Progress</div>
-            </div>
-            
-            <div class="glass-panel p-4 text-center">
-                <div class="text-3xl font-black text-red-400" id="dueToday">0</div>
-                <div class="text-xs text-zinc-400 uppercase mt-2">Due Today</div>
-            </div>
-        </div>
-        
-        <div class="glass-panel p-4">
-            <div class="flex justify-between text-xs mb-2">
-                <span class="text-zinc-400">Overall Progress</span>
-                <span class="text-yellow-400 font-bold" id="progressPercent">0%</span>
-            </div>
-            <div class="w-full h-2 bg-zinc-900 rounded-full overflow-hidden">
-                <div id="progressBar2" class="h-full bg-gradient-to-r from-green-500 to-blue-500 w-0 transition-all"></div>
-            </div>
-        </div>
-        
-        <button onclick="exportStats()" class="btn-ui w-full btn-accent">📥 Export Progress</button>
-        <input type="file" id="importFile" accept=".json" style="display:none;" onchange="importStats(event)">
-        <button onclick="document.getElementById('importFile').click()" class="btn-ui w-full btn-secondary">📤 Import Progress</button>
-    </div>
-    
-    <button onclick="closeModals()" class="btn-ui w-full mt-auto mt-4">Close</button>
-</div>
-
-<!-- SETTINGS MODAL -->
-<div id="settingsModal" class="modal hidden">
-    <div class="flex justify-between items-center mb-8">
-        <h2 class="text-sm font-black text-zinc-500 uppercase tracking-widest">⚙️ Settings</h2>
-        <button onclick="closeModals()" class="text-3xl">&times;</button>
-    </div>
-    
-    <div class="space-y-6">
-        <!-- Dark Mode Toggle -->
-        <div class="glass-panel p-4">
-            <div class="flex justify-between items-center">
-                <div>
-                    <div class="font-bold">Light Mode</div>
-                    <div class="text-xs text-zinc-400">Toggle light/dark theme</div>
-                </div>
-                <input type="checkbox" id="lightModeToggle" class="w-6 h-6 cursor-pointer" onchange="toggleLightMode()">
-            </div>
-        </div>
-        
-        <!-- Keyboard Shortcuts -->
-        <div class="glass-panel p-4">
-            <div class="font-bold mb-3">⌨️ Keyboard Shortcuts</div>
-            <div class="space-y-2 text-xs text-zinc-300">
-                <div><kbd class="bg-zinc-700 px-2 py-1 rounded">←</kbd> Previous card</div>
-                <div><kbd class="bg-zinc-700 px-2 py-1 rounded">→</kbd> Next card</div>
-                <div><kbd class="bg-zinc-700 px-2 py-1 rounded">Space</kbd> Flip card</div>
-                <div><kbd class="bg-zinc-700 px-2 py-1 rounded">M</kbd> Mark mastered</div>
-                <div><kbd class="bg-zinc-700 px-2 py-1 rounded">R</kbd> Mark for review</div>
-                <div><kbd class="bg-zinc-700 px-2 py-1 rounded">S</kbd> Open settings</div>
-            </div>
-        </div>
-        
-        <!-- Speech Speed -->
-        <div class="glass-panel p-4">
-            <label for="speechSpeed" class="font-bold block mb-2">🔊 Speech Speed</label>
-            <input type="range" id="speechSpeed" min="0.5" max="2" step="0.1" value="0.8" class="w-full cursor-pointer">
-            <div class="text-xs text-zinc-400 mt-2">Current: <span id="speedValue">0.8</span>x</div>
-        </div>
-        
-        <!-- Font Size -->
-        <div class="glass-panel p-4">
-            <label for="fontSize" class="font-bold block mb-2">📝 Font Size</label>
-            <input type="range" id="fontSize" min="12" max="24" step="1" value="16" class="w-full cursor-pointer" onchange="changeFontSize()">
-            <div class="text-xs text-zinc-400 mt-2">Current: <span id="fontSizeValue">16</span>px</div>
-        </div>
-        
-        <!-- SRS Info -->
-        <div class="glass-panel p-4 bg-blue-900/20 border border-blue-500/30">
-            <div class="font-bold mb-2">✨ Spaced Repetition (SRS)</div>
-            <div class="text-xs text-zinc-300">
-                Cards are intelligently scheduled based on the SM-2 algorithm. Rate cards (1-4) to adjust their difficulty and review schedule.
-            </div>
-        </div>
-    </div>
-    
-    <button onclick="closeModals()" class="btn-ui w-full mt-auto mt-4">Close</button>
-</div>
-
-<!-- END MODAL -->
-<div id="endModal" class="modal hidden items-center justify-center text-center">
-    <h1 class="text-5xl font-black mb-4">🎉 FINISH</h1>
-    <p class="text-zinc-500 mb-10 max-w-xs">You've reached the end of this selection.</p>
-    <div class="w-full space-y-3">
-        <button onclick="setFilter('review')" class="btn-ui w-full btn-accent">Study Unknown Words</button>
-        <button onclick="location.reload()" class="btn-ui w-full btn-secondary">Restart All</button>
-        <button onclick="goHome()" class="btn-ui w-full btn-secondary">Back to Hub</button>
-    </div>
-</div>
-
-<!-- SETTINGS BUTTON -->
-<button class="settings-btn" onclick="openSettings()" title="Settings (S)">⚙️</button>
-
-<script>
-// ========== RADICAL DATA WITH ETYMOLOGY ==========
-const radicalData = {
-    "爱": {rad: "爫", radP: "zhǎo", radM: "Claw", meaning: "Love", parts: "Claw + Cover + Friend", traditionalParts: "Claw + Cover + Heart (心) + Friend", traditional: "愛", etymology: "Traditional 愛 includes the heart (心) beneath 爫, showing love as something felt deeply. The simplified 爱 removed the heart component.", origin: "Ideogram showing affection held and protected"},
-    "八": {rad: "八", radP: "bā", radM: "Eight", meaning: "Eight", parts: "Two strokes splitting apart", traditionalParts: "Same as simplified", traditional: "八", etymology: "Originally a pictograph of two lines separating, representing division and the number eight.", origin: "Pictograph showing separation"},
-    "爸": {rad: "父", radP: "fù", radM: "Father", meaning: "Dad", parts: "Father + 巴 (phonetic)", traditionalParts: "Same as simplified", traditional: "爸", etymology: "Phono-semantic compound: 父 gives the meaning (father), while 巴 provides the sound (bà).", origin: "Semantic-phonetic character combining meaning and pronunciation"},
-    "吧": {rad: "口", radP: "kǒu", radM: "Mouth", meaning: "Particle", parts: "Mouth + 巴 (phonetic)", traditionalParts: "Same as simplified", traditional: "吧", etymology: "Used as a modal particle suggesting tone.", origin: "Phono-semantic"},
-    "白": {rad: "白", radP: "bái", radM: "White", meaning: "White", parts: "Sunlight", traditionalParts: "Same as simplified", traditional: "白", etymology: "Represents brightness or clarity.", origin: "Pictograph"},
-    "百": {rad: "白", radP: "bái", radM: "White", meaning: "Hundred", parts: "One + white", traditionalParts: "Same", traditional: "百", etymology: "Represents large number.", origin: "Ideogram"},
-    "班": {rad: "王", radP: "wáng", radM: "Jade", meaning: "Class", parts: "Jade + 刀", traditional: "班", etymology: "Division or group.", origin: "Compound"},
-    "半": {rad: "十", radP: "shí", radM: "Ten", meaning: "Half", parts: "Split form", traditional: "半", etymology: "Represents division.", origin: "Ideogram"},
-    "帮": {rad: "巾", radP: "jīn", radM: "Cloth", meaning: "Help", parts: "Cloth + 邦", traditional: "幫", etymology: "Assist or support.", origin: "Phono-semantic"},
-    "包": {rad: "勹", radP: "bāo", radM: "Wrap", meaning: "Package", parts: "Wrap + 巳", traditional: "包", etymology: "Wrap something.", origin: "Pictograph"},
-    "杯": {rad: "木", radP: "mù", radM: "Wood", meaning: "Cup", parts: "Wood + 不", traditional: "杯", etymology: "Wooden container.", origin: "Phono-semantic"},
-    "北": {rad: "匕", radP: "bǐ", radM: "Spoon", meaning: "North", parts: "Two backs", traditional: "北", etymology: "People back-to-back.", origin: "Pictograph"},
-    "本": {rad: "木", radP: "mù", radM: "Wood", meaning: "Root/book MW", parts: "Tree + line", traditional: "本", etymology: "Root of tree.", origin: "Ideogram"},
-    "比": {rad: "比", radP: "bǐ", radM: "Compare", meaning: "Compare", parts: "Two persons", traditional: "比", etymology: "Comparison.", origin: "Pictograph"},
-    "别": {rad: "刀", radP: "dāo", radM: "Knife", meaning: "Don’t/other", parts: "Separate + knife", traditional: "別", etymology: "Separation.", origin: "Compound"},
-    "病": {rad: "疒", radP: "nè", radM: "Sickness", meaning: "Disease", parts: "Sickness + 丙", traditional: "病", etymology: "Illness.", origin: "Phono-semantic"},
-    "不": {rad: "一", radP: "yī", radM: "One", meaning: "No", parts: "Negative mark", traditional: "不", etymology: "Negation.", origin: "Pictograph"},
-    "菜": {rad: "艹", radP: "cǎo", radM: "Grass", meaning: "Dish", parts: "Grass + 采", traditional: "菜", etymology: "Vegetables.", origin: "Compound"},
-    "茶": {rad: "艹", radP: "cǎo", radM: "Grass", meaning: "Tea", parts: "Grass + 人 + 木", traditional: "茶", etymology: "Tea plant.", origin: "Compound"},
-    "常": {rad: "巾", radP: "jīn", radM: "Cloth", meaning: "Often", parts: "尚 + cloth", traditional: "常", etymology: "Frequent.", origin: "Compound"},
-    "唱": {rad: "口", radP: "kǒu", radM: "Mouth", meaning: "Sing", parts: "Mouth + 昌", traditional: "唱", etymology: "Use voice.", origin: "Phono-semantic"},
-    "吃": {rad: "口", radP: "kǒu", radM: "Mouth", meaning: "Eat", parts: "Mouth + 乞", traditional: "吃", etymology: "Eating.", origin: "Phono-semantic"},
-     
-    "好": {rad: "女", radP: "nǚ", radM: "Woman", meaning: "Good; to like (hǎo, 3rd tone) / to love; be fond of (hào, 4th tone depending on context)", parts: "Woman + Child", traditionalParts: "Same as simplified", traditional: "好", etymology: "Combines 女 (woman) and 子 (child), historically reflecting harmony and goodness, later extended to mean liking or preference.", origin: "Ideogram showing harmony and positive meaning"},
-    "天": {rad: "大", radP: "dà", radM: "Big", meaning: "Sky/day", parts: "Big + line", traditional: "天", etymology: "Represents a person under the sky.", origin: "Ideogram"},
-    "年": {rad: "干", radP: "gān", radM: "Dry", meaning: "Year", parts: "Harvest symbol", traditional: "年", etymology: "Originally meant harvest cycle.", origin: "Pictograph"},
-    "忙": {rad: "忄", radP: "xīn", radM: "Heart", meaning: "Busy", parts: "Heart + 亡", traditional: "忙", etymology: "Mental/emotional state.", origin: "Phono-semantic"},
-    "子": {rad: "子", radP: "zǐ", radM: "Child", meaning: "Child/suffix", parts: "Child shape", traditional: "子", etymology: "Baby figure.", origin: "Pictograph"},
-    "边": {rad: "辶", radP: "chuò", radM: "Walk", meaning: "Side", parts: "Walk + 力", traditional: "邊", etymology: "Edge/side.", origin: "Compound"},
-    "京": {rad: "亠", radP: "tóu", radM: "Lid", meaning: "Capital", parts: "Building shape", traditional: "京", etymology: "Capital city.", origin: "Pictograph"},
-    "的": {rad: "白", radP: "bái", radM: "White", meaning: "Possessive particle", parts: "White + 勺", traditional: "的", etymology: "Grammatical particle.", origin: "Phono-semantic"},
-    "人": {rad: "人", radP: "rén", radM: "Person", meaning: "Person", parts: "Person shape", traditional: "人", etymology: "Human figure.", origin: "Pictograph"},
-    "客": {rad: "宀", radP: "mián", radM: "Roof", meaning: "Guest", parts: "Roof + 各", traditional: "客", etymology: "Person in house.", origin: "Compound"},
-    "气": {rad: "气", radP: "qì", radM: "Air", meaning: "Air/spirit", parts: "Air symbol", traditional: "氣", etymology: "Vapor/energy.", origin: "Pictograph"},
-    "用": {rad: "用", radP: "yòng", radM: "Use", meaning: "Use", parts: "Tool shape", traditional: "用", etymology: "Usage.", origin: "Pictograph"},
-    "歌": {rad: "欠", radP: "qiàn", radM: "Yawn", meaning: "Song", parts: "欠 + 哥", traditional: "歌", etymology: "Singing.", origin: "Phono-semantic"},
-    "票": {rad: "示", radP: "shì", radM: "Show", meaning: "Ticket", parts: "Show + 西", traditional: "票", etymology: "Slip/document.", origin: "Compound"},
-    "上": {rad: "一", radP: "yī", radM: "One", meaning: "Up/on", parts: "Line above", traditional: "上", etymology: "Above position.", origin: "Ideogram"},
-    "站": {rad: "立", radP: "lì", radM: "Stand", meaning: "Station", parts: "Stand + 占", traditional: "站", etymology: "Standing place.", origin: "Phono-semantic"},
-    "来": {rad: "木", radP: "mù", radM: "Wood", meaning: "Come", parts: "Plant shape", traditional: "來", etymology: "Arrival.", origin: "Pictograph"},
-   
-    "穿": {rad: "穴", radP: "xué", radM: "Cave", meaning: "Wear", parts: "Cave + 戈", traditionalParts: "穿", traditional: "穿", etymology: "Originally meant to pierce through, later extended to putting on clothes.", origin: "Phono-semantic"},
-    "床": {rad: "广", radP: "guǎng", radM: "Shelter", meaning: "Bed", parts: "Shelter + 木", traditionalParts: "床", traditional: "床", etymology: "A place for rest, combining shelter and wood.", origin: "Phono-semantic"},
-    "次": {rad: "欠", radP: "qiàn", radM: "Yawn", meaning: "Measure word for times/frequency", parts: "Step +欠", traditionalParts: "次", traditional: "次", etymology: "Represents sequence or occurrence.", origin: "Compound"},
-    "从": {rad: "人", radP: "rén", radM: "Person", meaning: "From", parts: "Person + Person", traditionalParts: "從", traditional: "从", etymology: "Represents following or coming after someone.", origin: "Pictograph"},
-    "错": {rad: "金", radP: "jīn", radM: "Metal", meaning: "Wrong", parts: "Metal + 乍", traditionalParts: "錯", traditional: "錯", etymology: "Originally meant to err in metalwork; now means mistake.", origin: "Phono-semantic"},
-    "打": {rad: "扌", radP: "shǒu", radM: "Hand", meaning: "Hit; take", parts: "Hand + 丁", traditionalParts: "打", traditional: "打", etymology: "Action using the hand.", origin: "Phono-semantic"},
-    "开": {rad: "廾", radP: "gǒng", radM: "Two hands", meaning: "Open", parts: "Hands spreading", traditionalParts: "開", traditional: "开", etymology: "To spread or unlock.", origin: "Ideogram"},
-    "到": {rad: "至", radP: "zhì", radM: "Arrive", meaning: "Reach", parts: "Arrive symbol", traditionalParts: "到", traditional: "到", etymology: "Represents reaching a place.", origin: "Ideogram"},
-    "得": {rad: "彳", radP: "chì", radM: "Step", meaning: "Get", parts: "Step + 一 + 寺", traditionalParts: "得", traditional: "得", etymology: "Represents acquiring or obtaining.", origin: "Phono-semantic"},
-    "地": {rad: "土", radP: "tǔ", radM: "Earth", meaning: "Auxiliary word; ground", parts: "Earth + 也", traditionalParts: "地", traditional: "地", etymology: "Ground or place, later grammatical.", origin: "Phono-semantic"},
-    "等": {rad: "竹", radP: "zhú", radM: "Bamboo", meaning: "Wait", parts: "Bamboo + 寺", traditionalParts: "等", traditional: "等", etymology: "Originally a rank; later extended to waiting.", origin: "Phono-semantic"},
-    "点": {rad: "黑", radP: "hēi", radM: "Black", meaning: "Spot; point", parts: "Black + small mark", traditionalParts: "點", traditional: "点", etymology: "Represents a dot or small spot.", origin: "Phono-semantic"},
-    "弟": {rad: "弓", radP: "gōng", radM: "Bow", meaning: "Younger brother", parts: "Bow + 少", traditionalParts: "弟", traditional: "弟", etymology: "Originally a bow; later a familial rank.", origin: "Phono-semantic"},
-    "第": {rad: "竹", radP: "zhú", radM: "Bamboo", meaning: "Ordinal marker", parts: "Bamboo + 弟", traditionalParts: "第", traditional: "第", etymology: "Used to indicate order.", origin: "Phono-semantic"},
-    "东": {rad: "木", radP: "mù", radM: "Wood", meaning: "East", parts: "Tree + one", traditionalParts: "東", traditional: "东", etymology: "Direction, sun rising from tree symbol.", origin: "Pictograph"},
-    "动": {rad: "力", radP: "lì", radM: "Power", meaning: "Move", parts: "Power + 力", traditionalParts: "動", traditional: "动", etymology: "Physical movement.", origin: "Phono-semantic"},
-    "都": {rad: "阝", radP: "fù", radM: "Mound", meaning: "All", parts: "City + 者", traditionalParts: "都", traditional: "都", etymology: "Represents all or metropolis.", origin: "Compound"},
-    "读": {rad: "讠", radP: "yán", radM: "Speech", meaning: "Read", parts: "Speech + 卖", traditionalParts: "讀", traditional: "读", etymology: "Reading aloud originally.", origin: "Phono-semantic"},
-    "多": {rad: "夕", radP: "xī", radM: "Evening", meaning: "Many; much; more", parts: "Evening + evening", traditionalParts: "多", traditional: "多", etymology: "Repeatedness or abundance.", origin: "Ideogram"},
-    "饿": {rad: "饣", radP: "shí", radM: "Food", meaning: "Hungry", parts: "Food + 我", traditionalParts: "餓", traditional: "饿", etymology: "Lack of food, desire to eat.", origin: "Phono-semantic"},
-    "儿": {rad: "儿", radP: "ér", radM: "Child", meaning: "Son", parts: "Child shape", traditionalParts: "兒", traditional: "儿", etymology: "Child figure.", origin: "Pictograph"},
-    "二": {rad: "二", radP: "èr", radM: "Two", meaning: "Two", parts: "Two horizontal lines", traditionalParts: "二", traditional: "二", etymology: "Numerical representation.", origin: "Pictograph"},
-    
-    "出": {rad: "凵", radP: "kǎn", radM: "Open box", meaning: "Go out; exit; leave", parts: "Two mountains", traditionalParts: "Same as simplified", traditional: "出", etymology: "Originally depicted two mountains; represents leaving or going out.", origin: "Ideogram"},
-    "去": {rad: "厶", radP: "sī", radM: "Private", meaning: "Go; depart; leave", parts: "Movement", traditionalParts: "Same as simplified", traditional: "去", etymology: "Represents departure or moving away.", origin: "Ideogram"},
-    "电": {rad: "雨", radP: "yǔ", radM: "Rain", meaning: "Electricity; lightning; electrical", parts: "Rain + field", traditionalParts: "電", traditional: "电", etymology: "Originally represented lightning in the sky, now extended to electricity.", origin: "Phono-semantic"},
-    "大": {rad: "大", radP: "dà", radM: "Big", meaning: "Big; large; great", parts: "Person stretched", traditionalParts: "Same as simplified", traditional: "大", etymology: "Represents a large person, symbolizing size or importance.", origin: "Pictograph"},
-    "车": {rad: "车", radP: "chē", radM: "Car", meaning: "Vehicle; cart; car", parts: "Cart shape", traditionalParts: "車", traditional: "车", etymology: "Represents wheeled vehicles.", origin: "Pictograph"},
-    "对": {rad: "寸", radP: "cùn", radM: "Inch", meaning: "Correct; right; match; respond", parts: "寸 + 又", traditionalParts: "對", traditional: "对", etymology: "Originally represented measuring/correctness; extended to correctness or matching.", origin: "Compound"},
-    "饭": {rad: "饣", radP: "shí", radM: "Food", meaning: "Meal; rice; cooked rice", parts: "Food + 反", traditionalParts: "飯", traditional: "饭", etymology: "Represents prepared rice or meal; extended to general eating.", origin: "Phono-semantic"},
-
-    "学": {rad: "子", radP: "zǐ", radM: "Child", meaning: "Study; learn", parts: "Child + 冖 + 爻", traditionalParts: "學", traditional: "学", etymology: "Originally a child under a roof learning symbols; represents education and learning.", origin: "Phono-semantic"},
-    "生": {rad: "生", radP: "shēng", radM: "Life", meaning: "Life; grow; student", parts: "Sprouting plant", traditionalParts: "生", traditional: "生", etymology: "Represents life emerging or growth, extended to students or living things.", origin: "Pictograph"},
-    "少": {rad: "小", radP: "xiǎo", radM: "Small", meaning: "Few; little", parts: "Small + small", traditionalParts: "少", traditional: "少", etymology: "Represents a small amount or minority; originally depicted small elements.", origin: "Ideogram"},
-    
-    "脑": {rad: "月", radP: "yuè", radM: "Flesh/Moon", meaning: "Brain", parts: "Flesh + 㐬", traditionalParts: "腦", traditional: "脑", etymology: "Represents the organ inside the head; originally indicating the flesh of the head.", origin: "Phono-semantic"},
-    "视": {rad: "见", radP: "jiàn", radM: "See", meaning: "Look; vision", parts: "See + 寸", traditionalParts: "視", traditional: "视", etymology: "Represents observing or watching; used in words related to vision and TV.", origin: "Phono-semantic"},
-    "机": {rad: "木", radP: "mù", radM: "Wood", meaning: "Machine; device", parts: "Wood + 幺", traditionalParts: "機", traditional: "机", etymology: "Originally indicated a wooden device; now extended to machines and devices.", origin: "Phono-semantic"},
-    "影": {rad: "彡", radP: "shān", radM: "Hair/lines", meaning: "Shadow; image", parts: "Sun + 彡", traditionalParts: "影", traditional: "影", etymology: "Represents the shape or shadow of an object; used in words for movies and images.", origin: "Compound"},
-    "院": {rad: "阝", radP: "fù", radM: "Mound", meaning: "Courtyard; institute", parts: "Mound + 完", traditionalParts: "院", traditional: "院", etymology: "Represents a walled space; extended to institutions and buildings like hospitals and schools.", origin: "Phono-semantic"},
-    
-    "球": {rad: "王", radP: "wáng", radM: "Jade", meaning: "Ball; sphere", parts: "Jade + 求", traditionalParts: "球", traditional: "球", etymology: "Originally represented a spherical object, later extended to balls used in games.", origin: "Phono-semantic"},
-    "方": {rad: "方", radP: "fāng", radM: "Square", meaning: "Square; direction; place", parts: "Square shape", traditionalParts: "方", traditional: "方", etymology: "Represents a square or region; often used for locations and directions.", origin: "Pictograph"},
-    "图": {rad: "囗", radP: "wéi", radM: "Enclosure", meaning: "Map; plan; chart", parts: "Enclosure + 由", traditionalParts: "圖", traditional: "图", etymology: "Represents enclosed ideas or plans; now extended to maps and diagrams.", origin: "Phono-semantic"},
-    "西": {rad: "西", radP: "xī", radM: "West", meaning: "West; western direction", parts: "Sun setting / folded lines", traditionalParts: "西", traditional: "西", etymology: "Originally represented the sun setting; now used for the western direction.", origin: "Pictograph"},
-    
-    "占": {rad: "卜", radP: "bǔ", radM: "Divination", meaning: "Occupy; divine; take up", parts: "Divination + 一", traditionalParts: "占", traditional: "占", etymology: "Originally a divination mark; now used in words meaning to occupy or a component in 车站.", origin: "Phono-semantic"},
-    "作": {rad: "亻", radP: "rén", radM: "Person", meaning: "Do; make; action", parts: "Person + 乍", traditionalParts: "作", traditional: "作", etymology: "Represents human activity or making something; used in words like 动作.", origin: "Phono-semantic"},
-    "书": {rad: "聿", radP: "yù", radM: "Brush", meaning: "Book; write", parts: "Brush + 乂", traditionalParts: "書", traditional: "书", etymology: "Represents writing with a brush; extended to books and literature.", origin: "Phono-semantic"},
-    "谢": {rad: "言", radP: "yán", radM: "Speech", meaning: "Thank; apologize", parts: "Speech + 身 + 射", traditionalParts: "謝", traditional: "谢", etymology: "Represents expressing gratitude or apology verbally; now used in polite expressions.", origin: "Phono-semantic"},
-
-    "差": {rad: "工", radP: "gōng", radM: "Work", meaning: "Differ; bad; short of", parts: "Work + 羊 + 工", traditionalParts: "差", traditional: "差", etymology: "Originally meant work or tasks with errors; extended to difference, bad quality, or deficiency.", origin: "Phono-semantic"},
-    "话": {rad: "讠", radP: "yán", radM: "Speech", meaning: "Speech; words; talk", parts: "Speech + 舌", traditionalParts: "話", traditional: "话", etymology: "Represents spoken words; used in conversation and communication.", origin: "Phono-semantic"},
-    "起": {rad: "走", radP: "zǒu", radM: "Walk", meaning: "Rise; start; get up", parts: "Walk + 己", traditionalParts: "起", traditional: "起", etymology: "Represents a person getting up or beginning an action.", origin: "Phono-semantic"},
-    "店": {rad: "广", radP: "guǎng", radM: "Shelter", meaning: "Shop; store", parts: "Shelter + 占", traditionalParts: "店", traditional: "店", etymology: "Represents a covered place for commerce; extended to stores and businesses.", origin: "Phono-semantic"}
-    // ... (keep all existing radical data)
-};
-
-// ========== HSK1 DATA WITH EXAMPLES & SRS ==========
-const hsk1Data = [
-    ["爱","ài","To love","我爱我的家人。~wǒ ài wǒ de jià rén\nI love my family.\n\n他爱读书。~tā ài dú shū\nHe loves reading."],
-    ["爱好","ài hào","Hobby; interest","我的爱好是打篮球。~wǒ de ài hào shì dǎ lán qiú\nMy hobby is playing basketball.\n\n他有很多爱好。~tā yǒu hěn duō ài hào\nHe has many hobbies."],
-    ["八","bā","Eight","他有八本书。~tā yǒu bā běn shū\nHe has eight books.\n\n今天八点见。~jīn tiān bā diǎn jiàn\nSee you at eight today."],
-    ["爸爸","bàba","Dad","我的爸爸是工程师。~wǒ de bàba shì gōngchéngshī\nMy dad is an engineer."],
-    ["吧","ba","Particle","我们走吧。~wǒmen zǒu ba\nLet's go."],
-    ["白","bái","White","这只猫是白的。~zhè zhī māo shì bái de\nThis cat is white."],
-    ["白天","bái tiān","Day","我白天学习。~wǒ bái tiān xué xí\nI study during the day."],
-    ["百","bǎi","Hundred","他有一百元。~tā yǒu yì bǎi yuán\nHe has 100 yuan."],
-    ["班","bān","Class","我们在同一个班。~wǒmen zài tóng yí gè bān\nWe are in the same class."],
-    ["半","bàn","Half","吃一半吧。~chī yí bàn ba\nEat half."],
-    ["半年","bàn nián","Half a year","我学了半年中文。~wǒ xué le bàn nián zhōngwén\nI studied Chinese for half a year."],
-    ["半天","bàn tiān","Half day","我等了半天。~wǒ děng le bàn tiān\nI waited half a day."],
-    ["帮","bāng","Help","我帮你。~wǒ bāng nǐ\nI help you."],
-    ["帮忙","bāng máng","Help","请帮忙。~qǐng bāng máng\nPlease help."],
-    ["包","bāo","Package","这是我的包。~zhè shì wǒ de bāo\nThis is my bag."],
-    ["包子","bāo zi","Bun","我吃包子。~wǒ chī bāo zi\nI eat buns."],
-    ["杯","bēi","Cup","一杯水。~yì bēi shuǐ\nA cup of water."],
-    ["杯子","bēi zi","Cup","这个杯子很好。~zhè gè bēi zi hěn hǎo\nThis cup is good."],
-    ["北","běi","North","北京在北边。~běi jīng zài běi biān\nBeijing is in the north."],
-    ["北边","běi biān","North side","在北边。~zài běi biān\nOn the north side."],
-    ["北京","běi jīng","Beijing","我去北京。~wǒ qù běi jīng\nI go to Beijing."],
-    ["本","běn","MW for books","一本书。~yì běn shū\nOne book."],
-    ["本子","běn zi","Notebook","这是我的本子。~zhè shì wǒ de běn zi\nThis is my notebook."],
-    ["比","bǐ","Compare","他比我高。~tā bǐ wǒ gāo\nHe is taller than me."],
-    ["别","bié","Don't","别说话。~bié shuō huà\nDon't speak."],
-    ["别的","bié de","Other","我不要别的。~wǒ bú yào bié de\nI don’t want others."],
-    ["别人","bié rén","Other people","别人来了。~bié rén lái le\nOthers came."],
-    ["病","bìng","Disease","他生病了。~tā shēng bìng le\nHe is sick."],
-    ["病人","bìng rén","Patient","病人在医院。~bìng rén zài yī yuàn\nThe patient is in the hospital."],
-    ["不大","bú dà","Not big","这个不大。~zhè gè bú dà\nThis is not big."],
-    ["不对","bú duì","Wrong","你不对。~nǐ bú duì\nYou are wrong."],
-    ["不客气","bú kè qi","You're welcome","不客气！~bú kè qi\nYou're welcome!"],
-    ["不用","bú yòng","No need","不用担心。~bú yòng dān xīn\nNo need to worry."],
-    ["不","bù","No","我不去。~wǒ bù qù\nI don’t go."],
-    ["菜","cài","Dish","我点菜。~wǒ diǎn cài\nI order dishes."],
-    ["茶","chá","Tea","我喝茶。~wǒ hē chá\nI drink tea."],
-    ["差","chà","Bad/differ","今天很差。~jīn tiān hěn chà\nToday is bad."],
-    ["常","cháng","Often","我常去。~wǒ cháng qù\nI often go."],
-    ["常常","cháng cháng","Often","他常常来。~tā cháng cháng lái\nHe often comes."],
-    ["唱","chàng","Sing","我唱歌。~wǒ chàng gē\nI sing."],
-    ["唱歌","chàng gē","Sing","她喜欢唱歌。~tā xǐhuān chàng gē\nShe likes singing."],
-    ["车","chē","Car","我有车。~wǒ yǒu chē\nI have a car."],
-    ["车票","chē piào","Ticket","买车票。~mǎi chē piào\nBuy a ticket."],
-    ["车上","chē shàng","In the car","他在车上。~tā zài chē shàng\nHe is in the car."],
-    ["车站","chē zhàn","Station","我在车站。~wǒ zài chē zhàn\nI am at the station."],
-    ["吃","chī","Eat","我吃饭。~wǒ chī fàn\nI eat."],
-    ["吃饭","chī fàn","Eat meal","我们吃饭。~wǒmen chī fàn\nWe eat."],
-    ["出","chū","Go out","我出门。~wǒ chū mén\nI go out."],
-    ["出来","chū lái","Come out","他出来了。~tā chū lái le\nHe came out."],
-    ["出去","chū qù","Go out","我们出去。~wǒmen chū qù\nWe go out."],
-    ["出去","chū qù","Go out","我想出去玩。~wǒ xiǎng chū qù wán\nI want to go out and play."],
-    ["穿","chuān","Wear","他穿黑色的衣服。~tā chuān hēi sè de yī fú\nHe is wearing black clothes."],
-    ["床","chuáng","Bed","这张床很大。~zhè zhāng chuáng hěn dà\nThis bed is very big."],
-    ["次","cì","Times","我去过三次北京。~wǒ qù guò sān cì běi jīng\nI have been to Beijing three times."],
-    ["从","cóng","From","我从中国来。~wǒ cóng zhōng guó lái\nI come from China."],
-    ["错","cuò","Wrong","这个字写错了。~zhè ge zì xiě cuò le\nThis character is written incorrectly."],
-    ["打","dǎ","Hit / Take / Play","他在打球。~tā zài dǎ qiú\nHe is playing ball."],
-    ["打车","dǎ chē","Take a taxi","我们打车去吧。~wǒ men dǎ chē qù ba\nLet's take a taxi."],
-    ["打电话","dǎ diàn huà","Make a phonecall","我在打电话。~wǒ zài dǎ diàn huà\nI am making a phone call."],
-    ["打开","dǎ kāi","Turn on / Open","请打开书。~qǐng dǎ kāi shū\nPlease open the book."],
-    ["打球","dǎ qiú","Play ball","你喜欢打球吗？~nǐ xǐ huān dǎ qiú ma\nDo you like playing ball?"],
-    ["大","dà","Big","这个苹果很大。~zhè ge píng guǒ hěn dà\nThis apple is very big."],
-    ["大学","dà xué","University","他在大学学习。~tā zài dà xué xué xí\nHe studies at a university."],
-    ["大学生","dà xué shēng","University student","我是一名大学生。~wǒ shì yī míng dà xué shēng\nI am a university student."],
-    ["到","dào","Reach / Arrive","火车到了。~huǒ chē dào le\nThe train has arrived."],
-    ["得到","dé dào","Get / Obtain","他得到了第一名。~tā dé dào le dì yī míng\nHe got first place."],
-    ["地","de","(Auxiliary particle)","他飞快地跑。~tā fēi kuài de pǎo\nHe runs quickly."],
-    ["的","de","(Possessive particle)","这是我的书。~zhè shì wǒ de shū\nThis is my book."],
-    ["等","děng","Wait","请等我一下。~qǐng děng wǒ yī xià\nPlease wait for me a moment."],
-    ["地点","dì diǎn","Location","会议地点在哪里？~huì yì dì diǎn zài nǎ lǐ\nWhere is the meeting location?"],
-    ["地方","dì fang","Place / Local","这是什么地方？~zhè shì shén me dì fang\nWhat place is this?"],
-    ["地上","dì shàng","On the ground","地上有一支笔。~dì shàng yǒu yī zhī bǐ\nThere is a pen on the ground."],
-    ["地图","dì tú","Map","我看了一下地图。~wǒ kàn le yī xià dì tú\nI took a look at the map."],
-    ["弟弟","dì di","Younger brother","我弟弟很可爱。~wǒ dì di hěn kě ài\nMy younger brother is very cute."],
-    ["第","dì","(Ordinal prefix)","这是第一课。~zhè shì dì yī kè\nThis is the first lesson."],
-    ["点","diǎn","O'clock / Spot","现在三点了。~xiàn zài sān diǎn le\nIt is three o'clock now."],
-    ["电","diàn","Electricity","这里没有电。~zhè lǐ méi yǒu diàn\nThere is no electricity here."],
-    ["电话","diàn huà","Phone","你的电话是多少？~nǐ de diàn huà shì duō shǎo\nWhat is your phone number?"],
-    ["电脑","diàn nǎo","Computer","我买了一台电脑。~wǒ mǎi le yī tái diàn nǎo\nI bought a computer."],
-    ["电视","diàn shì","Television","我不看电视。~wǒ bù kàn diàn shì\nI don't watch TV."],
-    ["电视机","diàn shì jī","TV set","电视机坏了。~diàn shì jī huài le\nThe TV set is broken."],
-    ["电影","diàn yǐng","Film / Movie","你看电影吗？~nǐ kàn diàn yǐng ma\nDo you watch movies?"],
-    ["电影院","diàn yǐng yuàn","Cinema","我们在电影院见。~wǒ men zài diàn yǐng yuàn jiàn\nSee you at the cinema."],
-    ["东","dōng","East","太阳从东边升起。~tài yáng cóng dōng biān shēng qǐ\nThe sun rises in the east."],
-    ["东边","dōng biān","East side","学校在东边。~xué xiào zài dōng biān\nThe school is on the east side."],
-    ["东西","dōng xi","Thing / Stuff","买东西。~mǎi dōng xi\nBuy things."],
-    ["动","dòng","Move","别动！~bié dòng\nDon't move!"],
-    ["动作","dòng zuò","Action / Movement","他的动作很快。~tā de dòng zuò hěn kuài\nHis movements are very fast."],
-    ["都","dōu","All / Both","我们都喜欢。~wǒ men dōu xǐ huān\nWe all like it."],
-    ["读","dú","Read","请读课文。~qǐng dú kè wén\nPlease read the text."],
-    ["读书","dú shū","Reading / Study","他喜欢读书。~tā xǐ huān dú shū\nHe likes reading."],
-    ["对","duì","Right / Correct","你说的对。~nǐ shuō de duì\nWhat you said is right."],
-    ["对不起","duì bu qǐ","I am sorry","对不起，我迟到了。~duì bu qǐ, wǒ chí dào le\nSorry, I'm late."],
-    ["多","duō","Many / Much","这里有很多人。~zhè lǐ yǒu hěn duō rén\nThere are many people here."],
-    ["多少","duō shǎo","How much / How many","这多少钱？~zhè duō shǎo qián\nHow much is this?"],
-    ["饿","è","Hungry","我有点儿饿。~wǒ yǒu diǎn er è\nI am a bit hungry."],
-    ["儿子","ér zi","Son","他有两个儿子。~tā yǒu liǎng gè ér zi\nHe has two sons."],
-    ["二","èr","Two","今天星期二。~jīn tiān xīng qī èr\nToday is Tuesday."],
-    ["饭","fàn","Meal / Rice","去吃饭吧。~qù chī fàn ba\nLet's go eat a meal."],
-    ["饭店","fàn diàn","Restaurant","这家饭店很好吃。~zhè jiā fàn diàn hěn hǎo chī\nThis restaurant is delicious."],
-    
-    // ... (keep existing data, add examples in index 3)
-];
-
-// ========== GLOBAL STATE ==========
-let fullSet = [];
-let currentFilter = 'all'; 
-let currentDeck = [];
-let index = 0;
-let isScrambled = false;
-let strokeWriter = null;
-let currentSpeechSpeed = 0.8;
-
-// ========== INITIALIZATION ==========
-function loadSettings() {
-    const lightMode = localStorage.getItem('lightMode') === 'true';
-    if (lightMode) {
-        document.body.classList.add('light-mode');
-        document.getElementById('lightModeToggle').checked = true;
-    }
-    const fontSize = localStorage.getItem('fontSize') || '16';
-    document.getElementById('fontSize').value = fontSize;
-    changeFontSize();
-    
-    currentSpeechSpeed = parseFloat(localStorage.getItem('speechSpeed')) || 0.8;
-    document.getElementById('speechSpeed').value = currentSpeechSpeed;
-    document.getElementById('speedValue').innerText = currentSpeechSpeed.toFixed(1);
-}
-
-window.addEventListener('DOMContentLoaded', loadSettings);
-
-// ========== AUDIO PRONUNCIATION ==========
-function speakWord(word) {
-    const synth = window.speechSynthesis;
-    synth.cancel();
-    
-    const utterance = new SpeechSynthesisUtterance(word);
-    utterance.lang = 'zh-CN';
-    utterance.rate = currentSpeechSpeed;
-    utterance.pitch = 1;
-    
-    const voices = synth.getVoices();
-    const chineseVoice = voices.find(v => v.lang === 'zh-CN');
-    if (chineseVoice) utterance.voice = chineseVoice;
-    
-    synth.speak(utterance);
-}
-
-// ========== SM-2 SPACED REPETITION ALGORITHM ==========
-function calculateNextReview(card, quality) {
-    // quality: 1=hard, 2=ok, 3=good, 4=easy
-    card.reviewCount = (card.reviewCount || 0) + 1;
-    
-    if (quality < 2) {
-        card.interval = 1;
-        card.consecutiveCorrect = 0;
-    } else {
-        card.consecutiveCorrect = (card.consecutiveCorrect || 0) + 1;
-        
-        if (card.consecutiveCorrect === 1) {
-            card.interval = 1;
-        } else if (card.consecutiveCorrect === 2) {
-            card.interval = 3;
-        } else {
-            card.interval = Math.round(card.interval * card.ease);
-        }
-    }
-    
-    card.ease = Math.max(1.3, card.ease + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02)));
-    card.nextReview = Date.now() + (card.interval * 24 * 60 * 60 * 1000);
-    
-    localStorage.setItem('hsk_srs_data', JSON.stringify(fullSet));
-}
-
-// ========== GET STATISTICS ==========
-function getStats() {
-    const total = fullSet.length;
-    const mastered = fullSet.filter(c => c.status === 'mastered').length;
-    const learning = fullSet.filter(c => c.status === 'normal' || c.status === 'review').length;
-    const now = Date.now();
-    const dueToday = fullSet.filter(c => c.nextReview && c.nextReview <= now).length;
-    
-    return { total, mastered, learning, dueToday };
-}
-
-// ========== OPEN STATS MODAL ==========
-function openStats() {
-    const stats = getStats();
-    const masteredPercent = Math.round((stats.mastered / stats.total) * 100);
-    
-    document.getElementById('totalWords').innerText = stats.total;
-    document.getElementById('masteredWords').innerText = stats.mastered;
-    document.getElementById('learningWords').innerText = stats.learning;
-    document.getElementById('dueToday').innerText = stats.dueToday;
-    document.getElementById('progressPercent').innerText = masteredPercent + '%';
-    document.getElementById('progressBar2').style.width = masteredPercent + '%';
-    
-    document.getElementById('statsModal').classList.remove('hidden');
-}
-
-// ========== EXPORT PROGRESS ==========
-function exportStats() {
-    const stats = {
-        date: new Date().toISOString(),
-        data: fullSet,
-        summary: getStats()
-    };
-    
-    const dataStr = JSON.stringify(stats, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `hsk-progress-${Date.now()}.json`;
-    link.click();
-    URL.revokeObjectURL(url);
-}
-
-// ========== IMPORT PROGRESS ==========
-function importStats(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        try {
-            const data = JSON.parse(e.target.result);
-            fullSet = data.data;
-            localStorage.setItem('hsk_srs_data', JSON.stringify(fullSet));
-            alert('✅ Progress imported successfully!');
-            location.reload();
-        } catch (err) {
-            alert('❌ Error importing file: ' + err.message);
-        }
-    };
-    reader.readAsText(file);
-}
-
-// ========== SETTINGS: LIGHT MODE ==========
-function toggleLightMode() {
-    const isLight = document.getElementById('lightModeToggle').checked;
-    localStorage.setItem('lightMode', isLight);
-    
-    if (isLight) {
-        document.body.classList.add('light-mode');
-    } else {
-        document.body.classList.remove('light-mode');
-    }
-}
-
-// ========== SETTINGS: FONT SIZE ==========
-function changeFontSize() {
-    const size = document.getElementById('fontSize').value;
-    document.getElementById('fontSizeValue').innerText = size;
-    document.documentElement.style.fontSize = size + 'px';
-    localStorage.setItem('fontSize', size);
-}
-
-// ========== SETTINGS: SPEECH SPEED ==========
-document.addEventListener('DOMContentLoaded', () => {
-    const speedSlider = document.getElementById('speechSpeed');
-    if (speedSlider) {
-        speedSlider.addEventListener('input', (e) => {
-            currentSpeechSpeed = parseFloat(e.target.value);
-            document.getElementById('speedValue').innerText = currentSpeechSpeed.toFixed(1);
-            localStorage.setItem('speechSpeed', currentSpeechSpeed);
-        });
-    }
-});
-
-// ========== SETTINGS: OPEN MODAL ==========
-function openSettings() {
-    document.getElementById('settingsModal').classList.remove('hidden');
-}
-
-// ========== KEYBOARD SHORTCUTS ==========
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowLeft') prev();
-    if (e.key === 'ArrowRight') next();
-    if (e.key === ' ') { e.preventDefault(); flip(); }
-    if (e.key === 'm' || e.key === 'M') mark('mastered', 4);
-    if (e.key === 'r' || e.key === 'R') mark('review', 1);
-    if (e.key === 's' || e.key === 'S') { e.preventDefault(); openSettings(); }
-});
-
-// ========== STROKE ORDER WITH ANIMATION ==========
-// ========== STROKE ORDER WITH ANIMATION ==========
-let drawingWord = '';
-let drawingCharIndex = 0;
-
-function showCharacterDrawing(char) {
-    try {
-        const container = document.getElementById('charRefDisplay');
-        
-        // Clear old container and create new one
-        container.innerHTML = '';
-        const writerDiv = document.createElement('div');
-        writerDiv.id = 'hanzi-writer-container';
-        writerDiv.style.width = '100%';
-        writerDiv.style.height = '100%';
-        container.appendChild(writerDiv);
-        
-        strokeWriter = HanziWriter.create('hanzi-writer-container', char, {
-            width: container.clientWidth,
-            height: container.clientHeight,
-            padding: 10,
-            strokeAnimationSpeed: 1,
-            delayBetweenStrokes: 200,
-            showOutline: true,
-            showStroke: true
-        });
-        
-        strokeWriter.animateCharacter({ onComplete: () => {} });
-        
-        const buttonContainer = document.getElementById('strokeControls');
-        buttonContainer.innerHTML = `
-            <button onclick="if(strokeWriter) strokeWriter.animateCharacter()" class="btn-ui btn-secondary">▶ Play</button>
-            <button onclick="if(strokeWriter) strokeWriter.reset()" class="btn-ui btn-secondary">⟲ Reset</button>
-            ${drawingWord.length > 1 ? `
-                <button onclick="drawingCharIndex = (drawingCharIndex - 1 + drawingWord.length) % drawingWord.length; showCharacterDrawing(drawingWord[drawingCharIndex])" class="btn-ui btn-secondary">← Prev Char</button>
-                <button onclick="drawingCharIndex = (drawingCharIndex + 1) % drawingWord.length; showCharacterDrawing(drawingWord[drawingCharIndex])" class="btn-ui btn-secondary">Next Char →</button>
-                <span class="text-zinc-400 text-xs pt-2">${drawingCharIndex + 1}/${drawingWord.length}</span>
-            ` : ''}
-        `;
-    } catch (err) {
-        console.error('Stroke writer error:', err);
-    }
-}
-
-function openDrawWithStroke() {
-    drawingWord = currentDeck[index].h;
-    drawingCharIndex = 0;
-    showingAll = false;
-    
-    document.getElementById('drawModal').classList.remove('hidden');
-    document.getElementById('allCharactersDisplay').innerHTML = '';
-    
-    const showAllBtn = document.getElementById('showAllBtn');
-    if (drawingWord.length > 1) {
-        showAllBtn.style.display = 'block';
-        showAllBtn.classList.remove('btn-accent');
-        showAllBtn.innerText = "📋 Show All";
-    } else {
-        showAllBtn.style.display = 'none';
-    }
-    
-    const container = document.getElementById('charRefDisplay');
-    container.innerHTML = '';
-    
-    const writerDiv = document.createElement('div');
-    writerDiv.id = 'hanzi-writer-container';
-    writerDiv.style.width = '100%';
-    writerDiv.style.height = '100%';
-    container.appendChild(writerDiv);
-    
-    setTimeout(() => {
-        showCharacterDrawing(drawingWord[drawingCharIndex]);
-        resizeCanvas();
-        clearCanvas();
-    }, 100);
-}
-
-// ========== ENHANCED INFO MODAL WITH ETYMOLOGY ==========
-function openInfo() {
-    const word = currentDeck[index].h;
-    const container = document.getElementById('infoContainer');
-    container.innerHTML = '';
-    
-    const chars = word.replace(/[｜\s\/]/g, '').split('');
-    
-    chars.forEach(char => {
-        const data = radicalData[char] || {
-            rad: "N/A", radP: "?", radM: "N/A", meaning: "Component", 
-            parts: "Simple/Unique", etymology: "Modern character", traditional: char, origin: "N/A"
-        };
-        
-        const card = document.createElement('div');
-        card.className = "glass-panel p-6 space-y-4";
-        card.innerHTML = `
-            <div class="flex items-center justify-between mb-4">
-                <div class="text-6xl font-black text-white">${char}</div>
-                <button onclick="speakWord('${char}')" class="btn-ui btn-secondary">🔊 Say</button>
-            </div>
-            
-            <div class="border-b border-zinc-800 pb-3">
-                <div class="text-[10px] text-zinc-500 uppercase font-black">Stroke Order</div>
-                <div id="stroke-${char}" style="width: 100%; height: 160px; border-radius: 8px;"></div>
-            </div>
-            
-            <div class="border-b border-zinc-800 pb-3">
-                <div class="text-[10px] text-zinc-500 uppercase font-black">Traditional Form</div>
-                <div class="text-2xl font-bold text-zinc-200">${data.traditional}</div>
-            </div>
-            
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <div class="text-[8px] text-zinc-500 uppercase font-black">Radical</div>
-                    <div class="text-xl font-bold">${data.rad} <span class="text-xs text-zinc-400">(${data.radP})</span></div>
-                    <div class="text-xs text-zinc-400">${data.radM}</div>
-                </div>
-                <div>
-                    <div class="text-[8px] text-zinc-500 uppercase font-black">Core Meaning</div>
-                    <div class="text-xs text-zinc-300">${data.meaning}</div>
-                </div>
-            </div>
-            
+        <section class="list-panel card-panel">
+          <div class="section-heading compact">
             <div>
-                <div class="text-[8px] text-zinc-500 uppercase font-black mb-2">Composition</div>
-                <div class="text-xs text-zinc-300">${data.parts}</div>
+              <p class="eyebrow">Word List</p>
+              <h3>Session cards</h3>
             </div>
-            
-            <div class="bg-zinc-900/50 p-3 rounded-lg">
-                <div class="text-[8px] text-zinc-500 uppercase font-black mb-2">Etymology & Origin</div>
-                <div class="text-xs text-zinc-300 leading-relaxed">${data.etymology}</div>
-                <div class="text-[10px] text-zinc-400 mt-2 italic">${data.origin}</div>
-            </div>
-        `;
-        container.appendChild(card);
-        setTimeout(() => {
-            try {
-                HanziWriter.create(`stroke-${char}`, char, {
-                    width: 160,
-                    height: 160,
-                    padding: 5,
-                    strokeAnimationSpeed: 0.5,
-                    delayBetweenStrokes: 100,
-                    showOutline: true,
-                    showStroke: true
-                }).animateCharacter();
-            } catch (err) {}
-        }, 50);
-    });
-    
-    document.getElementById('infoModal').classList.remove('hidden');
-}
+          </div>
+          <div id="wordList" class="word-list"></div>
+        </section>
+      </section>
+    </main>
+  </div>
 
-// ========== ENHANCED MARK FUNCTION WITH SRS ==========
-function mark(s, quality = 3) {
-    const word = currentDeck[index];
-    word.status = s;
-    
-    // Initialize SRS metrics if not present
-    if (!word.interval) {
-        word.interval = 1;
-        word.ease = 2.5;
-        word.reviewCount = 0;
-        word.consecutiveCorrect = 0;
-        word.nextReview = Date.now();
-    }
-    
-    calculateNextReview(word, quality);
-    
-    const masterIdx = fullSet.findIndex(f => f.h === word.h);
-    fullSet[masterIdx] = word;
-    
-    const progress = JSON.parse(localStorage.getItem('hsk_progress')) || {};
-    progress[word.h] = s;
-    localStorage.setItem('hsk_progress', JSON.stringify(progress));
-    
-    next();
-}
+  <div class="fab-group">
+    <button class="fab" id="floatingSettingsBtn" title="Settings">⚙</button>
+  </div>
 
-// ========== INITIALIZE CARD DATA ==========
-function startSet(setId) {
-    const progress = JSON.parse(localStorage.getItem('hsk_progress')) || {};
-    const srsData = JSON.parse(localStorage.getItem('hsk_srs_data')) || [];
-    
-    fullSet = hsk1Data.map(v => {
-        const existing = srsData.find(s => s.h === v[0]);
-        return existing || {
-            h: v[0], 
-            p: v[1], 
-            e: v[2], 
-            examples: v[3] || '',
-            status: progress[v[0]] || 'normal',
-            interval: 1,
-            ease: 2.5,
-            reviewCount: 0,
-            consecutiveCorrect: 0,
-            nextReview: Date.now()
-        };
-    });
-    
-    document.getElementById('lobbyScreen').classList.add('hidden');
-    document.getElementById('appScreen').classList.remove('hidden');
-    setFilter('all');
-}
+  <div id="settingsModal" class="modal hidden">
+    <div class="modal-card settings-card">
+      <div class="modal-head">
+        <div>
+          <p class="eyebrow">Preferences</p>
+          <h2>Study settings</h2>
+        </div>
+        <button class="close-btn" data-close-modal="settingsModal">&times;</button>
+      </div>
 
-// ========== ORIGINAL FUNCTIONS (Keep existing) ==========
-function resetProgress() {
-    if(confirm("Are you sure you want to reset all progress? This cannot be undone.")) {
-        localStorage.removeItem('hsk_progress');
-        localStorage.removeItem('hsk_srs_data');
-        alert("Progress reset successfully!");
-        location.reload();
-    }
-}
+      <div class="settings-grid">
+        <div class="setting-block">
+          <h3>Appearance</h3>
+          <label class="setting-row">
+            <span>Theme</span>
+            <select id="themeSelect">
+              <option value="aurora">Aurora</option>
+              <option value="light">Light</option>
+              <option value="midnight">Midnight</option>
+            </select>
+          </label>
+          <label class="setting-row">
+            <span>Font size</span>
+            <input id="fontSizeRange" type="range" min="14" max="20" value="16" />
+          </label>
+          <p class="setting-note">The whole app scales smoothly for phone, tablet, and desktop.</p>
+        </div>
 
-function goHome() {
-    document.getElementById('appScreen').classList.add('hidden');
-    document.getElementById('lobbyScreen').classList.remove('hidden');
-}
+        <div class="setting-block">
+          <h3>Study mode</h3>
+          <label class="setting-row">
+            <span>Default flashcard front</span>
+            <select id="defaultFrontSelect">
+              <option value="hanzi">Mandarin</option>
+              <option value="pinyin">Pinyin</option>
+              <option value="english">Translation</option>
+            </select>
+          </label>
+          <label class="setting-row">
+            <span>Speech speed</span>
+            <input id="speechSpeedRange" type="range" min="0.5" max="1.5" step="0.1" value="0.8" />
+          </label>
+          <label class="setting-row toggle-row">
+            <span>Auto-flip next card closed</span>
+            <input id="autoResetFlipToggle" type="checkbox" checked />
+          </label>
+        </div>
 
-function setFilter(type) {
-    currentFilter = type;
-    document.getElementById('filterAll').classList.toggle('active-filter', type === 'all');
-    document.getElementById('filterReview').classList.toggle('active-filter', type === 'review');
-    
-    if(type === 'all') currentDeck = [...fullSet];
-    else currentDeck = fullSet.filter(v => v.status === 'review');
-    
-    if(currentDeck.length === 0 && type === 'review') {
-        alert("No unknown words yet! Mark some for Review first.");
-        return setFilter('all');
-    }
+        <div class="setting-block">
+          <h3>Shortcuts</h3>
+          <div class="shortcut-list">
+            <span><kbd>Space</kbd> Flip card</span>
+            <span><kbd>←</kbd> Previous</span>
+            <span><kbd>→</kbd> Next</span>
+            <span><kbd>1-4</kbd> Rate card</span>
+            <span><kbd>S</kbd> Settings</span>
+          </div>
+        </div>
 
-    index = 0;
-    if(isScrambled) shuffleDeck();
-    updateUI();
-}
+        <div class="setting-block emphasis">
+          <h3>Progress gating</h3>
+          <p>HSK 2 unlocks only when every HSK 1 card is marked as mastered. This gives you a clean foundation and later gives you a place to attach premium access rules.</p>
+        </div>
+      </div>
+    </div>
+  </div>
 
-function updateUI() {
-    if(!currentDeck[index]) return;
-    const w = currentDeck[index];
-    document.getElementById('h-main').innerText = w.h;
-    document.getElementById('p-main').innerText = w.p;
-    
-    const exampleText = w.examples ? `\n\n📚 Examples:\n${w.examples}` : '';
-    document.getElementById('e-main').innerText = w.e + exampleText;
-    document.getElementById('counter').innerText = `${index + 1} / ${currentDeck.length}`;
-    document.getElementById('progressBar').style.width = ((index + 1) / currentDeck.length * 100) + '%';
-    document.getElementById('progressPercentage').innerText = Math.round(((index + 1) / currentDeck.length * 100)) + '%';
-    document.getElementById('card').classList.remove('flipped');
-    renderList();
-}
+  <div id="statsModal" class="modal hidden">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <p class="eyebrow">Progress</p>
+          <h2>Learning statistics</h2>
+        </div>
+        <button class="close-btn" data-close-modal="statsModal">&times;</button>
+      </div>
+      <div class="stats-grid" id="statsGrid"></div>
+      <div class="stats-actions">
+        <button class="secondary-btn" id="exportBtn">Export progress</button>
+        <label class="secondary-btn file-btn">
+          Import progress
+          <input id="importFile" type="file" accept=".json" hidden />
+        </label>
+      </div>
+    </div>
+  </div>
 
-function toggleScramble() {
-    isScrambled = !isScrambled;
-    const btn = document.getElementById('scrambleBtn');
-    if(isScrambled) {
-        btn.classList.add('btn-accent');
-        btn.innerText = "🔀 Unscramble";
-        shuffleDeck();
-    } else {
-        btn.classList.remove('btn-accent');
-        btn.innerText = "🔀 Scramble";
-        setFilter(currentFilter); 
-    }
-    updateUI();
-}
+  <div id="streakModal" class="modal hidden">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <p class="eyebrow">Consistency</p>
+          <h2>Your streak</h2>
+        </div>
+        <button class="close-btn" data-close-modal="streakModal">&times;</button>
+      </div>
+      <div class="streak-hero">
+        <div>
+          <div class="streak-number" id="streakCount">0</div>
+          <p class="streak-copy">day streak</p>
+        </div>
+        <div class="streak-meta">
+          <span id="lastStudyDate">No session yet</span>
+          <span id="streakBest">Best streak: 0</span>
+        </div>
+      </div>
+      <div id="streakCalendar" class="streak-calendar"></div>
+    </div>
+  </div>
 
-function shuffleDeck() {
-    for (let i = currentDeck.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [currentDeck[i], currentDeck[j]] = [currentDeck[j], currentDeck[i]];
-    }
-}
+  <div id="infoModal" class="modal hidden">
+    <div class="modal-card wide">
+      <div class="modal-head">
+        <div>
+          <p class="eyebrow">Character details</p>
+          <h2>Breakdown and stroke animation</h2>
+        </div>
+        <button class="close-btn" data-close-modal="infoModal">&times;</button>
+      </div>
+      <div id="infoContainer" class="info-grid"></div>
+    </div>
+  </div>
 
-function next() {
-    if(index < currentDeck.length - 1) { index++; updateUI(); }
-    else { document.getElementById('endModal').classList.remove('hidden'); }
-}
+  <div id="drawModal" class="modal hidden">
+    <div class="modal-card wide">
+      <div class="modal-head">
+        <div>
+          <p class="eyebrow">Practice</p>
+          <h2 id="drawTitle">Stroke practice</h2>
+        </div>
+        <button class="close-btn" data-close-modal="drawModal">&times;</button>
+      </div>
+      <div class="practice-grid">
+        <div class="practice-preview">
+          <div id="charRefDisplay" class="practice-writer"></div>
+          <div id="strokeControls" class="practice-controls"></div>
+        </div>
+        <div class="practice-canvas-wrap">
+          <canvas id="canvas"></canvas>
+          <div class="practice-actions">
+            <button class="secondary-btn" id="clearCanvasBtn">Clear</button>
+            <button class="secondary-btn" id="toggleAllCharsBtn">Show all characters</button>
+          </div>
+        </div>
+      </div>
+      <div id="allCharactersDisplay" class="all-characters"></div>
+    </div>
+  </div>
 
-function prev() { if(index > 0) { index--; updateUI(); } }
-function flip() { document.getElementById('card').classList.toggle('flipped'); }
+  <div id="completionModal" class="modal hidden">
+    <div class="modal-card completion-card">
+      <div class="completion-mark">✓</div>
+      <h2>Set complete</h2>
+      <p id="completionCopy">You finished this session.</p>
+      <div class="stats-actions">
+        <button class="primary-btn" id="reviewAgainBtn">Study due cards</button>
+        <button class="secondary-btn" data-close-modal="completionModal">Close</button>
+      </div>
+    </div>
+  </div>
 
-function renderList() {
-    const list = document.getElementById('wordList');
-    list.innerHTML = '';
-
-    currentDeck.forEach((v, i) => {
-        const item = document.createElement('div');
-
-        item.className = `
-            p-3 rounded-xl text-xs cursor-pointer flex flex-col
-            ${v.status === 'mastered' 
-                ? 'bg-green-900/10 text-green-400' 
-                : v.status === 'review' 
-                ? 'bg-red-900/20 text-red-400' 
-                : 'bg-zinc-900 text-zinc-300'}
-        `;
-
-        if (i === index) {
-            item.style.border = "2px solid #FFD700";
-        }
-
-        item.innerHTML = `
-            <div class="flex justify-between items-start">
-                <div class="flex-1">
-                    <div class="flex justify-between">
-                        <span class="font-semibold">${v.e}</span>
-                        <span class="text-zinc-400 text-[10px]">${v.p}</span>
-                    </div>
-                    <div class="text-lg font-bold text-center mt-1">${v.h}</div>
-                </div>
-                ${v.status !== 'normal' ? `<button class="ml-2 px-2 py-1 text-[10px] rounded bg-opacity-50 hover:bg-opacity-100 transition">↶</button>` : ''}
-            </div>
-        `;
-
-        item.onclick = () => {
-            index = i;
-            updateUI();
-        };
-
-        if (v.status !== 'normal') {
-            const undoBtn = item.querySelector('button');
-            undoBtn.onclick = (e) => {
-                e.stopPropagation();
-                const fullSetIdx = fullSet.findIndex(f => f.h === v.h);
-                fullSet[fullSetIdx].status = 'normal';
-                fullSet[fullSetIdx].interval = 1;
-                fullSet[fullSetIdx].ease = 2.5;
-                fullSet[fullSetIdx].reviewCount = 0;
-                fullSet[fullSetIdx].consecutiveCorrect = 0;
-                localStorage.setItem('hsk_srs_data', JSON.stringify(fullSet));
-                localStorage.setItem('hsk_progress', JSON.stringify(
-                    fullSet.reduce((acc, w) => ({...acc, [w.h]: w.status}), {})
-                ));
-                setFilter(currentFilter);
-            };
-        }
-
-        list.appendChild(item);
-    });
-}
-function closeModals() { 
-    document.querySelectorAll('.modal').forEach(m => m.classList.add('hidden')); 
-}
-
-// ========== CANVAS DRAWING ==========
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-let drawing = false;
-
-function resizeCanvas() {
-    const container = canvas.parentElement;
-    if (container) {
-        canvas.width = container.clientWidth;
-        canvas.height = container.clientHeight;
-    }
-}
-
-function getPos(e) {
-    const rect = canvas.getBoundingClientRect();
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    
-    return {
-        x: (clientX - rect.left) * (canvas.width / rect.width),
-        y: (clientY - rect.top) * (canvas.height / rect.height)
-    };
-}
-
-function startD(e) {
-    drawing = true;
-    const pos = getPos(e);
-    ctx.beginPath();
-    ctx.moveTo(pos.x, pos.y);
-}
-
-function drawD(e) {
-    if (!drawing) return;
-    const pos = getPos(e);
-    ctx.lineWidth = 12;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.strokeStyle = '#fff';
-    ctx.lineTo(pos.x, pos.y);
-    ctx.stroke();
-}
-
-canvas.addEventListener('mousedown', startD);
-canvas.addEventListener('mousemove', drawD);
-canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startD(e); }, {passive: false});
-canvas.addEventListener('touchmove', (e) => { e.preventDefault(); drawD(e); }, {passive: false});
-window.addEventListener('mouseup', () => drawing = false);
-window.addEventListener('touchend', () => drawing = false);
-
-function clearCanvas() { 
-    ctx.clearRect(0, 0, canvas.width, canvas.height); 
-}
-let showingAll = false;
-
-function toggleShowAll() {
-    const word = drawingWord;
-    if (word.length <= 1) return; // Only for multi-character words
-    
-    showingAll = !showingAll;
-    const btn = document.getElementById('showAllBtn');
-    const container = document.getElementById('allCharactersDisplay');
-    
-    if (showingAll) {
-        btn.classList.add('btn-accent');
-        btn.innerText = "📋 Hide All";
-        displayAllCharacters(word, container);
-    } else {
-        btn.classList.remove('btn-accent');
-        btn.innerText = "📋 Show All";
-        container.innerHTML = '';
-    }
-}
-
-function displayAllCharacters(word, container) {
-    container.innerHTML = '';
-    container.style.display = 'grid';
-    container.style.gridTemplateColumns = 'repeat(2, 1fr)';
-    container.style.gap = '16px';
-    
-    for (let i = 0; i < word.length; i++) {
-        const char = word[i];
-        const charDiv = document.createElement('div');
-        charDiv.className = 'glass-panel p-4';
-        
-        const title = document.createElement('div');
-        title.className = 'text-sm font-bold mb-3 text-zinc-400';
-        title.innerText = `Character ${i + 1}/${word.length}`;
-        charDiv.appendChild(title);
-        
-        const writerDiv = document.createElement('div');
-        writerDiv.style.width = '100%';
-        writerDiv.style.height = '200px';
-        writerDiv.style.marginBottom = '12px';
-        writerDiv.className = 'border-2 border-zinc-700 rounded-lg';
-        charDiv.appendChild(writerDiv);
-        
-        try {
-            const writer = HanziWriter.create(writerDiv, char, {
-                width: 300,
-                height: 200,
-                padding: 5,
-                strokeAnimationSpeed: 1,
-                delayBetweenStrokes: 200,
-                showOutline: true,
-                showStroke: true
-            });
-            writer.animateCharacter();
-        } catch (err) {
-            console.error('Error creating writer for character:', char, err);
-        }
-        
-        container.appendChild(charDiv);
-    }
-}
-</script>
+  <script type="module" src="./js/app.js"></script>
 </body>
 </html>
