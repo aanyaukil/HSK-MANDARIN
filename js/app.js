@@ -930,3 +930,9 @@ function initialize() {
 
 bindEvents();
 initialize();
+
+const btn = document.getElementById("openSettingsBtn");
+
+btn.addEventListener("click", () => {
+  console.log("CLICK WORKS");
+});
