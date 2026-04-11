@@ -1,1 +1,22 @@
-
+export const radicalData = {
+  "爱": { rad: "爫", radP: "zhǎo", radM: "claw", meaning: "love", parts: "Claw + cover + friend", traditional: "愛", etymology: "The traditional form includes 心, linking love with the heart.", origin: "Ideogram" },
+  "八": { rad: "八", radP: "bā", radM: "eight", meaning: "eight", parts: "Two splitting strokes", traditional: "八", etymology: "Originally pictured separation into two parts.", origin: "Pictograph" },
+  "爸": { rad: "父", radP: "fù", radM: "father", meaning: "dad", parts: "Father + 巴", traditional: "爸", etymology: "Phono-semantic compound using 父 for meaning.", origin: "Phono-semantic" },
+  "白": { rad: "白", radP: "bái", radM: "white", meaning: "white", parts: "Bright surface", traditional: "白", etymology: "Associated with brightness and clarity.", origin: "Pictograph" },
+  "半": { rad: "十", radP: "shí", radM: "ten", meaning: "half", parts: "Split form", traditional: "半", etymology: "Shows something divided into two parts.", origin: "Ideogram" },
+  "帮": { rad: "巾", radP: "jīn", radM: "cloth", meaning: "help", parts: "巾 + 邦", traditional: "幫", etymology: "Used for assisting or supporting.", origin: "Phono-semantic" },
+  "北": { rad: "匕", radP: "bǐ", radM: "spoon", meaning: "north", parts: "Two back-to-back figures", traditional: "北", etymology: "Back-to-back people came to suggest direction.", origin: "Pictograph" },
+  "不": { rad: "一", radP: "yī", radM: "one", meaning: "not", parts: "Negative mark", traditional: "不", etymology: "An early sign for negation.", origin: "Pictograph" },
+  "茶": { rad: "艹", radP: "cǎo", radM: "grass", meaning: "tea", parts: "Grass + person + wood", traditional: "茶", etymology: "Links tea to the tea plant.", origin: "Compound" },
+  "吃": { rad: "口", radP: "kǒu", radM: "mouth", meaning: "eat", parts: "Mouth + 乞", traditional: "吃", etymology: "Action performed with the mouth.", origin: "Phono-semantic" },
+  "出": { rad: "凵", radP: "kǎn", radM: "open box", meaning: "go out", parts: "Two mountains", traditional: "出", etymology: "Represents moving outward.", origin: "Ideogram" },
+  "大": { rad: "大", radP: "dà", radM: "big", meaning: "big", parts: "Person stretched wide", traditional: "大", etymology: "A large human figure.", origin: "Pictograph" },
+  "电": { rad: "雨", radP: "yǔ", radM: "rain", meaning: "electricity", parts: "Rain + field", traditional: "電", etymology: "Originally represented lightning.", origin: "Phono-semantic" },
+  "东": { rad: "木", radP: "mù", radM: "wood", meaning: "east", parts: "Sun through tree form", traditional: "東", etymology: "Linked to the rising sun.", origin: "Pictograph" },
+  "读": { rad: "讠", radP: "yán", radM: "speech", meaning: "read", parts: "Speech + 卖", traditional: "讀", etymology: "Originally reading aloud.", origin: "Phono-semantic" },
+  "饭": { rad: "饣", radP: "shí", radM: "food", meaning: "meal", parts: "Food + 反", traditional: "飯", etymology: "Prepared food or rice.", origin: "Phono-semantic" },
+  "好": { rad: "女", radP: "nǚ", radM: "woman", meaning: "good", parts: "Woman + child", traditional: "好", etymology: "Historically suggested harmony and goodness.", origin: "Ideogram" },
+  "学": { rad: "子", radP: "zǐ", radM: "child", meaning: "study", parts: "Child under a roof", traditional: "學", etymology: "A child learning symbols.", origin: "Compound" },
+  "脑": { rad: "月", radP: "yuè", radM: "flesh", meaning: "brain", parts: "Flesh + 㐬", traditional: "腦", etymology: "The organ in the head.", origin: "Phono-semantic" },
+  "谢": { rad: "言", radP: "yán", radM: "speech", meaning: "thank", parts: "Speech + 射", traditional: "謝", etymology: "Verbal thanks or apology.", origin: "Phono-semantic" }
+};
