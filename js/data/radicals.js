@@ -1,4 +1,4 @@
-export const radicalData = {
+export const radicals = {
   "爱": { rad: "爫", radP: "zhǎo", radM: "claw", meaning: "love", parts: "Claw + cover + friend", traditional: "愛", etymology: "The traditional form includes 心, linking love with the heart.", origin: "Ideogram" },
   "八": { rad: "八", radP: "bā", radM: "eight", meaning: "eight", parts: "Two splitting strokes", traditional: "八", etymology: "Originally pictured separation into two parts.", origin: "Pictograph" },
   "爸": { rad: "父", radP: "fù", radM: "father", meaning: "dad", parts: "Father + 巴", traditional: "爸", etymology: "Phono-semantic compound using 父 for meaning.", origin: "Phono-semantic" },
