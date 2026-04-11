@@ -1,6 +1,6 @@
 import { hsk1 } from "./data/hsk1.js";
 import { hsk2 } from "./data/hsk2.js";
-import { radicalData } from "./data/radicals.js";
+import { radicals } from "./data/radicals.js";
 
 const STORAGE_KEYS = {
   progress: "hsk_progress_v2",
