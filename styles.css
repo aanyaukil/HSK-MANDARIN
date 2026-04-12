@@ -89,7 +89,9 @@ textarea {
   -webkit-backdrop-filter: blur(18px);
 }
 
+
 .hero {
+  position: relative; /* ADD THIS LINE */
   display: grid;
   gap: 1rem;
   grid-template-columns: 1.3fr 0.7fr;
@@ -595,6 +597,10 @@ textarea {
   color: var(--text);
   cursor: pointer;
   font-size: 1.8rem;
+
+  position: absolute; /* ADD */
+  top: 12px;          /* ADD */
+  right: 12px;        /* ADD */
 }
 
 .settings-grid,
