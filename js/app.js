@@ -528,7 +528,7 @@ function openInfo() {
   elements.infoContainer.innerHTML = "";
 
   chars.forEach((char) => {
-    const meta = radicalData[char] || {
+    const meta = radicals[char] || {
       rad: "N/A",
       radP: "-",
       radM: "Unknown radical",
@@ -537,7 +537,7 @@ function openInfo() {
       traditional: char,
       etymology: "Add custom character notes later in js/data/radicals.js.",
       origin: "Unknown"
-    };
+};
 
     const card = document.createElement("article");
     card.className = "info-card";
