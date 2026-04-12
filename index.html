@@ -13,7 +13,9 @@
 </head>
 <body>
   <div class="app-shell">
-    <header class="hero">
+    <header class="hero" id="introBanner">
+      <button id="closeIntro" class="close-btn">✕</button>
+    
       <div>
         <p class="eyebrow">HSK 3.0 Study System</p>
         <h1>Build Mandarin fluency with structure, streaks, and smarter review.</h1>
@@ -22,11 +24,13 @@
           and keep HSK 2 locked until HSK 1 is truly finished.
         </p>
       </div>
+    
       <div class="hero-actions">
         <button class="primary-btn" id="openSettingsBtn">Study Settings</button>
         <button class="secondary-btn" id="openStreakBtn">View Streak</button>
       </div>
     </header>
+    
 
     <main class="layout">
       <section id="lobbyScreen" class="screen active">
