@@ -9,7 +9,11 @@ const radicalsSet = {
   level: "Foundation",
   title: "Radicals",
   description: "Core components of Chinese characters",
-  words: radicals
+  words: Object.entries(radicals).map(([char, data]) => [
+    char,
+    "", // pinyin (leave blank for now)
+    data.meaning
+  ])
 };
 
 const STORAGE_KEYS = {
