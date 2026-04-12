@@ -948,3 +948,14 @@ const btn = document.getElementById("openSettingsBtn");
 btn.addEventListener("click", () => {
   console.log("CLICK WORKS");
 });
+
+document.addEventListener("DOMContentLoaded", () => {
+  const intro = document.getElementById("introBanner");
+  const closeBtn = document.getElementById("closeIntro");
+
+  if (closeBtn && intro) {
+    closeBtn.addEventListener("click", () => {
+      intro.style.display = "none";
+    });
+  }
+});
