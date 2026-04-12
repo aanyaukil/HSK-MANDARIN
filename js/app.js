@@ -521,7 +521,7 @@ function openInfo() {
       radP: "-",
       radM: "Unknown radical",
       meaning: "Character",
-      parts: "Unique form",
+      traditionalParts: "Unique form",
       traditional: char,
       etymology: "Add custom character notes later in js/data/radicals.js.",
       origin: "Unknown"
@@ -535,7 +535,7 @@ function openInfo() {
       <p><strong>Traditional:</strong> ${meta.traditional}</p>
       <p><strong>Radical:</strong> ${meta.rad} (${meta.radP}) • ${meta.radM}</p>
       <p><strong>Meaning:</strong> ${meta.meaning}</p>
-      <p><strong>Parts:</strong> ${meta.parts}</p>
+      <p><strong>Parts:</strong> ${meta.traditionalParts}</p>
       <p><strong>Etymology:</strong> ${meta.etymology}</p>
       <p class="muted">${meta.origin}</p>
     `;
