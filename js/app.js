@@ -123,9 +123,9 @@ function buildCard(word, setId) {
     setId,
     hanzi: word[0],
     pinyin: word[1],
-    type: word[2] || "",        // Maps word[2] ("verb") to a dedicated 'type' field
-    english: word[3] || "",     // Maps word[3] ("to love") to 'english' translation
-    examples: word[4] || "",    // If you add Chinese example sentences later, they go here (word[4])
+    type: word[2] || "",        // "verb"
+    english: word[3] || "",     // "to love"
+    examples: word[4] || "",    // "我爱我的家。~wǒ ài wǒ de jiā.\nI love my family."
     status: "normal",
     interval: 1,
     ease: 2.5,
@@ -328,8 +328,20 @@ function renderStudy() {
   elements.frontHint.textContent = hintMap[state.frontMode];
   elements.backHanzi.textContent = word.hanzi;
   elements.backPinyin.textContent = word.pinyin;
-  elements.backEnglish.textContent = word.english;
-  elements.backExamples.textContent = word.examples || "No examples yet.";
+  
+  // Displays: "to love (verb)"
+  elements.backEnglish.textContent = word.type ? `${word.english} (${word.type})` : word.english;
+  
+  // Clean up example sentence formatting (replace tilde with a space or line break)
+  if (word.examples) {
+    const formattedExample = word.examples.replace("~", "\n");
+    elements.backExamples.textContent = formattedExample;
+  } else {
+    elements.backExamples.textContent = "No examples yet.";
+  }
+
+  elements.cardCounter.textContent = `${state.studyIndex + 1} / ${state.currentDeck.length}`;
+
   elements.cardCounter.textContent = `${state.studyIndex + 1} / ${state.currentDeck.length}`;
   elements.progressBar.style.width = `${progress}%`;
   elements.progressText.textContent = `${progress}%`;
@@ -344,6 +356,7 @@ function renderStudy() {
   renderWordList();
 }
 
+
 function renderWordList() {
   elements.wordList.innerHTML = "";
 
@@ -354,7 +367,7 @@ function renderWordList() {
       <div class="word-row-top">
         <div>
           <div class="word-hanzi">${word.hanzi}</div>
-          <div class="word-meta">${word.pinyin} • ${word.english}</div>
+          <div class="word-meta">${word.pinyin} • ${word.english} ${word.type ? `(${word.type})` : ''}</div>
         </div>
         <span class="badge ${word.status}">${getStatusLabel(word.status)}</span>
       </div>
