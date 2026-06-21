@@ -123,8 +123,9 @@ function buildCard(word, setId) {
     setId,
     hanzi: word[0],
     pinyin: word[1],
-    english: word[2],
-    examples: word[3] || "",
+    type: word[2] || "",        // Maps word[2] ("verb") to a dedicated 'type' field
+    english: word[3] || "",     // Maps word[3] ("to love") to 'english' translation
+    examples: word[4] || "",    // If you add Chinese example sentences later, they go here (word[4])
     status: "normal",
     interval: 1,
     ease: 2.5,
