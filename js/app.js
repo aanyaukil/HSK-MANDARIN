@@ -824,6 +824,10 @@ function bindEvents() {
     renderStreak();
     openModal("streakModal");
   });
+  document.getElementById("openStreakBtnLobby").addEventListener("click", () => {
+    renderStreak();
+    openModal("streakModal");
+  }); 
   document.getElementById("prevBtn").addEventListener("click", () => {
     if (state.studyIndex > 0) {
       state.studyIndex -= 1;
