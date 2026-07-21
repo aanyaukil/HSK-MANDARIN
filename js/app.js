@@ -189,6 +189,17 @@ function renderLobby() {
     const completion = set.words.length ? Math.round((progress / set.words.length) * 100) : 0;
     const unlocked = isSetUnlocked(set.id);
 
+// Check if the user has started studying this set
+    const hasStarted = set.words.some((word) => word.status !== "normal" || (word.reviewCount && word.reviewCount > 0));
+
+    // Determine button text dynamically
+    let buttonText = "Start set";
+    if (!unlocked) {
+      buttonText = "Finish HSK 1 first";
+    } else if (hasStarted) {
+      buttonText = "Continue";
+    }
+    
     const card = document.createElement("article");
     card.className = `set-card${unlocked ? "" : " locked"}`;
     card.innerHTML = `
@@ -946,6 +957,12 @@ function bindEvents() {
     if (event.key === "Escape") {
       closeAllModals();
     }
+  });
+
+  document.getElementById("continueLearningBtn").addEventListener("click", () => {
+  // Launches either your last active set or defaults to HSK 1
+  const targetSet = state.activeSetId || "hsk1";
+  startSet(targetSet);
   });
 }
 
