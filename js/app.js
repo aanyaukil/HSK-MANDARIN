@@ -958,12 +958,6 @@ function bindEvents() {
       closeAllModals();
     }
   });
-
-  document.getElementById("continueLearningBtn").addEventListener("click", () => {
-  // Launches either your last active set or defaults to HSK 1
-  const targetSet = state.activeSetId || "hsk1";
-  startSet(targetSet);
-  });
 }
 
 function initialize() {
