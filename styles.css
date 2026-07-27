@@ -537,13 +537,13 @@ textarea {
 }
 
 /* 3. Mastered Button (Green) */
-.rating-btn[data-rating="5"] {
+.rating-btn[data-rating="3"] {
   background: rgba(16, 185, 129, 0.16);
   color: #34d399;
   border: 1px solid rgba(52, 211, 153, 0.25);
 }
 
-.rating-btn[data-rating="5"]:hover {
+.rating-btn[data-rating="3"]:hover {
   background: rgba(16, 185, 129, 0.28);
 }
 
