@@ -4,18 +4,6 @@ import { hsk1 } from "./data/hsk1.js";
 import { hsk2 } from "./data/hsk2.js";
 import { radicals } from "./data/radicals.js";
 
-const radicalsSet = {
-  id: "radicals",
-  level: "Foundation",
-  title: "Radicals",
-  description: "Core components of Chinese characters",
-  words: Object.entries(radicals).map(([char, data]) => [
-    char,
-    "", // pinyin (leave blank for now)
-    data.meaning
-  ])
-};
-
 const STORAGE_KEYS = {
   progress: "hsk_progress_v2",
   settings: "hsk_settings_v2",
@@ -24,7 +12,7 @@ const STORAGE_KEYS = {
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-const rawSets = [hsk1, hsk2, radicalsSet];
+const rawSets = [hsk1, hsk2];
 let state = {
   activeSetId: null,
   activeFilter: "all",
