@@ -27,7 +27,8 @@ let state = {
   speechSpeed: 0.8,
   autoResetFlip: true,
   theme: "aurora",
-  fontSize: 16
+  fontSize: 16,
+  lastRatedCard: null // <-- ADD THIS LINE
 };
 
 let strokeWriter = null;
@@ -416,6 +417,15 @@ function calculateNextReview(card, quality) {
 function applyRating(quality) {
   const word = currentWord();
   if (!word) return;
+
+  // Save state before changing it so we can undo:
+  state.lastRatedCard = {
+    wordId: word.id,
+    previousStatus: word.status,
+    previousInterval: word.interval,
+    previousConsecutive: word.consecutiveCorrect,
+    previousIndex: state.studyIndex
+  };
 
   calculateNextReview(word, quality);
   persistProgress();
@@ -812,6 +822,32 @@ function clearCanvas() {
   const ctx = elements.canvas.getContext("2d");
   ctx.clearRect(0, 0, elements.canvas.width, elements.canvas.height);
 }
+
+function undoLastRating() {
+  if (!state.lastRatedCard) {
+    console.log("Nothing to undo!");
+    return;
+  }
+
+  const { wordId, previousStatus, previousInterval, previousConsecutive, previousIndex } = state.lastRatedCard;
+
+  rawSetsState().forEach((set) => {
+    const card = set.words.find((w) => w.id === wordId);
+    if (card) {
+      card.status = previousStatus;
+      card.interval = previousInterval;
+      card.consecutiveCorrect = previousConsecutive;
+    }
+  });
+
+  state.studyIndex = previousIndex;
+  state.lastRatedCard = null;
+
+  persistProgress();
+  renderLobby();
+  renderStudy();
+}
+
 
 function bindEvents() {
   document.getElementById("goHomeBtn").addEventListener("click", showLobby);
