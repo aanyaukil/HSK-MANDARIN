@@ -942,8 +942,13 @@ function bindEvents() {
       state.studyIndex += 1;
       renderStudy();
     }
-    if (["1", "2", "3", "4"].includes(event.key) && state.studyScreen.classList.contains("active")) {
-      applyRating(Number(event.key));
+    if (["1", "2", "3"].includes(event.key) && state.studyScreen.classList.contains("active")) {
+      const ratingMap = {
+        "1": 1, // Review again
+        "2": 2, // Good
+        "3": 3  // Mastered
+      };
+      applyRating(ratingMap[event.key]);
     }
     if (event.key.toLowerCase() === "s") {
       openModal("settingsModal");
