@@ -397,11 +397,6 @@ function calculateNextReview(card, quality) {
     card.interval = 1;
     card.consecutiveCorrect = 0;
     card.status = "review";
-  } else if (quality === 2) {
-    // 3 = GOOD (Normal progression)
-    card.consecutiveCorrect = (card.consecutiveCorrect || 0) + 1;
-    card.interval = Math.max(1, Math.round((card.interval || 1) * 2));
-    card.status = "normal";
   } else if (quality === 3) {
     // 5 = MASTERED (Fully completed)
     card.consecutiveCorrect = (card.consecutiveCorrect || 0) + 1;
