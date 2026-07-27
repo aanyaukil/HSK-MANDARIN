@@ -387,25 +387,31 @@ function shuffle(array) {
   return array;
 }
 
+
 function calculateNextReview(card, quality) {
   card.reviewCount = (card.reviewCount || 0) + 1;
 
-  if (quality < 2) {
+  if (quality === 1) {
+    // 1 = REVIEW AGAIN (Reset progress)
     card.interval = 1;
     card.consecutiveCorrect = 0;
     card.status = "review";
-  } else {
+  } else if (quality === 2) {
+    // 3 = GOOD (Normal progression)
     card.consecutiveCorrect = (card.consecutiveCorrect || 0) + 1;
-    if (card.consecutiveCorrect === 1) card.interval = 1;
-    else if (card.consecutiveCorrect === 2) card.interval = 3;
-    else card.interval = Math.max(4, Math.round(card.interval * card.ease));
-
-    card.status = quality >= 4 ? "mastered" : "normal";
+    card.interval = Math.max(1, Math.round((card.interval || 1) * 2));
+    card.status = "normal";
+  } else if (quality === 3) {
+    // 5 = MASTERED (Fully completed)
+    card.consecutiveCorrect = (card.consecutiveCorrect || 0) + 1;
+    card.interval = 30; // Jump ahead
+    card.status = "mastered";
   }
 
-  card.ease = Math.max(1.3, card.ease + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02)));
   card.nextReview = Date.now() + card.interval * DAY_MS;
 }
+
+
 
 function applyRating(quality) {
   const word = currentWord();
