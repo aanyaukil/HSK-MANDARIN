@@ -494,35 +494,57 @@ textarea {
   border-radius: 50%;
 }
 
+/* Update grid to 3 equal columns */
 .rating-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 0.75rem;
   margin-bottom: 1rem;
 }
 
-.rating-btn.good {
-  background: rgba(16, 185, 129, 0.16);
-  color: #34d399;
-  border: 1px solid rgba(52, 211, 153, 0.25);
+/* Base button styling */
+.rating-btn {
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s ease;
+  width: 100%;
 }
 
-.rating-btn.okay {
+/* 1. Review Again Button (Orange/Red Alert) */
+.rating-btn[data-rating="1"] {
+  background: rgba(249, 115, 22, 0.16);
+  color: #fb923c;
+  border: 1px solid rgba(251, 146, 60, 0.25);
+}
+
+.rating-btn[data-rating="1"]:hover {
+  background: rgba(249, 115, 22, 0.28);
+}
+
+/* 2. Undo Rating Button (Neutral/Blue) */
+#undoBtn {
   background: rgba(59, 130, 246, 0.16);
   color: #60a5fa;
   border: 1px solid rgba(96, 165, 250, 0.25);
 }
 
-.rating-btn.soft {
-  background: rgba(245, 158, 11, 0.14);
-  color: #fbbf24;
-  border: 1px solid rgba(251, 191, 36, 0.25);
+#undoBtn:hover {
+  background: rgba(59, 130, 246, 0.28);
 }
 
-.rating-btn.alert {
-  background: rgba(249, 115, 22, 0.16);
-  color: #fb923c;
-  border: 1px solid rgba(251, 146, 60, 0.25);
+/* 3. Mastered Button (Green) */
+.rating-btn[data-rating="5"] {
+  background: rgba(16, 185, 129, 0.16);
+  color: #34d399;
+  border: 1px solid rgba(52, 211, 153, 0.25);
+}
+
+.rating-btn[data-rating="5"]:hover {
+  background: rgba(16, 185, 129, 0.28);
 }
 
 .word-list {
