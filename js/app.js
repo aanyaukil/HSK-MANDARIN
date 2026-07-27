@@ -900,6 +900,10 @@ function bindEvents() {
     event.stopPropagation();
     openDraw();
   });
+  document.getElementById("undoBtn")?.addEventListener("click", (event) => {
+  event.stopPropagation();
+  undoLastRating();
+  });
   document.getElementById("toggleShuffleBtn").addEventListener("click", () => {
     state.isShuffled = !state.isShuffled;
     elements.toggleShuffleBtn.textContent = state.isShuffled ? "Shuffle On" : "Shuffle Off";
@@ -978,14 +982,19 @@ function bindEvents() {
       state.studyIndex += 1;
       renderStudy();
     }
-    if (["1", "2", "3"].includes(event.key) && state.studyScreen.classList.contains("active")) {
+    if (["1", "2"].includes(event.key) && state.studyScreen.classList.contains("active")) {
       const ratingMap = {
         "1": 1, // Review again
-        "2": 2, // Good
-        "3": 3  // Mastered
+        "2": 5  // Mastered
       };
       applyRating(ratingMap[event.key]);
     }
+  
+    // KEY 'Z' FOR UNDO:
+    if (event.key.toLowerCase() === "z" && state.studyScreen.classList.contains("active")) {
+      undoLastRating();
+    }
+  
     if (event.key.toLowerCase() === "s") {
       openModal("settingsModal");
     }
