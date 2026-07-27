@@ -965,10 +965,18 @@ function bindEvents() {
   document.getElementById("toggleAllCharsBtn").addEventListener("click", toggleAllCharacters);
   window.addEventListener("resize", resizeCanvas);
   document.addEventListener("keydown", (event) => {
+  // Prevent keyboard shortcuts while typing in input fields or textareas
+    if (["input", "textarea"].includes(document.activeElement?.tagName?.toLowerCase())) {
+      return;
+    }
+  
+    // Spacebar to flip card
     if (event.key === " ") {
       event.preventDefault();
       elements.cardInner.classList.toggle("flipped");
     }
+  
+    // Left/Right arrows for card navigation
     if (event.key === "ArrowLeft" && state.studyIndex > 0) {
       state.studyIndex -= 1;
       renderStudy();
@@ -977,10 +985,12 @@ function bindEvents() {
       state.studyIndex += 1;
       renderStudy();
     }
+  
+    // Rating Shortcuts: Key '1' = Review again (1), Key '2' = Mastered (3)
     if (["1", "2"].includes(event.key) && state.studyScreen.classList.contains("active")) {
       const ratingMap = {
         "1": 1, // Review again
-        "2": 5  // Mastered
+        "2": 3  // Mastered (Updated from 5 to 3)
       };
       applyRating(ratingMap[event.key]);
     }
@@ -990,9 +1000,12 @@ function bindEvents() {
       undoLastRating();
     }
   
+    // Open settings with 'S'
     if (event.key.toLowerCase() === "s") {
       openModal("settingsModal");
     }
+  
+    // Close modals with 'Escape'
     if (event.key === "Escape") {
       closeAllModals();
     }
