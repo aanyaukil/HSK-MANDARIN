@@ -426,8 +426,7 @@ function calculateNextReview(card, quality) {
 }
 
 
-
-// 1. Declare helper at top level (e.g., above applyRating)
+// 1. Standalone celebration function (Place this above applyRating)
 function triggerCelebration() {
   if (typeof confetti === "function") {
     confetti({
@@ -438,7 +437,7 @@ function triggerCelebration() {
   }
 }
 
-// 2. Cleaned applyRating function
+// 2. Clean applyRating function
 function applyRating(quality) {
   const word = currentWord();
   if (!word) return;
@@ -462,7 +461,9 @@ function applyRating(quality) {
     renderStudy();
   } else {
     renderStudy();
-    elements.completionCopy.textContent = `You finished ${getSetById(state.activeSetId)?.title || "this set"}. ${isSetUnlocked("hsk2") ? "HSK 2 is now unlocked." : "Keep mastering HSK 1 to unlock HSK 2."}`;
+    if (elements.completionCopy) {
+      elements.completionCopy.textContent = `You finished ${getSetById(state.activeSetId)?.title || "this set"}. ${isSetUnlocked("hsk2") ? "HSK 2 is now unlocked." : "Keep mastering HSK 1 to unlock HSK 2."}`;
+    }
     
     triggerCelebration(); // Confetti blast! 🎉
     openModal("completionModal");
