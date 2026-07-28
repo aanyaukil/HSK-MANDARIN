@@ -983,46 +983,48 @@ function bindEvents() {
   document.getElementById("toggleAllCharsBtn").addEventListener("click", toggleAllCharacters);
   window.addEventListener("resize", resizeCanvas);
   document.addEventListener("keydown", (event) => {
-  // Ignore shortcuts if typing in input fields
+    // 1. Ignore shortcuts if typing inside an input field
     if (["input", "textarea"].includes(document.activeElement?.tagName?.toLowerCase())) {
       return;
     }
-  
-    // Spacebar -> Flip Card
-    if (event.key === " ") {
+
+    // Check if user is currently on the study screen
+    const isStudying = elements.studyScreen?.classList.contains("active");
+
+    // 2. Spacebar -> Flip card
+    if (event.key === " " && isStudying) {
       event.preventDefault();
       elements.cardInner.classList.toggle("flipped");
     }
-  
-    // Left / Right Arrows -> Navigation
-    if (event.key === "ArrowLeft" && state.studyIndex > 0) {
+
+    // 3. Arrow Keys -> Prev / Next card navigation
+    if (event.key === "ArrowLeft" && isStudying && state.studyIndex > 0) {
       state.studyIndex -= 1;
       renderStudy();
     }
-    if (event.key === "ArrowRight" && state.studyIndex < state.currentDeck.length - 1) {
+    if (event.key === "ArrowRight" && isStudying && state.studyIndex < state.currentDeck.length - 1) {
       state.studyIndex += 1;
       renderStudy();
     }
-  
-    // Key '1' = Review again (quality 1)
-    // Key '2' = Mastered (quality 3)
-    if (["1", "2"].includes(event.key) && state.studyScreen.classList.contains("active")) {
+
+    // 4. Rating Shortcuts: Key '1' = Review again, Key '2' = Mastered
+    if (["1", "2"].includes(event.key) && isStudying) {
       const ratingMap = {
-        "1": 1, 
-        "2": 3
+        "1": 1, // Review again
+        "2": 3  // Mastered
       };
       applyRating(ratingMap[event.key]);
     }
-  
-    // Key 'Z' or 'z' = Undo / Reset to New
-    if (event.key.toLowerCase() === "z" && state.studyScreen.classList.contains("active")) {
+
+    // 5. Key 'Z' or 'z' -> Undo / Reset card
+    if (event.key.toLowerCase() === "z" && isStudying) {
       undoLastRating();
     }
-  
+
+    // 6. Global shortcuts (Settings & Modals)
     if (event.key.toLowerCase() === "s") {
       openModal("settingsModal");
     }
-  
     if (event.key === "Escape") {
       closeAllModals();
     }
