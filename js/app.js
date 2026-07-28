@@ -332,15 +332,18 @@ function renderStudy() {
 
   const word = currentWord();
   const progress = Math.round(((state.studyIndex + 1) / state.currentDeck.length) * 100);
+
   const frontMap = {
     hanzi: word.hanzi,
     pinyin: word.pinyin,
     english: word.english
   };
+
+  // UPDATED: No small Hanzi character underneath in Pinyin/English mode
   const hintMap = {
     hanzi: "Tap to reveal pinyin, translation, and examples",
-    pinyin: word.hanzi,
-    english: word.hanzi
+    pinyin: "Tap to reveal character and details",
+    english: "Tap to reveal character and details"
   };
 
   elements.frontDisplay.textContent = frontMap[state.frontMode];
@@ -351,15 +354,13 @@ function renderStudy() {
   // Displays: "to love (verb)"
   elements.backEnglish.textContent = word.type ? `${word.english} (${word.type})` : word.english;
   
-  // Clean up example sentence formatting (replace tilde with a space or line break)
+  // Clean up example sentence formatting
   if (word.examples) {
     const formattedExample = word.examples.replace("~", "\n");
     elements.backExamples.textContent = formattedExample;
   } else {
     elements.backExamples.textContent = "No examples yet.";
   }
-
-  elements.cardCounter.textContent = `${state.studyIndex + 1} / ${state.currentDeck.length}`;
 
   elements.cardCounter.textContent = `${state.studyIndex + 1} / ${state.currentDeck.length}`;
   elements.progressBar.style.width = `${progress}%`;
@@ -369,6 +370,13 @@ function renderStudy() {
 
   if (state.autoResetFlip) {
     elements.cardInner.classList.remove("flipped");
+  }
+
+  // Update Star button toggle state
+  const starBtn = document.getElementById("starBtn");
+  if (starBtn) {
+    starBtn.textContent = word.starred ? "★" : "☆";
+    starBtn.classList.toggle("active", Boolean(word.starred));
   }
 
   updateFrontModeButtons();
