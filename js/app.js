@@ -427,6 +427,18 @@ function calculateNextReview(card, quality) {
 
 
 
+// 1. Declare helper at top level (e.g., above applyRating)
+function triggerCelebration() {
+  if (typeof confetti === "function") {
+    confetti({
+      particleCount: 80,
+      spread: 70,
+      origin: { y: 0.6 }
+    });
+  }
+}
+
+// 2. Cleaned applyRating function
 function applyRating(quality) {
   const word = currentWord();
   if (!word) return;
@@ -451,6 +463,8 @@ function applyRating(quality) {
   } else {
     renderStudy();
     elements.completionCopy.textContent = `You finished ${getSetById(state.activeSetId)?.title || "this set"}. ${isSetUnlocked("hsk2") ? "HSK 2 is now unlocked." : "Keep mastering HSK 1 to unlock HSK 2."}`;
+    
+    triggerCelebration(); // Confetti blast! 🎉
     openModal("completionModal");
   }
 }
