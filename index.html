@@ -91,6 +91,7 @@
                 <button class="dropdown-item" data-filter="review">Needs review</button>
                 <button class="dropdown-item" data-filter="mastered">Mastered</button>
                 <button class="dropdown-item" data-filter="normal">New words</button>
+                <button class="dropdown-item" data-filter="starred">Starred</button>
               </div>
             </div>
           </div>
@@ -111,7 +112,10 @@
                 <div class="card-face front-face">
                   <div class="card-face-top">
                     <span class="badge" id="wordStatusBadge">New</span>
-                    <button class="icon-btn" id="speakBtn" aria-label="Pronounce current card">🔊</button>
+                    <div class="flex items-center gap-2">
+                      <button class="icon-btn star-btn" id="starBtn" title="Star Card">☆</button>
+                      <button class="icon-btn" id="speakBtn" aria-label="Pronounce current card">🔊</button>
+                    </div>
                   </div>
                   <div class="front-content">
                     <div id="frontDisplay" class="front-display"></div>
@@ -119,7 +123,7 @@
                   </div>
                   <button class="card-flip-hint" id="flipFrontBtn">Tap to reveal</button>
                 </div>
-
+          
                 <div class="card-face back-face">
                   <div class="back-stack">
                     <div class="back-main">
