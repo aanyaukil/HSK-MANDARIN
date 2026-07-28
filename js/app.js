@@ -820,31 +820,17 @@ function clearCanvas() {
 
 function undoLastRating() {
   const word = currentWord();
+  if (!word) return;
 
-  // Scenario A: If there's an immediate previous rating action saved, undo it
-  if (state.lastRatedCard) {
-    const { wordId, previousStatus, previousInterval, previousConsecutive, previousIndex } = state.lastRatedCard;
+  // Reset the card currently visible on screen back to "new"
+  word.status = "normal";
+  word.interval = 1;
+  word.consecutiveCorrect = 0;
+  word.reviewCount = 0;
+  word.nextReview = Date.now();
 
-    rawSetsState().forEach((set) => {
-      const card = set.words.find((w) => w.id === wordId);
-      if (card) {
-        card.status = previousStatus;
-        card.interval = previousInterval;
-        card.consecutiveCorrect = previousConsecutive;
-      }
-    });
-
-    state.studyIndex = previousIndex;
-    state.lastRatedCard = null; // Clear after undoing
-  } 
-  // Scenario B: Reset the currently visible card back to brand-new state
-  else if (word) {
-    word.status = "normal";
-    word.interval = 1;
-    word.consecutiveCorrect = 0;
-    word.reviewCount = 0;
-    word.nextReview = Date.now();
-  }
+  // Clear last rated snapshot so history doesn't interfere
+  state.lastRatedCard = null;
 
   persistProgress();
   renderLobby();
