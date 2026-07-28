@@ -372,14 +372,18 @@ function renderStudy() {
   renderWordList();
 }
 function renderWordList() {
-  const container = document.getElementById("sessionWordList");
+  // Look for wordList or sessionWordList
+  const container = document.getElementById("wordList") || document.getElementById("sessionWordList");
   if (!container) return;
 
   container.innerHTML = "";
 
-  // If no words match the current filter
   if (!state.currentDeck || state.currentDeck.length === 0) {
-    container.innerHTML = `<div class="p-4 text-center text-muted">No words in this list</div>`;
+    container.innerHTML = `
+      <div style="padding: 1.5rem; text-align: center; color: var(--muted);">
+        No words match this filter. Try switching to <b>All words</b>!
+      </div>
+    `;
     return;
   }
 
@@ -388,7 +392,6 @@ function renderWordList() {
     const row = document.createElement("div");
     row.className = `word-row ${isCurrent ? "active" : ""}`;
 
-    // Safe status label fallback
     const statusText = typeof getStatusLabel === "function" ? getStatusLabel(word.status) : (word.status || "New");
 
     row.innerHTML = `
@@ -408,13 +411,12 @@ function renderWordList() {
 
     // Click row -> Navigate to that card
     row.addEventListener("click", (e) => {
-      // Don't change card if clicking directly on the star button
       if (e.target.closest(".list-star-btn")) return;
       state.studyIndex = index;
       renderStudy();
     });
 
-    // Click star button in list -> Toggle star for that card
+    // Click star button in list -> Toggle star state
     const listStarBtn = row.querySelector(".list-star-btn");
     listStarBtn?.addEventListener("click", (e) => {
       e.stopPropagation();
