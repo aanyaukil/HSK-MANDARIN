@@ -291,30 +291,36 @@
   </div>
 
   <div id="drawModal" class="modal hidden">
-    <div class="modal-card wide">
-      <div class="modal-head">
-        <div>
-          <p class="eyebrow">Practice</p>
-          <h2 id="drawTitle">Stroke practice</h2>
-        </div>
-        <button class="close-btn" data-close-modal="drawModal">&times;</button>
+  <div class="modal-card wide">
+    <div class="modal-head">
+      <div>
+        <p class="eyebrow">Practice</p>
+        <h2 id="drawTitle">Stroke practice</h2>
       </div>
-      <div class="practice-grid">
-        <div class="practice-preview">
-          <div id="charRefDisplay" class="practice-writer"></div>
-          <div id="strokeControls" class="practice-controls"></div>
-        </div>
-        <div class="practice-canvas-wrap">
-          <canvas id="canvas"></canvas>
-          <div class="practice-actions">
-            <button class="secondary-btn" id="clearCanvasBtn">Clear</button>
-            <button class="secondary-btn" id="toggleAllCharsBtn">Show all characters</button>
-          </div>
-        </div>
-      </div>
-      <div id="allCharactersDisplay" class="all-characters"></div>
+      <button class="close-btn" data-close-modal="drawModal">&times;</button>
     </div>
+    
+    <div class="practice-grid">
+      <div class="practice-box">
+        <div id="charRefDisplay" class="practice-writer"></div>
+        <div id="strokeControls" class="practice-actions"></div>
+      </div>
+
+      <div class="practice-box">
+        <div class="canvas-container">
+          <span class="canvas-hint">Draw character here</span>
+          <canvas id="canvas"></canvas>
+        </div>
+        <div class="practice-actions">
+          <button class="secondary-btn" id="clearCanvasBtn">Clear</button>
+          <button class="secondary-btn" id="toggleAllCharsBtn">Show all characters</button>
+        </div>
+      </div>
+    </div>
+    
+    <div id="allCharactersDisplay" class="all-characters"></div>
   </div>
+</div>
 
   <div id="completionModal" class="modal hidden">
     <div class="modal-card completion-card">
