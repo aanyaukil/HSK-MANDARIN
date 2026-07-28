@@ -372,27 +372,50 @@ function renderStudy() {
   renderWordList();
 }
 
-
 function renderWordList() {
-  elements.wordList.innerHTML = "";
+  const container = document.getElementById("sessionWordList");
+  if (!container) return;
+
+  container.innerHTML = "";
 
   state.currentDeck.forEach((word, index) => {
-    const row = document.createElement("button");
-    row.className = `word-row${index === state.studyIndex ? " active" : ""}`;
+    const isCurrent = index === state.studyIndex;
+    const row = document.createElement("div");
+    row.className = `word-row ${isCurrent ? "active" : ""}`;
+
     row.innerHTML = `
       <div class="word-row-top">
-        <div>
-          <div class="word-hanzi">${word.hanzi}</div>
-          <div class="word-meta">${word.pinyin} • ${word.english} ${word.type ? `(${word.type})` : ''}</div>
+        <div class="flex items-center gap-2">
+          <button class="list-star-btn ${word.starred ? "active" : ""}" data-word-id="${word.id}">
+            ${word.starred ? "★" : "☆"}
+          </button>
+          <span class="word-hanzi">${word.hanzi}</span>
         </div>
         <span class="badge ${word.status}">${getStatusLabel(word.status)}</span>
       </div>
+      <div class="word-meta">
+        <span>${word.pinyin}</span> • <span>${word.english}</span>
+      </div>
     `;
-    row.addEventListener("click", () => {
+
+    // Click row -> Navigate to that card
+    row.addEventListener("click", (e) => {
+      // Don't change card if clicking directly on the star button
+      if (e.target.closest(".list-star-btn")) return;
       state.studyIndex = index;
       renderStudy();
     });
-    elements.wordList.appendChild(row);
+
+    // Click star button in list -> Toggle star for that card
+    const listStarBtn = row.querySelector(".list-star-btn");
+    listStarBtn?.addEventListener("click", (e) => {
+      e.stopPropagation();
+      word.starred = !word.starred;
+      persistProgress();
+      renderStudy();
+    });
+
+    container.appendChild(row);
   });
 }
 
@@ -1028,53 +1051,63 @@ function bindEvents() {
   document.getElementById("clearCanvasBtn").addEventListener("click", clearCanvas);
   document.getElementById("toggleAllCharsBtn").addEventListener("click", toggleAllCharacters);
   window.addEventListener("resize", resizeCanvas);
-  document.addEventListener("keydown", (event) => {
-    // 1. Ignore shortcuts if typing inside an input field
-    if (["input", "textarea"].includes(document.activeElement?.tagName?.toLowerCase())) {
-      return;
-    }
+document.addEventListener("keydown", (event) => {
+  // 1. Ignore shortcuts if typing inside an input field
+  if (["input", "textarea"].includes(document.activeElement?.tagName?.toLowerCase())) {
+    return;
+  }
 
-    // Check if user is currently on the study screen
-    const isStudying = elements.studyScreen?.classList.contains("active");
+  // Check if user is currently on the study screen
+  const isStudying = elements.studyScreen?.classList.contains("active");
 
-    // 2. Spacebar -> Flip card
-    if (event.key === " " && isStudying) {
-      event.preventDefault();
-      elements.cardInner.classList.toggle("flipped");
-    }
+  // 2. Spacebar -> Flip card
+  if (event.key === " " && isStudying) {
+    event.preventDefault();
+    elements.cardInner.classList.toggle("flipped");
+  }
 
-    // 3. Arrow Keys -> Prev / Next card navigation
-    if (event.key === "ArrowLeft" && isStudying && state.studyIndex > 0) {
-      state.studyIndex -= 1;
+  // 3. Arrow Keys -> Prev / Next card navigation
+  if (event.key === "ArrowLeft" && isStudying && state.studyIndex > 0) {
+    state.studyIndex -= 1;
+    renderStudy();
+  }
+  if (event.key === "ArrowRight" && isStudying && state.studyIndex < state.currentDeck.length - 1) {
+    state.studyIndex += 1;
+    renderStudy();
+  }
+
+  // 4. Rating Shortcuts: Key '1' = Review again, Key '2' = Mastered
+  if (["1", "2"].includes(event.key) && isStudying) {
+    const ratingMap = {
+      "1": 1, // Review again
+      "2": 3  // Mastered
+    };
+    applyRating(ratingMap[event.key]);
+  }
+
+  // 5. Key '3' -> Toggle Star on Current Flashcard ⭐
+  if (event.key === "3" && isStudying) {
+    const word = currentWord();
+    if (word) {
+      word.starred = !word.starred;
+      persistProgress();
       renderStudy();
     }
-    if (event.key === "ArrowRight" && isStudying && state.studyIndex < state.currentDeck.length - 1) {
-      state.studyIndex += 1;
-      renderStudy();
-    }
+  }
 
-    // 4. Rating Shortcuts: Key '1' = Review again, Key '2' = Mastered
-    if (["1", "2"].includes(event.key) && isStudying) {
-      const ratingMap = {
-        "1": 1, // Review again
-        "2": 3  // Mastered
-      };
-      applyRating(ratingMap[event.key]);
-    }
+  // 6. Key 'Z' or 'z' -> Undo / Reset card
+  if (event.key.toLowerCase() === "z" && isStudying) {
+    undoLastRating();
+  }
 
-    // 5. Key 'Z' or 'z' -> Undo / Reset card
-    if (event.key.toLowerCase() === "z" && isStudying) {
-      undoLastRating();
-    }
-
-    // 6. Global shortcuts (Settings & Modals)
-    if (event.key.toLowerCase() === "s") {
-      openModal("settingsModal");
-    }
-    if (event.key === "Escape") {
-      closeAllModals();
-    }
-  });
+  // 7. Global shortcuts (Settings & Modals)
+  if (event.key.toLowerCase() === "s") {
+    openModal("settingsModal");
+  }
+  if (event.key === "Escape") {
+    closeAllModals();
+  }
+});
   // Toggle Review Dropdown Menu
   const dropdownBtn = document.getElementById("reviewDropdownBtn");
   const dropdownMenu = document.getElementById("reviewDropdownMenu");
