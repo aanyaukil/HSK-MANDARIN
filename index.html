@@ -171,72 +171,89 @@
     <button class="fab" id="floatingSettingsBtn" title="Settings">⚙</button>
   </div>
 
-  <div id="settingsModal" class="modal hidden">
-    <div class="modal-card settings-card">
-      <div class="modal-head">
-        <div>
-          <p class="eyebrow">Preferences</p>
-          <h2>Study settings</h2>
+<div id="settingsModal" class="modal hidden">
+  <div class="modal-card wide"> <div class="modal-head">
+      <div>
+        <p class="eyebrow">PREFERENCES</p>
+        <h2>Study Settings</h2>
+      </div>
+      <button class="close-btn" data-close-modal="settingsModal">&times;</button>
+    </div>
+
+    <div class="settings-grid">
+      <div class="settings-box">
+        <h3>Appearance</h3>
+        <div class="setting-item">
+          <label>Theme</label>
+          <select id="themeSelect" class="settings-select">
+            <option value="midnight">Midnight 🌌</option>
+            <option value="dark">Dark Mode 🌙</option>
+            <option value="light">Light Mode ☀️</option>
+            <option value="aurora">Aurora 🌲</option>
+          </select>
         </div>
-        <button class="close-btn" data-close-modal="settingsModal">&times;</button>
+        <div class="setting-item">
+          <label>Font Size</label>
+          <input id="fontSizeRange" type="range" min="14" max="22" value="16" class="settings-slider" />
+        </div>
+        <p class="settings-note">Scales the interface for better readability.</p>
       </div>
 
-      <div class="settings-grid">
-        <div class="setting-block">
-          <h3>Appearance</h3>
-          <label class="setting-row">
-            <span>Theme</span>
-            <select id="themeSelect">
-              <option value="aurora">Aurora</option>
-              <option value="light">Light</option>
-              <option value="midnight">Midnight</option>
-            </select>
-          </label>
-          <label class="setting-row">
-            <span>Font size</span>
-            <input id="fontSizeRange" type="range" min="14" max="20" value="16" />
-          </label>
-          <p class="setting-note">The whole app scales smoothly for phone, tablet, and desktop.</p>
+      <div class="settings-box">
+        <h3>Study Mode</h3>
+        <div class="setting-item">
+          <label>Default card front</label>
+          <select id="defaultFrontSelect" class="settings-select">
+            <option value="hanzi">Mandarin</option>
+            <option value="pinyin">Pinyin</option>
+            <option value="english">Translation</option>
+          </select>
         </div>
-
-        <div class="setting-block">
-          <h3>Study mode</h3>
-          <label class="setting-row">
-            <span>Default flashcard front</span>
-            <select id="defaultFrontSelect">
-              <option value="hanzi">Mandarin</option>
-              <option value="pinyin">Pinyin</option>
-              <option value="english">Translation</option>
-            </select>
-          </label>
-          <label class="setting-row">
-            <span>Speech speed</span>
-            <input id="speechSpeedRange" type="range" min="0.5" max="1.5" step="0.1" value="0.8" />
-          </label>
-          <label class="setting-row toggle-row">
-            <span>Auto-flip next card closed</span>
-            <input id="autoResetFlipToggle" type="checkbox" checked />
-          </label>
+        <div class="setting-item">
+          <label>Speech speed</label>
+          <input id="speechSpeedRange" type="range" min="0.5" max="1.5" step="0.1" value="0.8" class="settings-slider" />
         </div>
-
-        <div class="setting-block">
-          <h3>Shortcuts</h3>
-          <div class="shortcut-list">
-            <span><kbd>Space</kbd> Flip card</span>
-            <span><kbd>←</kbd> Previous</span>
-            <span><kbd>→</kbd> Next</span>
-            <p>Shortcuts: <strong>1</strong> (Review again), <strong>2</strong> (Mastered), <strong>Z</strong> (Undo / Reset to new)</p>
-            <span><kbd>S</kbd> Settings</span>
-          </div>
+        <div class="setting-item checkbox-item">
+          <label>Auto-flip next card</label>
+          <input id="autoResetFlipToggle" type="checkbox" checked />
         </div>
+      </div>
 
-        <div class="setting-block emphasis">
-          <h3>Progress gating</h3>
-          <p>HSK 2 unlocks only when every HSK 1 card is marked as mastered. This gives you a clean foundation and later gives you a place to attach premium access rules.</p>
+      <div class="settings-box">
+        <h3>Progress Gating</h3>
+        <p class="settings-note">
+          HSK 2 unlocks only when every HSK 1 card is marked as mastered. Mark cards as <b>Mastered</b> to progress.
+        </p>
+      </div>
+    </div>
+
+    <hr class="settings-divider" />
+
+    <div class="shortcuts-section">
+      <div class="shortcuts-group">
+        <h3>Flashcard Controls</h3>
+        <div class="shortcuts-grid">
+          <div class="shortcut-pill"><kbd>Space</kbd> Flip</div>
+          <div class="shortcut-pill"><kbd>←</kbd> <kbd>→</kbd> Navigate</div>
+          <div class="shortcut-pill"><kbd>1</kbd> Review</div>
+          <div class="shortcut-pill"><kbd>2</kbd> Master</div>
+          <div class="shortcut-pill"><kbd>3</kbd> Star ⭐</div>
+          <div class="shortcut-pill"><kbd>Z</kbd> Undo</div>
+          <div class="shortcut-pill"><kbd>S</kbd> Settings</div>
+        </div>
+      </div>
+
+      <div class="shortcuts-group">
+        <h3>Drawing Pad Controls</h3>
+        <div class="shortcuts-grid">
+          <div class="shortcut-pill"><kbd>C</kbd> or <kbd>Z</kbd> Clear Pad</div>
+          <div class="shortcut-pill"><kbd>←</kbd> <kbd>→</kbd> Prev/Next Card</div>
+          <div class="shortcut-pill"><kbd>Esc</kbd> Close Modal</div>
         </div>
       </div>
     </div>
   </div>
+</div>
 
   <div id="statsModal" class="modal hidden">
     <div class="modal-card">
