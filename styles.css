@@ -825,18 +825,24 @@ kbd {
   font-weight: 900;
 }
 
+/* Practice Grid Container */
 .practice-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
+  align-items: stretch;
 }
 
-.practice-preview,
-.practice-canvas-wrap {
+/* Standardized Practice Boxes */
+.practice-box {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   padding: 1rem;
   border-radius: 1.25rem;
   border: 1px solid var(--border);
   background: rgba(255, 255, 255, 0.03);
+  min-height: 420px;
 }
 
 .practice-writer {
@@ -846,17 +852,50 @@ kbd {
   overflow: hidden;
 }
 
-.practice-controls,
-.all-characters {
+/* Canvas Container & Placeholder Label */
+.canvas-container {
+  position: relative;
+  width: 100%;
+  min-height: 320px;
+  border-radius: 1rem;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.02);
+  overflow: hidden;
+}
+
+.canvas-hint {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 700;
+  pointer-events: none; /* Let strokes pass through to canvas */
+  opacity: 0.35;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  user-select: none;
+}
+
+/* Practice Action Buttons Bar */
+.practice-actions {
   display: flex;
   gap: 0.75rem;
-  flex-wrap: wrap;
+  align-items: center;
   margin-top: 1rem;
+  width: 100%;
+}
+
+.practice-actions .secondary-btn {
+  flex: 1;
 }
 
 .all-characters {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.75rem;
+  margin-top: 1rem;
 }
 
 .practice-mini-card {
