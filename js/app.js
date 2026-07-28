@@ -1061,63 +1061,105 @@ function bindEvents() {
   document.getElementById("clearCanvasBtn").addEventListener("click", clearCanvas);
   document.getElementById("toggleAllCharsBtn").addEventListener("click", toggleAllCharacters);
   window.addEventListener("resize", resizeCanvas);
-document.addEventListener("keydown", (event) => {
-  // 1. Ignore shortcuts if typing inside an input field
-  if (["input", "textarea"].includes(document.activeElement?.tagName?.toLowerCase())) {
-    return;
-  }
-
-  // Check if user is currently on the study screen
-  const isStudying = elements.studyScreen?.classList.contains("active");
-
-  // 2. Spacebar -> Flip card
-  if (event.key === " " && isStudying) {
-    event.preventDefault();
-    elements.cardInner.classList.toggle("flipped");
-  }
-
-  // 3. Arrow Keys -> Prev / Next card navigation
-  if (event.key === "ArrowLeft" && isStudying && state.studyIndex > 0) {
-    state.studyIndex -= 1;
-    renderStudy();
-  }
-  if (event.key === "ArrowRight" && isStudying && state.studyIndex < state.currentDeck.length - 1) {
-    state.studyIndex += 1;
-    renderStudy();
-  }
-
-  // 4. Rating Shortcuts: Key '1' = Review again, Key '2' = Mastered
-  if (["1", "2"].includes(event.key) && isStudying) {
-    const ratingMap = {
-      "1": 1, // Review again
-      "2": 3  // Mastered
-    };
-    applyRating(ratingMap[event.key]);
-  }
-
-  // 5. Key '3' -> Toggle Star on Current Flashcard ⭐
-  if (event.key === "3" && isStudying) {
-    const word = currentWord();
-    if (word) {
-      word.starred = !word.starred;
-      persistProgress();
+  document.addEventListener("keydown", (event) => {
+    // 1. Ignore shortcuts if typing inside an input field
+    if (["input", "textarea"].includes(document.activeElement?.tagName?.toLowerCase())) {
+      return;
+    }
+  
+    // Check which view/modal is currently open
+    const drawModal = document.getElementById("drawModal");
+    const isDrawOpen = drawModal && !drawModal.classList.contains("hidden");
+    const isStudying = elements.studyScreen?.classList.contains("active");
+  
+    // ==========================================
+    // A. SHORTCUTS FOR DRAW / PRACTICE MODAL 🎨
+    // ==========================================
+    if (isDrawOpen) {
+      const key = event.key.toLowerCase();
+  
+      // 'C' or 'Z' -> Clear the Canvas / Practice Pad
+      if (key === "c" || key === "z") {
+        event.preventDefault();
+        document.getElementById("clearCanvasBtn")?.click();
+      }
+  
+      // Left / Right Arrows -> Switch Character inside Practice View
+      if (event.key === "ArrowLeft" && state.studyIndex > 0) {
+        event.preventDefault();
+        state.studyIndex -= 1;
+        renderStudy();
+        if (typeof openPracticeModal === "function") openPracticeModal();
+      }
+      if (event.key === "ArrowRight" && state.studyIndex < state.currentDeck.length - 1) {
+        event.preventDefault();
+        state.studyIndex += 1;
+        renderStudy();
+        if (typeof openPracticeModal === "function") openPracticeModal();
+      }
+  
+      // Escape -> Close the Drawing Modal
+      if (event.key === "Escape") {
+        closeAllModals();
+      }
+  
+      return; // Stop here so flashcard shortcuts don't fire while drawing
+    }
+  
+    // ==========================================
+    // B. SHORTCUTS FOR FLASHCARD STUDY SCREEN 🃏
+    // ==========================================
+  
+    // Spacebar -> Flip card
+    if (event.key === " " && isStudying) {
+      event.preventDefault();
+      elements.cardInner.classList.toggle("flipped");
+    }
+  
+    // Arrow Keys -> Prev / Next card navigation
+    if (event.key === "ArrowLeft" && isStudying && state.studyIndex > 0) {
+      state.studyIndex -= 1;
       renderStudy();
     }
-  }
-
-  // 6. Key 'Z' or 'z' -> Undo / Reset card
-  if (event.key.toLowerCase() === "z" && isStudying) {
-    undoLastRating();
-  }
-
-  // 7. Global shortcuts (Settings & Modals)
-  if (event.key.toLowerCase() === "s") {
-    openModal("settingsModal");
-  }
-  if (event.key === "Escape") {
-    closeAllModals();
-  }
-});
+    if (event.key === "ArrowRight" && isStudying && state.studyIndex < state.currentDeck.length - 1) {
+      state.studyIndex += 1;
+      renderStudy();
+    }
+  
+    // Rating Shortcuts: Key '1' = Review again, Key '2' = Mastered
+    if (["1", "2"].includes(event.key) && isStudying) {
+      const ratingMap = {
+        "1": 1, // Review again
+        "2": 3  // Mastered
+      };
+      applyRating(ratingMap[event.key]);
+    }
+  
+    // Key '3' -> Toggle Star on Current Flashcard ⭐
+    if (event.key === "3" && isStudying) {
+      const word = currentWord();
+      if (word) {
+        word.starred = !word.starred;
+        persistProgress();
+        renderStudy();
+      }
+    }
+  
+    // Key 'Z' or 'z' -> Undo rating
+    if (event.key.toLowerCase() === "z" && isStudying) {
+      undoLastRating();
+    }
+  
+    // ==========================================
+    // C. GLOBAL SHORTCUTS ⚙️
+    // ==========================================
+    if (event.key.toLowerCase() === "s") {
+      openModal("settingsModal");
+    }
+    if (event.key === "Escape") {
+      closeAllModals();
+    }
+  });
   // Toggle Review Dropdown Menu
   const dropdownBtn = document.getElementById("reviewDropdownBtn");
   const dropdownMenu = document.getElementById("reviewDropdownMenu");
