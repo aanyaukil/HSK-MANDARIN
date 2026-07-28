@@ -273,20 +273,11 @@ function updateStudyDeck() {
   if (state.studyIndex >= state.currentDeck.length) {
     state.studyIndex = Math.max(0, state.currentDeck.length - 1);
   }
+  // Inside updateStudyDeck():
+  } else if (state.activeFilter === "starred") {
+    deck = deck.filter((word) => word.starred);
+  }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 function startSet(setId) {
   state.activeSetId = setId;
@@ -975,6 +966,15 @@ function bindEvents() {
 
   document.querySelectorAll("[data-close-modal]").forEach((button) => {
     button.addEventListener("click", () => closeModal(button.dataset.closeModal));
+  });
+  document.getElementById("starBtn")?.addEventListener("click", (event) => {
+    event.stopPropagation();
+    const word = currentWord();
+    if (!word) return;
+  
+    word.starred = !word.starred; // Toggle boolean
+    persistProgress();
+    renderStudy();
   });
 
   document.getElementById("reviewAgainBtn").addEventListener("click", () => {
