@@ -698,54 +698,132 @@ textarea {
   right: 12px;        /* ADD */
 }
 
-.settings-grid,
+/* --- GRID BASE --- */
 .stats-grid,
 .info-grid {
   display: grid;
   gap: 1rem;
 }
 
+/* --- REDESIGNED SETTINGS GRID --- */
 .settings-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
 }
 
-.setting-block {
-  padding: 1rem;
+.settings-box {
+  padding: 1.25rem;
   border-radius: 1.25rem;
   border: 1px solid var(--border);
   background: rgba(255, 255, 255, 0.03);
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
 }
 
-.setting-block.emphasis {
-  background: rgba(96, 165, 250, 0.08);
+.settings-box h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--fg);
 }
 
-.setting-row {
-  align-items: center;
-  margin-top: 0.85rem;
+.setting-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
 }
 
-.setting-row input[type="range"],
-.setting-row select {
-  width: 48%;
-}
-
-.toggle-row input {
-  width: auto;
-}
-
-.shortcut-list {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.75rem;
+.setting-item label {
+  font-size: 0.85rem;
   color: var(--muted);
+  font-weight: 500;
+}
+
+.setting-item.checkbox-item {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.setting-item.checkbox-item input[type="checkbox"] {
+  width: auto;
+  cursor: pointer;
+}
+
+/* Styled Select & Slider Controls */
+.settings-select {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  background: var(--bg);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  outline: none;
+}
+
+.settings-slider {
+  width: 100%;
+  accent-color: var(--accent, #60a5fa);
+  cursor: pointer;
+}
+
+.settings-note {
+  font-size: 0.8rem;
+  color: var(--muted);
+  line-height: 1.4;
+  margin: 0;
+}
+
+.settings-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 1.25rem 0;
+}
+
+/* --- SHORTCUTS SECTION --- */
+.shortcuts-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.shortcuts-group h3 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 0.6rem;
+  color: var(--fg);
+}
+
+.shortcuts-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.shortcut-pill {
+  padding: 0.4rem 0.65rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--fg);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
 kbd {
-  padding: 0.2rem 0.45rem;
-  border-radius: 0.45rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.35rem;
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.1);
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 700;
 }
 
 .stats-grid {
