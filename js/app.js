@@ -806,10 +806,15 @@ function setupCanvas() {
   }
 
   function start(event) {
-    drawing = true;
-    const point = position(event);
-    ctx.beginPath();
-    ctx.moveTo(point.x, point.y);
+  drawing = true;
+  
+  // HIDE HINT TEXT WHEN DRAWING STARTS
+  const hint = document.querySelector(".canvas-hint");
+  if (hint) hint.style.display = "none";
+
+  const point = position(event);
+  ctx.beginPath();
+  ctx.moveTo(point.x, point.y);
   }
 
   function move(event) {
@@ -846,6 +851,10 @@ function setupCanvas() {
 function clearCanvas() {
   const ctx = elements.canvas.getContext("2d");
   ctx.clearRect(0, 0, elements.canvas.width, elements.canvas.height);
+
+  // SHOW HINT TEXT AGAIN
+  const hint = document.querySelector(".canvas-hint");
+  if (hint) hint.style.display = "block";
 }
 
 function undoLastRating() {
