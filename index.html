@@ -79,9 +79,22 @@
         <div class="toolbar card-panel">
           <div class="segmented">
             <button class="segmented-btn active" data-filter="all">All words</button>
-            <button class="segmented-btn" data-filter="review">Needs review</button>
             <button class="segmented-btn" data-filter="due">Due now</button>
+        
+            <div class="dropdown-wrapper">
+              <button id="reviewDropdownBtn" class="segmented-btn dropdown-btn">
+                <span id="dropdownLabel">Review</span>
+                <span class="dropdown-arrow">▾</span>
+              </button>
+        
+              <div id="reviewDropdownMenu" class="dropdown-menu hidden">
+                <button class="dropdown-item" data-filter="review">Needs review</button>
+                <button class="dropdown-item" data-filter="mastered">Mastered</button>
+                <button class="dropdown-item" data-filter="normal">New words</button>
+              </div>
+            </div>
           </div>
+        
           <div class="segmented">
             <button class="segmented-btn active" data-front="hanzi">Mandarin</button>
             <button class="segmented-btn" data-front="pinyin">Pinyin</button>
