@@ -1056,7 +1056,8 @@ canvas {
   }
 }
 
-/* --- STAR BUTTON STYLES --- */
+
+/* Star Button on the Flashcard */
 .star-btn {
   font-size: 1.4rem;
   color: var(--muted);
@@ -1072,4 +1073,23 @@ canvas {
 
 .star-btn:hover {
   transform: scale(1.15);
+}
+
+/* Star Button inside the Word List Rows */
+.list-star-btn {
+  background: transparent;
+  border: none;
+  font-size: 1.25rem;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0 0.25rem;
+  transition: color 0.15s ease, transform 0.15s ease;
+}
+
+.list-star-btn.active {
+  color: #fbbf24; /* Golden yellow */
+}
+
+.list-star-btn:hover {
+  transform: scale(1.2);
 }
