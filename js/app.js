@@ -371,30 +371,38 @@ function renderStudy() {
   updateFrontModeButtons();
   renderWordList();
 }
-
 function renderWordList() {
   const container = document.getElementById("sessionWordList");
   if (!container) return;
 
   container.innerHTML = "";
 
+  // If no words match the current filter
+  if (!state.currentDeck || state.currentDeck.length === 0) {
+    container.innerHTML = `<div class="p-4 text-center text-muted">No words in this list</div>`;
+    return;
+  }
+
   state.currentDeck.forEach((word, index) => {
     const isCurrent = index === state.studyIndex;
     const row = document.createElement("div");
     row.className = `word-row ${isCurrent ? "active" : ""}`;
 
+    // Safe status label fallback
+    const statusText = typeof getStatusLabel === "function" ? getStatusLabel(word.status) : (word.status || "New");
+
     row.innerHTML = `
       <div class="word-row-top">
         <div class="flex items-center gap-2">
-          <button class="list-star-btn ${word.starred ? "active" : ""}" data-word-id="${word.id}">
+          <button class="list-star-btn ${word.starred ? "active" : ""}" data-word-id="${word.id}" type="button">
             ${word.starred ? "★" : "☆"}
           </button>
-          <span class="word-hanzi">${word.hanzi}</span>
+          <span class="word-hanzi">${word.hanzi || ""}</span>
         </div>
-        <span class="badge ${word.status}">${getStatusLabel(word.status)}</span>
+        <span class="badge ${word.status || "normal"}">${statusText}</span>
       </div>
       <div class="word-meta">
-        <span>${word.pinyin}</span> • <span>${word.english}</span>
+        <span>${word.pinyin || ""}</span> • <span>${word.english || ""}</span>
       </div>
     `;
 
