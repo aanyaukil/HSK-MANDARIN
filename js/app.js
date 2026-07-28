@@ -331,7 +331,7 @@ function renderStudy() {
   // UPDATED: No small Hanzi character underneath in Pinyin/English mode
   const hintMap = {
     hanzi: "Tap to reveal pinyin, translation, and examples",
-    pinyin: "Tap to reveal character and details",
+    pinyin: word.hanzi,
     english: "Tap to reveal character and details"
   };
 
