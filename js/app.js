@@ -246,6 +246,7 @@ function currentWord() {
   return state.currentDeck[state.studyIndex];
 }
 
+
 function updateStudyDeck() {
   const set = getSetById(state.activeSetId);
   if (!set) return;
@@ -253,10 +254,15 @@ function updateStudyDeck() {
   let deck = [...set.words];
   const now = Date.now();
 
+  // FILTER LOGIC
   if (state.activeFilter === "review") {
     deck = deck.filter((word) => word.status === "review");
   } else if (state.activeFilter === "due") {
     deck = deck.filter((word) => word.nextReview <= now || word.status === "review");
+  } else if (state.activeFilter === "mastered") {
+    deck = deck.filter((word) => word.status === "mastered");
+  } else if (state.activeFilter === "normal") {
+    deck = deck.filter((word) => word.status === "normal");
   }
 
   if (state.isShuffled) {
@@ -268,6 +274,19 @@ function updateStudyDeck() {
     state.studyIndex = Math.max(0, state.currentDeck.length - 1);
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 function startSet(setId) {
   state.activeSetId = setId;
