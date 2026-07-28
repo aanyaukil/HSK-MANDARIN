@@ -893,16 +893,32 @@ kbd {
 
 .all-characters {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 0.75rem;
-  margin-top: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Larger min-width */
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+  width: 100%;
 }
 
 .practice-mini-card {
-  padding: 1rem;
-  border-radius: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  min-height: 280px; /* Expands height to feel like full boxes */
+  border-radius: 1.25rem;
   border: 1px solid var(--border);
   background: rgba(255, 255, 255, 0.03);
+  width: 100%;
+}
+
+/* Ensure HanziWriter elements inside mini cards scale up */
+.practice-mini-card div {
+  width: 100% !important;
+  height: 220px !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 canvas {
