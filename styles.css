@@ -1055,3 +1055,21 @@ canvas {
     grid-template-columns: 1fr;
   }
 }
+
+/* --- STAR BUTTON STYLES --- */
+.star-btn {
+  font-size: 1.4rem;
+  color: var(--muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.star-btn.active {
+  color: #fbbf24; /* Golden yellow */
+}
+
+.star-btn:hover {
+  transform: scale(1.15);
+}
