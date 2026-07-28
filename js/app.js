@@ -263,6 +263,8 @@ function updateStudyDeck() {
     deck = deck.filter((word) => word.status === "mastered");
   } else if (state.activeFilter === "normal") {
     deck = deck.filter((word) => word.status === "normal");
+  } else if (state.activeFilter === "starred") {
+    deck = deck.filter((word) => word.starred);
   }
 
   if (state.isShuffled) {
@@ -272,10 +274,6 @@ function updateStudyDeck() {
   state.currentDeck = deck;
   if (state.studyIndex >= state.currentDeck.length) {
     state.studyIndex = Math.max(0, state.currentDeck.length - 1);
-  }
-  // Inside updateStudyDeck():
-  } else if (state.activeFilter === "starred") {
-    deck = deck.filter((word) => word.starred);
   }
 }
 
