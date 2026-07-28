@@ -357,6 +357,8 @@ textarea {
   display: grid;
   gap: 1rem;
   grid-template-columns: 1fr;
+  position: relative; /* Keeps the toolbar above lower elements */
+  z-index: 20;
 }
 
 .segmented {
@@ -384,17 +386,17 @@ textarea {
 
 .dropdown-menu {
   position: absolute;
-  top: calc(100% + 0.4rem);
+  top: calc(100% + 0.5rem);
   left: 0;
   background: var(--panel-strong);
   border: 1px solid var(--border);
-  border-radius: 1rem;
-  box-shadow: var(--shadow);
+  border-radius: 1.25rem;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
   display: flex;
   flex-direction: column;
-  min-width: 150px;
-  padding: 0.35rem;
-  z-index: 50;
+  min-width: 180px; /* Made wider */
+  padding: 0.5rem;
+  z-index: 999; /* Forces dropdown over the flashcard stage */
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
 }
@@ -404,16 +406,17 @@ textarea {
 }
 
 .dropdown-item {
-  padding: 0.6rem 0.85rem;
+  padding: 0.85rem 1.1rem; /* Increased button size */
   background: transparent;
   border: 0;
-  border-radius: 0.6rem;
+  border-radius: 0.85rem;
   color: var(--text);
   text-align: left;
-  font-size: 0.85rem;
+  font-size: 0.95rem; /* Larger font size */
   font-weight: 700;
   cursor: pointer;
   transition: background-color 0.15s ease, color 0.15s ease;
+  width: 100%;
 }
 
 .dropdown-item:hover {
