@@ -1034,6 +1034,48 @@ function bindEvents() {
       closeAllModals();
     }
   });
+  // Toggle Review Dropdown Menu
+  const dropdownBtn = document.getElementById("reviewDropdownBtn");
+  const dropdownMenu = document.getElementById("reviewDropdownMenu");
+  const dropdownLabel = document.getElementById("dropdownLabel");
+
+  dropdownBtn?.addEventListener("click", (event) => {
+    event.stopPropagation();
+    dropdownMenu.classList.toggle("hidden");
+  });
+
+  // Close dropdown when clicking anywhere outside
+  document.addEventListener("click", () => {
+    dropdownMenu?.classList.add("hidden");
+  });
+
+  // Filter Button Click Listener (Handles main buttons + dropdown items)
+  document.querySelectorAll("[data-filter]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const selectedFilter = button.dataset.filter;
+      state.activeFilter = selectedFilter;
+
+      // Update active state on all buttons/items
+      document.querySelectorAll("[data-filter]").forEach((item) => {
+        item.classList.remove("active");
+      });
+      button.classList.add("active");
+
+      // Update dropdown button text & active status if picking from dropdown
+      const isDropdownOption = ["review", "mastered", "normal"].includes(selectedFilter);
+      if (isDropdownOption) {
+        dropdownBtn.classList.add("active");
+        dropdownLabel.textContent = button.textContent; // Changes button label to option name
+      } else {
+        dropdownBtn.classList.remove("active");
+        dropdownLabel.textContent = "Review"; // Resets back to default
+      }
+
+      dropdownMenu?.classList.add("hidden");
+      state.studyIndex = 0;
+      renderStudy();
+    });
+  });
 }
 
 function initialize() {
