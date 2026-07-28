@@ -653,6 +653,17 @@ function renderDrawingCharacter() {
     console.error(error);
   }
 
+  // Hide or Show the "Show all characters" button based on word length
+  const toggleAllCharsBtn = document.getElementById("toggleAllCharsBtn");
+  if (toggleAllCharsBtn) {
+    if (state.drawingWord.length > 1) {
+      toggleAllCharsBtn.style.display = "inline-flex";
+    } else {
+      toggleAllCharsBtn.style.display = "none";
+    }
+  }
+
+  // Render left-side animation controls
   elements.strokeControls.innerHTML = "";
   [
     ["Replay", () => strokeWriter?.animateCharacter()],
