@@ -819,24 +819,32 @@ function clearCanvas() {
 }
 
 function undoLastRating() {
-  if (!state.lastRatedCard) {
-    console.log("Nothing to undo!");
-    return;
+  const word = currentWord();
+
+  // Scenario A: If there's an immediate previous rating action saved, undo it
+  if (state.lastRatedCard) {
+    const { wordId, previousStatus, previousInterval, previousConsecutive, previousIndex } = state.lastRatedCard;
+
+    rawSetsState().forEach((set) => {
+      const card = set.words.find((w) => w.id === wordId);
+      if (card) {
+        card.status = previousStatus;
+        card.interval = previousInterval;
+        card.consecutiveCorrect = previousConsecutive;
+      }
+    });
+
+    state.studyIndex = previousIndex;
+    state.lastRatedCard = null; // Clear after undoing
+  } 
+  // Scenario B: Reset the currently visible card back to brand-new state
+  else if (word) {
+    word.status = "normal";
+    word.interval = 1;
+    word.consecutiveCorrect = 0;
+    word.reviewCount = 0;
+    word.nextReview = Date.now();
   }
-
-  const { wordId, previousStatus, previousInterval, previousConsecutive, previousIndex } = state.lastRatedCard;
-
-  rawSetsState().forEach((set) => {
-    const card = set.words.find((w) => w.id === wordId);
-    if (card) {
-      card.status = previousStatus;
-      card.interval = previousInterval;
-      card.consecutiveCorrect = previousConsecutive;
-    }
-  });
-
-  state.studyIndex = previousIndex;
-  state.lastRatedCard = null;
 
   persistProgress();
   renderLobby();
@@ -896,14 +904,16 @@ function bindEvents() {
     openDraw();
   });
   document.getElementById("undoBtn")?.addEventListener("click", (event) => {
-  event.stopPropagation();
-  undoLastRating();
+    event.stopPropagation();
+    undoLastRating();
   });
+
   document.getElementById("toggleShuffleBtn").addEventListener("click", () => {
     state.isShuffled = !state.isShuffled;
     elements.toggleShuffleBtn.textContent = state.isShuffled ? "Shuffle On" : "Shuffle Off";
     renderStudy();
   });
+
   document.querySelectorAll("[data-filter]").forEach((button) => {
     button.addEventListener("click", () => {
       state.activeFilter = button.dataset.filter;
@@ -913,6 +923,7 @@ function bindEvents() {
       renderStudy();
     });
   });
+
   document.querySelectorAll("[data-front]").forEach((button) => {
     button.addEventListener("click", () => {
       state.frontMode = button.dataset.front;
@@ -920,12 +931,19 @@ function bindEvents() {
       renderStudy();
     });
   });
+
+  // Updated to prevent event bubbling on card flip when rating
   document.querySelectorAll("[data-rating]").forEach((button) => {
-    button.addEventListener("click", () => applyRating(Number(button.dataset.rating)));
+    button.addEventListener("click", (event) => {
+      event.stopPropagation();
+      applyRating(Number(button.dataset.rating));
+    });
   });
+
   document.querySelectorAll("[data-close-modal]").forEach((button) => {
     button.addEventListener("click", () => closeModal(button.dataset.closeModal));
   });
+
   document.getElementById("reviewAgainBtn").addEventListener("click", () => {
     closeModal("completionModal");
     state.activeFilter = "due";
@@ -965,18 +983,18 @@ function bindEvents() {
   document.getElementById("toggleAllCharsBtn").addEventListener("click", toggleAllCharacters);
   window.addEventListener("resize", resizeCanvas);
   document.addEventListener("keydown", (event) => {
-  // Prevent keyboard shortcuts while typing in input fields or textareas
+  // Ignore shortcuts if typing in input fields
     if (["input", "textarea"].includes(document.activeElement?.tagName?.toLowerCase())) {
       return;
     }
   
-    // Spacebar to flip card
+    // Spacebar -> Flip Card
     if (event.key === " ") {
       event.preventDefault();
       elements.cardInner.classList.toggle("flipped");
     }
   
-    // Left/Right arrows for card navigation
+    // Left / Right Arrows -> Navigation
     if (event.key === "ArrowLeft" && state.studyIndex > 0) {
       state.studyIndex -= 1;
       renderStudy();
@@ -986,26 +1004,25 @@ function bindEvents() {
       renderStudy();
     }
   
-    // Rating Shortcuts: Key '1' = Review again (1), Key '2' = Mastered (3)
+    // Key '1' = Review again (quality 1)
+    // Key '2' = Mastered (quality 3)
     if (["1", "2"].includes(event.key) && state.studyScreen.classList.contains("active")) {
       const ratingMap = {
-        "1": 1, // Review again
-        "2": 3  // Mastered (Updated from 5 to 3)
+        "1": 1, 
+        "2": 3
       };
       applyRating(ratingMap[event.key]);
     }
   
-    // KEY 'Z' FOR UNDO:
+    // Key 'Z' or 'z' = Undo / Reset to New
     if (event.key.toLowerCase() === "z" && state.studyScreen.classList.contains("active")) {
       undoLastRating();
     }
   
-    // Open settings with 'S'
     if (event.key.toLowerCase() === "s") {
       openModal("settingsModal");
     }
   
-    // Close modals with 'Escape'
     if (event.key === "Escape") {
       closeAllModals();
     }
