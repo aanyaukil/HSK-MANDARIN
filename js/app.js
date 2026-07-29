@@ -686,28 +686,45 @@ function openInfo() {
 
 function openDraw() {
   const word = currentWord();
-  if (!word) return;
+  if (!word || !word.hanzi) return;
 
-  // Initialize character index if not set
   if (typeof state.practiceCharIndex !== "number") {
     state.practiceCharIndex = 0;
   }
-
 
   const chars = Array.from(word.hanzi);
   const targetChar = chars[state.practiceCharIndex] || chars[0];
 
   openModal("drawModal");
 
-  // Render HanziWriter animation or hint for targetChar...
-  if (window.HanziWriter && document.getElementById("characterTarget")) {
-    document.getElementById("characterTarget").innerHTML = "";
-    window.hanziWriterInstance = HanziWriter.create('characterTarget', targetChar, {
-      width: 150,
-      height: 150,
-      padding: 5,
-      showOutline: true
-    });
+  // Reset drawing canvas
+  resizeCanvas();
+  clearCanvas();
+
+  // Render HanziWriter animation
+  const targetEl = document.getElementById("characterTarget") || elements.charRefDisplay;
+  if (targetEl && window.HanziWriter) {
+    targetEl.innerHTML = "";
+    try {
+      window.hanziWriterInstance = HanziWriter.create(targetEl, targetChar, {
+        width: 160,
+        height: 160,
+        padding: 8,
+        showOutline: true,
+        showStroke: true,
+        strokeColor: "#60a5fa",
+        outlineColor: "rgba(255, 255, 255, 0.2)"
+      });
+      window.hanziWriterInstance.animateCharacter();
+    } catch (err) {
+      console.error("HanziWriter initialization error:", err);
+    }
+  }
+}
+
+function replayCharacterAnimation() {
+  if (window.hanziWriterInstance) {
+    window.hanziWriterInstance.animateCharacter();
   }
 }
 
@@ -873,6 +890,7 @@ function resizeCanvas() {
 function setupCanvas() {
   if (canvasReady) return;
   const canvas = elements.canvas;
+  if (!canvas) return;
   const ctx = canvas.getContext("2d");
 
   function position(event) {
@@ -885,21 +903,21 @@ function setupCanvas() {
   }
 
   function start(event) {
-  drawing = true;
-  
-  // HIDE HINT TEXT WHEN DRAWING STARTS
-  const hint = document.querySelector(".canvas-hint");
-  if (hint) hint.style.display = "none";
+    drawing = true;
+    
+    // Hide hint text when drawing starts
+    const hint = document.querySelector(".canvas-hint");
+    if (hint) hint.style.display = "none";
 
-  const point = position(event);
-  ctx.beginPath();
-  ctx.moveTo(point.x, point.y);
+    const point = position(event);
+    ctx.beginPath();
+    ctx.moveTo(point.x, point.y);
   }
 
   function move(event) {
     if (!drawing) return;
     const point = position(event);
-    ctx.lineWidth = 12;
+    ctx.lineWidth = 10;
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
     ctx.strokeStyle = state.theme === "light" ? "#0f172a" : "#f8fafc";
@@ -907,8 +925,18 @@ function setupCanvas() {
     ctx.stroke();
   }
 
+  function stop() {
+    if (drawing) {
+      drawing = false;
+      saveCanvasState(); // Save snapshot after each stroke for Z (undo)
+    }
+  }
+
   canvas.addEventListener("mousedown", start);
   canvas.addEventListener("mousemove", move);
+  canvas.addEventListener("mouseup", stop);
+  canvas.addEventListener("mouseleave", stop);
+
   canvas.addEventListener("touchstart", (event) => {
     event.preventDefault();
     start(event);
@@ -917,16 +945,10 @@ function setupCanvas() {
     event.preventDefault();
     move(event);
   }, { passive: false });
-  window.addEventListener("mouseup", () => {
-    drawing = false;
-  });
-  window.addEventListener("touchend", () => {
-    drawing = false;
-  });
+  canvas.addEventListener("touchend", stop);
 
   canvasReady = true;
 }
-
 // Global history array for canvas undo
 let strokeHistory = [];
 
@@ -939,30 +961,28 @@ function saveCanvasState() {
 
 // Updated clearCanvas function
 function clearCanvas() {
-  if (!elements.canvas) return;
-  const ctx = elements.canvas.getContext("2d");
-  ctx.clearRect(0, 0, elements.canvas.width, elements.canvas.height);
+  const canvas = elements.canvas;
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Reset stroke history
-  strokeHistory = [];
+  strokeHistory = []; // Reset stroke history
 
-  // SHOW HINT TEXT AGAIN
   const hint = document.querySelector(".canvas-hint");
   if (hint) hint.style.display = "block";
 }
 
 // New undoCanvas function for strokes
 function undoCanvas() {
-  if (!elements.canvas) return;
-  const ctx = elements.canvas.getContext("2d");
+  const canvas = elements.canvas;
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
 
   if (strokeHistory.length > 0) {
-    strokeHistory.pop(); // Remove the latest stroke
+    strokeHistory.pop(); // Remove the most recent stroke
     if (strokeHistory.length > 0) {
-      // Restore previous state
       ctx.putImageData(strokeHistory[strokeHistory.length - 1], 0, 0);
     } else {
-      // If history is now empty, clear completely
       clearCanvas();
     }
   } else {
