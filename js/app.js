@@ -433,10 +433,10 @@ function renderWordList() {
       </div>
     `;
 
-    // Click row -> Navigate to that card
     row.addEventListener("click", (e) => {
       if (e.target.closest(".list-star-btn")) return;
       state.studyIndex = index;
+      state.practiceCharIndex = 0; // 👈 Reset practice character index to 0
       renderStudy();
     });
 
@@ -688,17 +688,27 @@ function openDraw() {
   const word = currentWord();
   if (!word) return;
 
-  state.drawingWord = word.hanzi;
-  state.drawingCharIndex = 0;
-  state.showingAllChars = false;
-  elements.allCharactersDisplay.innerHTML = "";
-  elements.drawTitle.textContent = `Stroke practice • ${word.hanzi}`;
+  // Initialize character index if not set
+  if (typeof state.practiceCharIndex !== "number") {
+    state.practiceCharIndex = 0;
+  }
+
+
+  const chars = Array.from(word.hanzi);
+  const targetChar = chars[state.practiceCharIndex] || chars[0];
+
   openModal("drawModal");
-  setTimeout(() => {
-    resizeCanvas();
-    clearCanvas();
-    renderDrawingCharacter();
-  }, 50);
+
+  // Render HanziWriter animation or hint for targetChar...
+  if (window.HanziWriter && document.getElementById("characterTarget")) {
+    document.getElementById("characterTarget").innerHTML = "";
+    window.hanziWriterInstance = HanziWriter.create('characterTarget', targetChar, {
+      width: 150,
+      height: 150,
+      padding: 5,
+      showOutline: true
+    });
+  }
 }
 
 function renderDrawingCharacter() {
@@ -917,13 +927,47 @@ function setupCanvas() {
   canvasReady = true;
 }
 
+// Global history array for canvas undo
+let strokeHistory = [];
+
+// Call this function whenever a stroke is drawn (e.g., in pointerup/mouseup/touchend)
+function saveCanvasState() {
+  if (!elements.canvas) return;
+  const ctx = elements.canvas.getContext("2d");
+  strokeHistory.push(ctx.getImageData(0, 0, elements.canvas.width, elements.canvas.height));
+}
+
+// Updated clearCanvas function
 function clearCanvas() {
+  if (!elements.canvas) return;
   const ctx = elements.canvas.getContext("2d");
   ctx.clearRect(0, 0, elements.canvas.width, elements.canvas.height);
+
+  // Reset stroke history
+  strokeHistory = [];
 
   // SHOW HINT TEXT AGAIN
   const hint = document.querySelector(".canvas-hint");
   if (hint) hint.style.display = "block";
+}
+
+// New undoCanvas function for strokes
+function undoCanvas() {
+  if (!elements.canvas) return;
+  const ctx = elements.canvas.getContext("2d");
+
+  if (strokeHistory.length > 0) {
+    strokeHistory.pop(); // Remove the latest stroke
+    if (strokeHistory.length > 0) {
+      // Restore previous state
+      ctx.putImageData(strokeHistory[strokeHistory.length - 1], 0, 0);
+    } else {
+      // If history is now empty, clear completely
+      clearCanvas();
+    }
+  } else {
+    clearCanvas();
+  }
 }
 
 function undoLastRating() {
@@ -943,6 +987,32 @@ function undoLastRating() {
   persistProgress();
   renderLobby();
   renderStudy();
+}
+
+// Helper to navigate between characters of multi-char words (e.g., 爱好)
+function navigatePracticeChar(direction) {
+  const word = currentWord();
+  if (!word || !word.hanzi) return;
+
+  const chars = Array.from(word.hanzi); 
+  if (chars.length <= 1) return; // Single character word -> do nothing
+
+  if (typeof state.practiceCharIndex !== "number") {
+    state.practiceCharIndex = 0;
+  }
+
+  const nextIndex = state.practiceCharIndex + direction;
+
+  // Ensure index stays within word bounds
+  if (nextIndex >= 0 && nextIndex < chars.length) {
+    state.practiceCharIndex = nextIndex;
+    clearCanvas(); // Clear drawing canvas for the new character
+    
+    // Refresh practice view for the new character
+    if (typeof openDraw === "function") {
+      openDraw();
+    }
+  }
 }
 
 
@@ -972,12 +1042,15 @@ function bindEvents() {
   document.getElementById("prevBtn")?.addEventListener("click", () => {
     if (state.studyIndex > 0) {
       state.studyIndex -= 1;
+      state.practiceCharIndex = 0; // 👈 Reset practice character index to 0
       renderStudy();
     }
   });
+
   document.getElementById("nextBtn")?.addEventListener("click", () => {
     if (state.studyIndex < state.currentDeck.length - 1) {
       state.studyIndex += 1;
+      state.practiceCharIndex = 0; // 👈 Reset practice character index to 0
       renderStudy();
     }
   });
@@ -1112,47 +1185,67 @@ function bindEvents() {
     if (isDrawOpen) {
       const key = event.key.toLowerCase();
 
-      if (key === "c" || key === "z") {
+      // 1. Clear Canvas (C)
+      if (key === "c") {
         event.preventDefault();
-        document.getElementById("clearCanvasBtn")?.click();
+        clearCanvas();
       }
 
-      if (event.key === "ArrowLeft" && state.studyIndex > 0) {
+      // 2. Undo Last Stroke (Z)
+      if (key === "z") {
         event.preventDefault();
-        state.studyIndex -= 1;
-        renderStudy();
-        if (typeof openPracticeModal === "function") openPracticeModal();
+        undoCanvas();
       }
-      if (event.key === "ArrowRight" && state.studyIndex < state.currentDeck.length - 1) {
+
+      // 3. Replay Animation (R)
+      if (key === "r") {
         event.preventDefault();
-        state.studyIndex += 1;
-        renderStudy();
-        if (typeof openPracticeModal === "function") openPracticeModal();
+        replayCharacterAnimation();
+      }
+
+      // 4. Navigate Multi-character words (← / →) inside popup
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        navigatePracticeChar(-1);
+      }
+      if (event.key === "ArrowRight") {
+        event.preventDefault();
+        navigatePracticeChar(1);
       }
 
       if (event.key === "Escape") closeAllModals();
-      return;
+      return; // Prevents background card switching while drawing modal is open
     }
 
+    // ==========================================
+    // B. MAIN FLASHCARD STUDY SHORTCUTS 🃏
+    // ==========================================
+
+    // Flip Card (Space)
     if (event.key === " " && isStudying) {
       event.preventDefault();
       elements.cardInner.classList.toggle("flipped");
     }
 
+    // Prev / Next Card Navigation (← / →)
     if (event.key === "ArrowLeft" && isStudying && state.studyIndex > 0) {
       state.studyIndex -= 1;
+      state.practiceCharIndex = 0; // Reset practice char index for new card
       renderStudy();
     }
     if (event.key === "ArrowRight" && isStudying && state.studyIndex < state.currentDeck.length - 1) {
       state.studyIndex += 1;
+      state.practiceCharIndex = 0; // Reset practice char index for new card
       renderStudy();
     }
 
+    // Ratings (1 = Review again, 2 = Mastered)
     if (["1", "2"].includes(event.key) && isStudying) {
       const ratingMap = { "1": 1, "2": 3 };
       applyRating(ratingMap[event.key]);
     }
 
+    // Toggle Star (3)
     if (event.key === "3" && isStudying) {
       const word = currentWord();
       if (word) {
@@ -1162,10 +1255,12 @@ function bindEvents() {
       }
     }
 
+    // Undo Rating (Z on study screen)
     if (event.key.toLowerCase() === "z" && isStudying) {
       undoLastRating();
     }
 
+    // Global Modal Shortcuts
     if (event.key.toLowerCase() === "s") openModal("settingsModal");
     if (event.key === "Escape") closeAllModals();
   });
