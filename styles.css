@@ -668,6 +668,7 @@ textarea {
 }
 
 .modal-card {
+  position: relative; /* Ensures the corner 'X' close button stays inside the card */
   width: min(920px, 100%);
   max-height: min(90vh, 1000px);
   overflow: auto;
@@ -1170,4 +1171,48 @@ canvas {
 
 .list-star-btn:hover {
   transform: scale(1.2);
+}
+
+
+/* Corner X Close Button */
+.corner-x-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--muted);
+  cursor: pointer;
+  line-height: 1;
+  transition: color 0.15s ease;
+}
+
+.corner-x-btn:hover {
+  color: var(--fg);
+}
+
+/* Modal Vertical Actions */
+.modal-actions-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.full-width {
+  width: 100%;
+}
+
+/* Reset Set Button in Lobby Card */
+.reset-set-btn {
+  font-size: 0.9rem;
+  padding: 0.25rem 0.4rem;
+  opacity: 0.7;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.reset-set-btn:hover {
+  opacity: 1;
+  transform: rotate(-30deg);
 }
