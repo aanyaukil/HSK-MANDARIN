@@ -688,6 +688,7 @@ function openDraw() {
   const word = currentWord();
   if (!word || !word.hanzi) return;
 
+  // Initialize character index if needed
   if (typeof state.practiceCharIndex !== "number") {
     state.practiceCharIndex = 0;
   }
@@ -701,23 +702,72 @@ function openDraw() {
   resizeCanvas();
   clearCanvas();
 
-  // Render HanziWriter animation
+  // 1. FIX: Render HanziWriter animation BIGGER (280px) & WHITE (#ffffff)
   const targetEl = document.getElementById("characterTarget") || elements.charRefDisplay;
   if (targetEl && window.HanziWriter) {
     targetEl.innerHTML = "";
+
     try {
       window.hanziWriterInstance = HanziWriter.create(targetEl, targetChar, {
-        width: 160,
-        height: 160,
-        padding: 8,
+        width: 280,
+        height: 280,
+        padding: 10,
         showOutline: true,
         showStroke: true,
-        strokeColor: "#60a5fa",
+        strokeColor: "#ffffff", // White character stroke
         outlineColor: "rgba(255, 255, 255, 0.2)"
       });
       window.hanziWriterInstance.animateCharacter();
     } catch (err) {
       console.error("HanziWriter initialization error:", err);
+    }
+  }
+
+  // 2. FIX: Dynamically render controls below the animation
+  renderPracticeControls(chars);
+}
+
+// Helper to render Replay, Prev Char, and Next Char buttons dynamically
+function renderPracticeControls(chars) {
+  const controlsEl = document.getElementById("strokeControls");
+  if (!controlsEl) return;
+
+  controlsEl.innerHTML = "";
+
+  // Replay Button
+  const replayBtn = document.createElement("button");
+  replayBtn.className = "secondary-btn";
+  replayBtn.textContent = "Replay Animation";
+  replayBtn.addEventListener("click", replayCharacterAnimation);
+  controlsEl.appendChild(replayBtn);
+
+  // Prev / Next Character buttons (Only show if multi-character word)
+  if (chars.length > 1) {
+    const prevBtn = document.createElement("button");
+    prevBtn.className = "secondary-btn";
+    prevBtn.textContent = "← Prev Char";
+    prevBtn.addEventListener("click", () => navigatePracticeChar(-1));
+
+    const nextBtn = document.createElement("button");
+    nextBtn.className = "secondary-btn";
+    nextBtn.textContent = "Next Char →";
+    nextBtn.addEventListener("click", () => navigatePracticeChar(1));
+
+    controlsEl.appendChild(prevBtn);
+    controlsEl.appendChild(nextBtn);
+  }
+
+  // Show / Hide "Show all characters" button based on word length
+  const toggleAllCharsBtn = document.getElementById("toggleAllCharsBtn");
+  if (toggleAllCharsBtn) {
+    if (chars.length > 1) {
+      toggleAllCharsBtn.style.display = "inline-flex";
+      toggleAllCharsBtn.textContent = state.showingAllChars ? "Hide all characters" : "Show all characters";
+    } else {
+      toggleAllCharsBtn.style.display = "none";
+      state.showingAllChars = false;
+      const container = document.getElementById("allCharactersDisplay");
+      if (container) container.innerHTML = "";
     }
   }
 }
@@ -728,90 +778,48 @@ function replayCharacterAnimation() {
   }
 }
 
-function renderDrawingCharacter() {
-  elements.charRefDisplay.innerHTML = "";
-  const target = document.createElement("div");
-  target.style.width = "100%";
-  target.style.height = "100%";
-  elements.charRefDisplay.appendChild(target);
-  const char = state.drawingWord[state.drawingCharIndex];
-
-  try {
-    strokeWriter = HanziWriter.create(target, char, {
-      width: Math.max(280, elements.charRefDisplay.clientWidth),
-      height: 320,
-      padding: 10,
-      showOutline: true,
-      showStroke: true
-    });
-    strokeWriter.animateCharacter();
-  } catch (error) {
-    console.error(error);
-  }
-
-  // Hide or Show the "Show all characters" button based on word length
-  const toggleAllCharsBtn = document.getElementById("toggleAllCharsBtn");
-  if (toggleAllCharsBtn) {
-    if (state.drawingWord.length > 1) {
-      toggleAllCharsBtn.style.display = "inline-flex";
-    } else {
-      toggleAllCharsBtn.style.display = "none";
-    }
-  }
-
-  // Render left-side animation controls
-  elements.strokeControls.innerHTML = "";
-  [
-    ["Replay", () => strokeWriter?.animateCharacter()],
-    ["Reset", () => strokeWriter?.reset()],
-    ...(state.drawingWord.length > 1 ? [
-      ["Prev char", () => {
-        state.drawingCharIndex = (state.drawingCharIndex - 1 + state.drawingWord.length) % state.drawingWord.length;
-        renderDrawingCharacter();
-      }],
-      ["Next char", () => {
-        state.drawingCharIndex = (state.drawingCharIndex + 1) % state.drawingWord.length;
-        renderDrawingCharacter();
-      }]
-    ] : [])
-  ].forEach(([label, handler]) => {
-    const button = document.createElement("button");
-    button.className = "secondary-btn";
-    button.textContent = label;
-    button.addEventListener("click", handler);
-    elements.strokeControls.appendChild(button);
-  });
-}
-
 function toggleAllCharacters() {
-  if (state.drawingWord.length <= 1) return;
-  state.showingAllChars = !state.showingAllChars;
-  document.getElementById("toggleAllCharsBtn").textContent = state.showingAllChars ? "Hide all characters" : "Show all characters";
+  const word = currentWord();
+  if (!word || !word.hanzi) return;
 
-  if (!state.showingAllChars) {
-    elements.allCharactersDisplay.innerHTML = "";
-    return;
+  const chars = Array.from(word.hanzi);
+  if (chars.length <= 1) return;
+
+  state.showingAllChars = !state.showingAllChars;
+
+  const toggleBtn = document.getElementById("toggleAllCharsBtn");
+  if (toggleBtn) {
+    toggleBtn.textContent = state.showingAllChars ? "Hide all characters" : "Show all characters";
   }
 
-  elements.allCharactersDisplay.innerHTML = "";
-  [...state.drawingWord].forEach((char, index) => {
-    const card = document.createElement("div");
-    card.className = "practice-mini-card";
-    card.innerHTML = `<p class="eyebrow">Character ${index + 1}</p><div class="practice-writer"></div>`;
-    elements.allCharactersDisplay.appendChild(card);
-    const target = card.querySelector(".practice-writer");
-    try {
-      HanziWriter.create(target, char, {
-        width: 220,
-        height: 220,
-        padding: 8,
-        showOutline: true,
-        showStroke: true
-      }).animateCharacter();
-    } catch (error) {
-      console.error(error);
-    }
-  });
+  const container = document.getElementById("allCharactersDisplay");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  if (state.showingAllChars) {
+    chars.forEach((char, index) => {
+      const card = document.createElement("div");
+      card.className = "practice-mini-card";
+      card.innerHTML = `<p class="eyebrow">Character ${index + 1}: ${char}</p><div class="mini-writer"></div>`;
+      container.appendChild(card);
+
+      const target = card.querySelector(".mini-writer");
+      try {
+        HanziWriter.create(target, char, {
+          width: 140,
+          height: 140,
+          padding: 8,
+          showOutline: true,
+          showStroke: true,
+          strokeColor: "#ffffff",
+          outlineColor: "rgba(255, 255, 255, 0.2)"
+        }).animateCharacter();
+      } catch (error) {
+        console.error(error);
+      }
+    });
+  }
 }
 
 function speakCurrent(text = currentWord()?.hanzi) {
