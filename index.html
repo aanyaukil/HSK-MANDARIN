@@ -344,13 +344,16 @@
 </div>
 
   <div id="completionModal" class="modal hidden">
-    <div class="modal-card completion-card">
-      <div class="completion-mark">✓</div>
-      <h2>Set complete</h2>
-      <p id="completionCopy">You finished this session.</p>
-      <div class="stats-actions">
-        <button class="primary-btn" id="reviewAgainBtn">Study due cards</button>
-        <button class="secondary-btn" data-close-modal="completionModal">Close</button>
+    <div class="modal-card compact text-center">
+      <button class="close-btn corner-x-btn" data-close-modal="completionModal">&times;</button>
+  
+      <div class="completion-icon">🎉</div>
+      <h2>Set Completed!</h2>
+      <p id="completionCopy" class="modal-subtext">You have finished reviewing all words in this set.</p>
+  
+      <div class="modal-actions-column">
+        <button id="nextSetBtn" class="primary-btn full-width">Next Set →</button>
+        <button class="secondary-btn full-width" data-close-modal="completionModal">Back to Lobby</button>
       </div>
     </div>
   </div>
