@@ -1216,3 +1216,79 @@ canvas {
   opacity: 1;
   transform: rotate(-30deg);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Control Buttons (Replay, Prev Char, Next Char) */
+#strokeControls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  align-items: center;
+  margin-top: 0.75rem;
+  width: 100%;
+}
+
+#strokeControls .secondary-btn {
+  padding: 0.5rem 0.85rem;
+  font-size: 0.85rem;
+}
+
+/* Character Animation Target Container */
+#characterTarget,
+#strokeTarget,
+.practice-writer {
+  width: 100%;
+  max-width: 280px;
+  height: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+/* Ensure HanziWriter SVG renders centered and responsive */
+#characterTarget svg,
+#strokeTarget svg,
+.mini-writer svg {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* "Show All Characters" Grid Container */
+#allCharactersDisplay {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1.25rem;
+  width: 100%;
+}
+
+.mini-writer {
+  width: 140px;
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
