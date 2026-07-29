@@ -199,7 +199,7 @@ function renderLobby() {
         </div>
         <div class="flex items-center gap-2">
           <span class="pill">${unlocked ? "Unlocked" : "Locked"}</span>
-          ${unlocked ? `<button class="icon-btn reset-set-btn" title="Reset Set Progress">🔄</button>` : ""}
+          ${unlocked ? `<button class="icon-btn reset-set-btn" title="Reset Set Progress">Reset</button>` : ""}
         </div>
       </div>
       <p class="set-note">${set.description}</p>
