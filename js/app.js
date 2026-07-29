@@ -178,7 +178,7 @@ function renderLobby() {
     const completion = set.words.length ? Math.round((progress / set.words.length) * 100) : 0;
     const unlocked = isSetUnlocked(set.id);
 
-// Check if the user has started studying this set
+    // Check if the user has started studying this set
     const hasStarted = set.words.some((word) => word.status !== "normal" || (word.reviewCount && word.reviewCount > 0));
 
     // Determine button text dynamically
@@ -197,7 +197,10 @@ function renderLobby() {
           <p class="eyebrow">${set.level}</p>
           <h3 class="set-title">${set.title}</h3>
         </div>
-        <span class="pill">${unlocked ? "Unlocked" : "Locked"}</span>
+        <div class="flex items-center gap-2">
+          <span class="pill">${unlocked ? "Unlocked" : "Locked"}</span>
+          ${unlocked ? `<button class="icon-btn reset-set-btn" title="Reset Set Progress">🔄</button>` : ""}
+        </div>
       </div>
       <p class="set-note">${set.description}</p>
       <div class="set-card-bottom">
@@ -207,10 +210,31 @@ function renderLobby() {
       <div class="progress-rail">
         <div class="progress-fill" style="width:${completion}%"></div>
       </div>
-      <button class="${unlocked ? "primary-btn" : "secondary-btn"}">${unlocked ? "Start set" : "Finish HSK 1 first"}</button>
+      <button class="${unlocked ? "primary-btn" : "secondary-btn"}">${buttonText}</button>
     `;
 
-    card.querySelector("button").addEventListener("click", () => {
+    // Reset Progress Event Handler
+    const resetBtn = card.querySelector(".reset-set-btn");
+    resetBtn?.addEventListener("click", (event) => {
+      event.stopPropagation(); // Prevents launching the set when clicking reset
+      
+      const confirmReset = window.confirm(`Are you sure you want to reset all progress for "${set.title}"?`);
+      if (confirmReset) {
+        set.words.forEach((word) => {
+          word.status = "normal";
+          word.interval = 1;
+          word.consecutiveCorrect = 0;
+          word.nextReview = 0;
+          word.starred = false;
+        });
+
+        persistProgress();
+        renderLobby();
+      }
+    });
+
+    // Main Set Action Event Handler
+    card.querySelector(".primary-btn, .secondary-btn")?.addEventListener("click", () => {
       if (!unlocked) {
         openModal("statsModal");
         renderStats();
@@ -923,53 +947,56 @@ function undoLastRating() {
 
 
 function bindEvents() {
-  document.getElementById("goHomeBtn").addEventListener("click", showLobby);
-  document.getElementById("openSettingsBtn").addEventListener("click", () => openModal("settingsModal"));
-  document.getElementById("floatingSettingsBtn").addEventListener("click", () => openModal("settingsModal"));
-  document.getElementById("openStatsBtn").addEventListener("click", () => {
+  // --- Navigation & Headers ---
+  document.getElementById("goHomeBtn")?.addEventListener("click", showLobby);
+  document.getElementById("openSettingsBtn")?.addEventListener("click", () => openModal("settingsModal"));
+  document.getElementById("floatingSettingsBtn")?.addEventListener("click", () => openModal("settingsModal"));
+  document.getElementById("openStatsBtn")?.addEventListener("click", () => {
     renderStats();
     openModal("statsModal");
   });
-  document.getElementById("studyStatsBtn").addEventListener("click", () => {
+  document.getElementById("studyStatsBtn")?.addEventListener("click", () => {
     renderStats();
     openModal("statsModal");
   });
-  document.getElementById("openStreakBtn").addEventListener("click", () => {
+  document.getElementById("openStreakBtn")?.addEventListener("click", () => {
     renderStreak();
     openModal("streakModal");
   });
-  document.getElementById("openStreakBtnLobby").addEventListener("click", () => {
+  document.getElementById("openStreakBtnLobby")?.addEventListener("click", () => {
     renderStreak();
     openModal("streakModal");
   }); 
-  document.getElementById("prevBtn").addEventListener("click", () => {
+
+  // --- Flashcard Controls ---
+  document.getElementById("prevBtn")?.addEventListener("click", () => {
     if (state.studyIndex > 0) {
       state.studyIndex -= 1;
       renderStudy();
     }
   });
-  document.getElementById("nextBtn").addEventListener("click", () => {
+  document.getElementById("nextBtn")?.addEventListener("click", () => {
     if (state.studyIndex < state.currentDeck.length - 1) {
       state.studyIndex += 1;
       renderStudy();
     }
   });
-  document.getElementById("flipFrontBtn").addEventListener("click", (event) => {
+  document.getElementById("flipFrontBtn")?.addEventListener("click", (event) => {
     event.stopPropagation();
     elements.cardInner.classList.add("flipped");
   });
-  document.getElementById("flashcard").addEventListener("click", () => {
+  document.getElementById("flashcard")?.addEventListener("click", () => {
     elements.cardInner.classList.toggle("flipped");
   });
-  document.getElementById("speakBtn").addEventListener("click", (event) => {
+  document.getElementById("speakBtn")?.addEventListener("click", (event) => {
     event.stopPropagation();
     speakCurrent();
   });
-  document.getElementById("infoBtn").addEventListener("click", (event) => {
+  document.getElementById("infoBtn")?.addEventListener("click", (event) => {
     event.stopPropagation();
     openInfo();
   });
-  document.getElementById("practiceBtn").addEventListener("click", (event) => {
+  document.getElementById("practiceBtn")?.addEventListener("click", (event) => {
     event.stopPropagation();
     openDraw();
   });
@@ -978,20 +1005,20 @@ function bindEvents() {
     undoLastRating();
   });
 
-  document.getElementById("toggleShuffleBtn").addEventListener("click", () => {
+  document.getElementById("toggleShuffleBtn")?.addEventListener("click", () => {
     state.isShuffled = !state.isShuffled;
     elements.toggleShuffleBtn.textContent = state.isShuffled ? "Shuffle On" : "Shuffle Off";
     renderStudy();
   });
 
-  document.querySelectorAll("[data-filter]").forEach((button) => {
-    button.addEventListener("click", () => {
-      state.activeFilter = button.dataset.filter;
-      document.querySelectorAll("[data-filter]").forEach((item) => item.classList.remove("active"));
-      button.classList.add("active");
-      state.studyIndex = 0;
-      renderStudy();
-    });
+  document.getElementById("starBtn")?.addEventListener("click", (event) => {
+    event.stopPropagation();
+    const word = currentWord();
+    if (!word) return;
+    
+    word.starred = !word.starred;
+    persistProgress();
+    renderStudy();
   });
 
   document.querySelectorAll("[data-front]").forEach((button) => {
@@ -1002,7 +1029,6 @@ function bindEvents() {
     });
   });
 
-  // Updated to prevent event bubbling on card flip when rating
   document.querySelectorAll("[data-rating]").forEach((button) => {
     button.addEventListener("click", (event) => {
       event.stopPropagation();
@@ -1010,81 +1036,87 @@ function bindEvents() {
     });
   });
 
+  // --- Modals & Close Handlers ---
   document.querySelectorAll("[data-close-modal]").forEach((button) => {
     button.addEventListener("click", () => closeModal(button.dataset.closeModal));
   });
-  document.getElementById("starBtn")?.addEventListener("click", (event) => {
-    event.stopPropagation();
-    const word = currentWord();
-    if (!word) return;
-  
-    word.starred = !word.starred; // Toggle boolean
-    persistProgress();
-    renderStudy();
+
+  // 👇 NEXT SET BUTTON (PLACED HERE)
+  document.getElementById("nextSetBtn")?.addEventListener("click", () => {
+    closeAllModals();
+
+    const sets = rawSetsState();
+    const currentIndex = sets.findIndex((s) => s.id === state.activeSetId);
+
+    // Find the next unlocked set
+    if (currentIndex !== -1 && currentIndex < sets.length - 1) {
+      const nextSet = sets[currentIndex + 1];
+      if (!nextSet.locked) {
+        state.activeSetId = nextSet.id;
+        state.studyIndex = 0;
+        state.activeFilter = "all";
+        renderStudy();
+        return;
+      }
+    }
+
+    // Fallback to lobby if no next set is unlocked
+    document.querySelectorAll(".screen").forEach((s) => s.classList.remove("active"));
+    document.getElementById("lobbyScreen")?.classList.add("active");
+    renderLobby();
   });
 
-  document.getElementById("reviewAgainBtn").addEventListener("click", () => {
-    closeModal("completionModal");
-    state.activeFilter = "due";
-    document.querySelectorAll("[data-filter]").forEach((item) => item.classList.toggle("active", item.dataset.filter === "due"));
-    state.studyIndex = 0;
-    renderStudy();
-  });
-  document.getElementById("exportBtn").addEventListener("click", exportProgress);
-  elements.importFile.addEventListener("change", (event) => {
+  // --- Settings Inputs ---
+  document.getElementById("exportBtn")?.addEventListener("click", exportProgress);
+  elements.importFile?.addEventListener("change", (event) => {
     const file = event.target.files?.[0];
     if (file) importProgress(file);
   });
-  elements.themeSelect.addEventListener("change", () => {
+  elements.themeSelect?.addEventListener("change", () => {
     state.theme = elements.themeSelect.value;
     elements.body.dataset.theme = state.theme;
     saveSettings();
   });
-  elements.fontSizeRange.addEventListener("input", () => {
+  elements.fontSizeRange?.addEventListener("input", () => {
     state.fontSize = Number(elements.fontSizeRange.value);
     document.documentElement.style.fontSize = `${state.fontSize}px`;
     saveSettings();
   });
-  elements.defaultFrontSelect.addEventListener("change", () => {
+  elements.defaultFrontSelect?.addEventListener("change", () => {
     state.frontMode = elements.defaultFrontSelect.value;
     saveSettings();
     renderStudy();
   });
-  elements.speechSpeedRange.addEventListener("input", () => {
+  elements.speechSpeedRange?.addEventListener("input", () => {
     state.speechSpeed = Number(elements.speechSpeedRange.value);
     saveSettings();
   });
-  elements.autoResetFlipToggle.addEventListener("change", () => {
+  elements.autoResetFlipToggle?.addEventListener("change", () => {
     state.autoResetFlip = elements.autoResetFlipToggle.checked;
     saveSettings();
   });
-  document.getElementById("clearCanvasBtn").addEventListener("click", clearCanvas);
-  document.getElementById("toggleAllCharsBtn").addEventListener("click", toggleAllCharacters);
+
+  // --- Canvas Practice ---
+  document.getElementById("clearCanvasBtn")?.addEventListener("click", clearCanvas);
+  document.getElementById("toggleAllCharsBtn")?.addEventListener("click", toggleAllCharacters);
   window.addEventListener("resize", resizeCanvas);
+
+  // --- Keyboard Shortcuts ---
   document.addEventListener("keydown", (event) => {
-    // 1. Ignore shortcuts if typing inside an input field
-    if (["input", "textarea"].includes(document.activeElement?.tagName?.toLowerCase())) {
-      return;
-    }
-  
-    // Check which view/modal is currently open
+    if (["input", "textarea"].includes(document.activeElement?.tagName?.toLowerCase())) return;
+
     const drawModal = document.getElementById("drawModal");
     const isDrawOpen = drawModal && !drawModal.classList.contains("hidden");
     const isStudying = elements.studyScreen?.classList.contains("active");
-  
-    // ==========================================
-    // A. SHORTCUTS FOR DRAW / PRACTICE MODAL 🎨
-    // ==========================================
+
     if (isDrawOpen) {
       const key = event.key.toLowerCase();
-  
-      // 'C' or 'Z' -> Clear the Canvas / Practice Pad
+
       if (key === "c" || key === "z") {
         event.preventDefault();
         document.getElementById("clearCanvasBtn")?.click();
       }
-  
-      // Left / Right Arrows -> Switch Character inside Practice View
+
       if (event.key === "ArrowLeft" && state.studyIndex > 0) {
         event.preventDefault();
         state.studyIndex -= 1;
@@ -1097,26 +1129,16 @@ function bindEvents() {
         renderStudy();
         if (typeof openPracticeModal === "function") openPracticeModal();
       }
-  
-      // Escape -> Close the Drawing Modal
-      if (event.key === "Escape") {
-        closeAllModals();
-      }
-  
-      return; // Stop here so flashcard shortcuts don't fire while drawing
+
+      if (event.key === "Escape") closeAllModals();
+      return;
     }
-  
-    // ==========================================
-    // B. SHORTCUTS FOR FLASHCARD STUDY SCREEN 🃏
-    // ==========================================
-  
-    // Spacebar -> Flip card
+
     if (event.key === " " && isStudying) {
       event.preventDefault();
       elements.cardInner.classList.toggle("flipped");
     }
-  
-    // Arrow Keys -> Prev / Next card navigation
+
     if (event.key === "ArrowLeft" && isStudying && state.studyIndex > 0) {
       state.studyIndex -= 1;
       renderStudy();
@@ -1125,17 +1147,12 @@ function bindEvents() {
       state.studyIndex += 1;
       renderStudy();
     }
-  
-    // Rating Shortcuts: Key '1' = Review again, Key '2' = Mastered
+
     if (["1", "2"].includes(event.key) && isStudying) {
-      const ratingMap = {
-        "1": 1, // Review again
-        "2": 3  // Mastered
-      };
+      const ratingMap = { "1": 1, "2": 3 };
       applyRating(ratingMap[event.key]);
     }
-  
-    // Key '3' -> Toggle Star on Current Flashcard ⭐
+
     if (event.key === "3" && isStudying) {
       const word = currentWord();
       if (word) {
@@ -1144,57 +1161,44 @@ function bindEvents() {
         renderStudy();
       }
     }
-  
-    // Key 'Z' or 'z' -> Undo rating
+
     if (event.key.toLowerCase() === "z" && isStudying) {
       undoLastRating();
     }
-  
-    // ==========================================
-    // C. GLOBAL SHORTCUTS ⚙️
-    // ==========================================
-    if (event.key.toLowerCase() === "s") {
-      openModal("settingsModal");
-    }
-    if (event.key === "Escape") {
-      closeAllModals();
-    }
+
+    if (event.key.toLowerCase() === "s") openModal("settingsModal");
+    if (event.key === "Escape") closeAllModals();
   });
-  // Toggle Review Dropdown Menu
+
+  // --- Dropdowns & Filters ---
   const dropdownBtn = document.getElementById("reviewDropdownBtn");
   const dropdownMenu = document.getElementById("reviewDropdownMenu");
   const dropdownLabel = document.getElementById("dropdownLabel");
 
   dropdownBtn?.addEventListener("click", (event) => {
     event.stopPropagation();
-    dropdownMenu.classList.toggle("hidden");
+    dropdownMenu?.classList.toggle("hidden");
   });
 
-  // Close dropdown when clicking anywhere outside
   document.addEventListener("click", () => {
     dropdownMenu?.classList.add("hidden");
   });
 
-  // Filter Button Click Listener (Handles main buttons + dropdown items)
   document.querySelectorAll("[data-filter]").forEach((button) => {
     button.addEventListener("click", () => {
       const selectedFilter = button.dataset.filter;
       state.activeFilter = selectedFilter;
 
-      // Update active state on all buttons/items
-      document.querySelectorAll("[data-filter]").forEach((item) => {
-        item.classList.remove("active");
-      });
+      document.querySelectorAll("[data-filter]").forEach((item) => item.classList.remove("active"));
       button.classList.add("active");
 
-      // Update dropdown button text & active status if picking from dropdown
       const isDropdownOption = ["review", "mastered", "normal"].includes(selectedFilter);
       if (isDropdownOption) {
-        dropdownBtn.classList.add("active");
-        dropdownLabel.textContent = button.textContent; // Changes button label to option name
+        dropdownBtn?.classList.add("active");
+        if (dropdownLabel) dropdownLabel.textContent = button.textContent;
       } else {
-        dropdownBtn.classList.remove("active");
-        dropdownLabel.textContent = "Review"; // Resets back to default
+        dropdownBtn?.classList.remove("active");
+        if (dropdownLabel) dropdownLabel.textContent = "Review";
       }
 
       dropdownMenu?.classList.add("hidden");
@@ -1203,6 +1207,7 @@ function bindEvents() {
     });
   });
 }
+
 
 function initialize() {
   setRawSetsState(hydrateSets());
