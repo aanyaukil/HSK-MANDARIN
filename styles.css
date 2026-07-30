@@ -1295,19 +1295,22 @@ canvas {
   justify-content: center;
 }
 
-/* --- GOALS RADIAL MODAL STYLES --- */
+/* Vertical Stack & Clean Layout */
 .goals-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
   margin-top: 1rem;
 }
 
 .radial-card {
-  padding: 1.5rem;
-  border-radius: 1.5rem;
+  width: 100%;
+  max-width: 380px; /* Made cards wider to fit bigger dials */
+  padding: 1.75rem;
+  border-radius: 1.75rem;
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.02);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1315,15 +1318,17 @@ canvas {
 }
 
 .radial-card h3 {
-  margin: 0 0 1rem;
-  font-size: 1.1rem;
+  margin: 0 0 1.25rem;
+  font-size: 1.2rem;
+  font-weight: 800;
   color: var(--text);
 }
 
+/* Bigger Dial Wrapper */
 .radial-wrapper {
   position: relative;
-  width: 200px;
-  height: 200px;
+  width: 260px; /* Increased from 200px */
+  height: 260px;
   touch-action: none;
   cursor: pointer;
   user-select: none;
@@ -1332,38 +1337,42 @@ canvas {
 .radial-svg {
   width: 100%;
   height: 100%;
-  transform: rotate(-90deg); /* Start 0 deg at top */
+  /* Removed CSS rotate transform to fix alignment bugs */
 }
 
+/* Hollow Thin Track & Smooth Stroke */
 .radial-track {
   fill: none;
-  stroke: rgba(255, 255, 255, 0.08);
-  stroke-width: 14;
+  stroke: rgba(255, 255, 255, 0.06);
+  stroke-width: 10; /* Thinner stroke = more hollow center */
 }
 
 .radial-progress {
   fill: none;
   stroke: var(--accent);
-  stroke-width: 14;
+  stroke-width: 10;
   stroke-linecap: round;
   stroke-dasharray: 502.65; /* 2 * PI * 80 */
   stroke-dashoffset: 502.65;
-  transition: stroke-dashoffset 0.05s linear;
+  transition: stroke-dashoffset 0.08s cubic-bezier(0, 0, 0.2, 1);
 }
 
+/* Crisp Handle Point */
 .radial-handle {
   fill: #ffffff;
   stroke: var(--accent);
   stroke-width: 4;
   cursor: grab;
-  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4));
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+  transition: r 0.15s ease;
 }
 
 .radial-handle:active {
   cursor: grabbing;
-  transform: scale(1.1);
+  r: 14; /* Slightly expands when dragging */
 }
 
+/* Central Value Typography */
 .radial-display {
   position: absolute;
   inset: 0;
@@ -1375,15 +1384,18 @@ canvas {
 }
 
 .radial-num {
-  font-size: 2.75rem;
+  font-size: 3.25rem;
   font-weight: 900;
   line-height: 1;
   color: var(--text);
+  letter-spacing: -0.03em;
 }
 
 .radial-unit {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   color: var(--muted);
-  margin-top: 0.25rem;
+  margin-top: 0.35rem;
   font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
