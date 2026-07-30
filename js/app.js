@@ -1054,6 +1054,7 @@ function navigatePracticeChar(direction) {
 class ArcSlider {
   constructor(config) {
     this.wrapper = document.getElementById(config.wrapperId);
+    this.ticks = document.getElementById(config.ticksId);
     this.track = document.getElementById(config.trackId);
     this.progress = document.getElementById(config.progressId);
     this.handle = document.getElementById(config.handleId);
@@ -1065,11 +1066,14 @@ class ArcSlider {
     this.step = config.step;
     this.val = config.initialValue;
 
-    // 270-degree arc parameters (Bottom open)
-    this.startAngle = 135; // Bottom-left
+    // 270-degree arc parameters
+    this.startAngle = 135;
     this.totalAngle = 270;
     this.radius = 80;
-    this.arcLength = (this.totalAngle / 360) * (2 * Math.PI * this.radius); // ~376.99px
+    this.arcLength = (this.totalAngle / 360) * (2 * Math.PI * this.radius);
+
+    // Continuous float percent for liquid-smooth visual movement
+    this.smoothPercent = (this.val - this.min) / (this.max - this.min);
 
     this.setupTrackArcs();
     this.initEvents();
@@ -1078,7 +1082,18 @@ class ArcSlider {
 
   setupTrackArcs() {
     const fullCircumference = 2 * Math.PI * this.radius;
-    // Set base stroke dash for 270 deg arc
+    const outerRadius = 92;
+    const outerArcLength = (this.totalAngle / 360) * (2 * Math.PI * outerRadius);
+    const outerCircumference = 2 * Math.PI * outerRadius;
+
+    // Cut-off outer ticks to 270 degrees
+    if (this.ticks) {
+      this.ticks.style.strokeDasharray = `${outerArcLength} ${outerCircumference}`;
+      this.ticks.style.transformOrigin = "center";
+      this.ticks.style.transform = `rotate(${this.startAngle}deg)`;
+    }
+
+    // Cut-off track & progress arc
     this.track.style.strokeDasharray = `${this.arcLength} ${fullCircumference}`;
     this.track.style.transformOrigin = "center";
     this.track.style.transform = `rotate(${this.startAngle}deg)`;
@@ -1086,11 +1101,6 @@ class ArcSlider {
     this.progress.style.strokeDasharray = `${this.arcLength} ${fullCircumference}`;
     this.progress.style.transformOrigin = "center";
     this.progress.style.transform = `rotate(${this.startAngle}deg)`;
-  }
-
-  setValue(newVal) {
-    this.val = Math.max(this.min, Math.min(this.max, newVal));
-    this.updateUI();
   }
 
   getIntensityTag(percent) {
@@ -1105,27 +1115,28 @@ class ArcSlider {
       if (!this.isDragging) return;
       const rect = this.wrapper.getBoundingClientRect();
       const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.width / 2; // Keep center square
+      const centerY = rect.top + rect.width / 2;
       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
       const clientY = e.touches ? e.touches[0].clientY : e.clientY;
 
       let angle = Math.atan2(clientY - centerY, clientX - centerX) * (180 / Math.PI);
       if (angle < 0) angle += 360;
 
-      // Adjust relative angle to startAngle (135 deg)
       let relAngle = angle - this.startAngle;
       if (relAngle < 0) relAngle += 360;
 
-      // Clamp to 0..270 degrees
       if (relAngle > this.totalAngle) {
         relAngle = relAngle - this.totalAngle < 45 ? this.totalAngle : 0;
       }
 
-      const percent = relAngle / this.totalAngle;
-      const rawVal = this.min + percent * (this.max - this.min);
-      const roundedVal = Math.round(rawVal / this.step) * this.step;
+      // Smooth un-rounded percent for visual fluidity
+      this.smoothPercent = Math.max(0, Math.min(1, relAngle / this.totalAngle));
 
-      this.setValue(roundedVal);
+      // Discrete value for integer counting
+      const rawVal = this.min + this.smoothPercent * (this.max - this.min);
+      this.val = Math.round(rawVal / this.step) * this.step;
+
+      this.updateUI();
     };
 
     const onStart = (e) => {
@@ -1133,7 +1144,14 @@ class ArcSlider {
       onMove(e);
     };
 
-    const onEnd = () => { this.isDragging = false; };
+    const onEnd = () => {
+      if (this.isDragging) {
+        this.isDragging = false;
+        // Snap smooth percent to exact integer position when drag releases
+        this.smoothPercent = (this.val - this.min) / (this.max - this.min);
+        this.updateUI();
+      }
+    };
 
     this.wrapper.addEventListener("mousedown", onStart);
     window.addEventListener("mousemove", onMove);
@@ -1145,47 +1163,45 @@ class ArcSlider {
   }
 
   updateUI() {
-    const percent = (this.val - this.min) / (this.max - this.min);
-    
-    // Fill offset along 270 deg arc
-    const offset = this.arcLength - (percent * this.arcLength);
+    // Fill offset along arc using smooth percent
+    const offset = this.arcLength - (this.smoothPercent * this.arcLength);
     this.progress.style.strokeDashoffset = offset;
 
-    // Calculate handle knob X/Y along arc
-    const currentAngleDeg = this.startAngle + (percent * this.totalAngle);
+    // Fluid knob handle placement
+    const currentAngleDeg = this.startAngle + (this.smoothPercent * this.totalAngle);
     const angleRad = currentAngleDeg * (Math.PI / 180);
 
     const cx = 100 + this.radius * Math.cos(angleRad);
     const cy = 100 + this.radius * Math.sin(angleRad);
-    
+
     this.handle.setAttribute("cx", cx);
     this.handle.setAttribute("cy", cy);
 
     if (this.valueDisplay) this.valueDisplay.textContent = this.val;
-    if (this.tagDisplay) this.tagDisplay.textContent = this.getIntensityTag(percent);
+    if (this.tagDisplay) this.tagDisplay.textContent = this.getIntensityTag(this.smoothPercent);
   }
 }
 
 let timeSlider, wordsSlider;
 
 function initGoalSliders() {
-  // Goal 1: 1 to 60 mins (step of 1 minute)
   timeSlider = new ArcSlider({
     wrapperId: "timeRadial",
+    ticksId: "timeTicks",
     trackId: "timeTrack",
     progressId: "timeProgress",
     handleId: "timeHandle",
     valueId: "timeVal",
     tagId: "timeTag",
-    min: 1,    // Starts at 1 min
-    max: 60,   // Max 60 mins
-    step: 1,   // 1-minute increments
+    min: 1,
+    max: 60,
+    step: 1,
     initialValue: Math.min(state.goals.time || 15, 60)
   });
 
-  // Goal 2: 1 to 40 words (step of 1 word)
   wordsSlider = new ArcSlider({
     wrapperId: "wordsRadial",
+    ticksId: "wordsTicks",
     trackId: "wordsTrack",
     progressId: "wordsProgress",
     handleId: "wordsHandle",
