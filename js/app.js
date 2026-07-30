@@ -28,7 +28,7 @@ let state = {
   autoResetFlip: true,
   theme: "aurora",
   fontSize: 16,
-  lastRatedCard: null // <-- ADD THIS LINE
+  lastRatedCard: null, // <-- ADD THIS LINE
   goals: JSON.parse(localStorage.getItem("hsk_goals_v2") || '{"time": 15, "words": 20}') // 👈 ADD THIS LINE
 };
 
