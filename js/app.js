@@ -1082,6 +1082,7 @@ class CircularSlider {
       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
       const clientY = e.touches ? e.touches[0].clientY : e.clientY;
 
+      // Calculate angle from 12 o'clock position
       let angle = Math.atan2(clientY - centerY, clientX - centerX) * (180 / Math.PI) + 90;
       if (angle < 0) angle += 360;
 
@@ -1110,12 +1111,18 @@ class CircularSlider {
 
   updateUI() {
     const percent = (this.val - this.min) / (this.max - this.min);
+    
+    // Stroke offset starts from top (12 o'clock)
     const offset = this.circumference - (percent * this.circumference);
     this.progress.style.strokeDashoffset = offset;
+    this.progress.style.transformOrigin = "center";
+    this.progress.style.transform = "rotate(-90deg)"; // Rotates arc visual to 12 o'clock
 
+    // Convert angle to match 12 o'clock start position cleanly
     const angleRad = (percent * 360 - 90) * (Math.PI / 180);
     const cx = 100 + this.radius * Math.cos(angleRad);
     const cy = 100 + this.radius * Math.sin(angleRad);
+    
     this.handle.setAttribute("cx", cx);
     this.handle.setAttribute("cy", cy);
 
@@ -1126,26 +1133,28 @@ class CircularSlider {
 let timeSlider, wordsSlider;
 
 function initGoalSliders() {
+  // Goal 1: Max 60 mins (1 hour max), step of 5 mins
   timeSlider = new CircularSlider({
     wrapperId: "timeRadial",
     progressId: "timeProgress",
     handleId: "timeHandle",
     valueId: "timeVal",
     min: 5,
-    max: 120,
+    max: 60,  // 👈 Max 1 hour per day
     step: 5,
-    initialValue: state.goals.time || 15
+    initialValue: Math.min(state.goals.time || 15, 60)
   });
 
+  // Goal 2: 1 to 40 words max, step of 1 word
   wordsSlider = new CircularSlider({
     wrapperId: "wordsRadial",
     progressId: "wordsProgress",
     handleId: "wordsHandle",
     valueId: "wordsVal",
-    min: 5,
-    max: 100,
-    step: 5,
-    initialValue: state.goals.words || 20
+    min: 1,   // 👈 Minimum 1 word
+    max: 40,  // 👈 Maximum 40 words
+    step: 1,  // 👈 Step increment of 1 word
+    initialValue: Math.min(state.goals.words || 20, 40)
   });
 }
 
