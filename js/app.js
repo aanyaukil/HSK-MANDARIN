@@ -29,6 +29,7 @@ let state = {
   theme: "aurora",
   fontSize: 16,
   lastRatedCard: null // <-- ADD THIS LINE
+  goals: JSON.parse(localStorage.getItem("hsk_goals_v2") || '{"time": 15, "words": 20}') // 👈 ADD THIS LINE
 };
 
 let strokeWriter = null;
@@ -76,7 +77,7 @@ const elements = {
   completionCopy: document.getElementById("completionCopy")
 };
 
-const modals = ["settingsModal", "statsModal", "streakModal", "infoModal", "drawModal", "completionModal"];
+const modals = ["settingsModal", "statsModal", "streakModal", "infoModal", "drawModal", "completionModal", "goalsModal"];
 
 function saveSettings() {
   localStorage.setItem(STORAGE_KEYS.settings, JSON.stringify({
@@ -1046,6 +1047,107 @@ function navigatePracticeChar(direction) {
   }
 }
 
+// ==========================================
+// CIRCULAR GOALS DIAL LOGIC ⭕
+// ==========================================
+
+class CircularSlider {
+  constructor(config) {
+    this.wrapper = document.getElementById(config.wrapperId);
+    this.progress = document.getElementById(config.progressId);
+    this.handle = document.getElementById(config.handleId);
+    this.valueDisplay = document.getElementById(config.valueId);
+    this.min = config.min;
+    this.max = config.max;
+    this.step = config.step;
+    this.val = config.initialValue;
+    this.radius = 80;
+    this.circumference = 2 * Math.PI * this.radius;
+
+    this.initEvents();
+    this.updateUI();
+  }
+
+  setValue(newVal) {
+    this.val = Math.max(this.min, Math.min(this.max, newVal));
+    this.updateUI();
+  }
+
+  initEvents() {
+    const onMove = (e) => {
+      if (!this.isDragging) return;
+      const rect = this.wrapper.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+      let angle = Math.atan2(clientY - centerY, clientX - centerX) * (180 / Math.PI) + 90;
+      if (angle < 0) angle += 360;
+
+      const percent = angle / 360;
+      const rawVal = this.min + percent * (this.max - this.min);
+      const roundedVal = Math.round(rawVal / this.step) * this.step;
+
+      this.setValue(roundedVal);
+    };
+
+    const onStart = (e) => {
+      this.isDragging = true;
+      onMove(e);
+    };
+
+    const onEnd = () => { this.isDragging = false; };
+
+    this.wrapper.addEventListener("mousedown", onStart);
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onEnd);
+
+    this.wrapper.addEventListener("touchstart", onStart, { passive: true });
+    window.addEventListener("touchmove", onMove, { passive: true });
+    window.addEventListener("touchend", onEnd);
+  }
+
+  updateUI() {
+    const percent = (this.val - this.min) / (this.max - this.min);
+    const offset = this.circumference - (percent * this.circumference);
+    this.progress.style.strokeDashoffset = offset;
+
+    const angleRad = (percent * 360 - 90) * (Math.PI / 180);
+    const cx = 100 + this.radius * Math.cos(angleRad);
+    const cy = 100 + this.radius * Math.sin(angleRad);
+    this.handle.setAttribute("cx", cx);
+    this.handle.setAttribute("cy", cy);
+
+    if (this.valueDisplay) this.valueDisplay.textContent = this.val;
+  }
+}
+
+let timeSlider, wordsSlider;
+
+function initGoalSliders() {
+  timeSlider = new CircularSlider({
+    wrapperId: "timeRadial",
+    progressId: "timeProgress",
+    handleId: "timeHandle",
+    valueId: "timeVal",
+    min: 5,
+    max: 120,
+    step: 5,
+    initialValue: state.goals.time || 15
+  });
+
+  wordsSlider = new CircularSlider({
+    wrapperId: "wordsRadial",
+    progressId: "wordsProgress",
+    handleId: "wordsHandle",
+    valueId: "wordsVal",
+    min: 5,
+    max: 100,
+    step: 5,
+    initialValue: state.goals.words || 20
+  });
+}
 
 function bindEvents() {
   // --- Navigation & Headers ---
@@ -1068,6 +1170,20 @@ function bindEvents() {
     renderStreak();
     openModal("streakModal");
   }); 
+
+  // --- Goals Modal Listeners ---
+  document.getElementById("openGoalsBtn")?.addEventListener("click", () => {
+    openModal("goalsModal");
+    if (!timeSlider) initGoalSliders();
+  });
+
+  document.getElementById("saveGoalsBtn")?.addEventListener("click", () => {
+    if (timeSlider && wordsSlider) {
+      state.goals = { time: timeSlider.val, words: wordsSlider.val };
+      localStorage.setItem("hsk_goals_v2", JSON.stringify(state.goals));
+    }
+    closeModal("goalsModal");
+  });
 
   // --- Flashcard Controls ---
   document.getElementById("prevBtn")?.addEventListener("click", () => {
