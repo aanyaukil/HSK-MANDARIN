@@ -531,13 +531,16 @@ function getStats() {
   const totalWords = allWords.length;
   const masteredWords = allWords.filter((word) => word.status === "mastered").length;
   const reviewWords = allWords.filter((word) => word.status === "review").length;
-  const dueToday = allWords.filter((word) => word.nextReview <= Date.now()).length;
+  
+  // Due now = New cards ("normal") + Review cards ("review")
+  const newWords = allWords.filter((word) => word.status === "normal").length;
+  const dueCount = reviewWords + newWords;
 
   return {
     totalWords,
     masteredWords,
     reviewWords,
-    dueToday,
+    dueDisplay: dueCount > 0 ? dueCount : "No more due",
     hsk1Completion: Math.round(getHSK1Completion() * 100)
   };
 }
@@ -550,7 +553,7 @@ function renderStats() {
     ["Total cards", stats.totalWords],
     ["Mastered", stats.masteredWords],
     ["Needs review", stats.reviewWords],
-    ["Due now", stats.dueToday],
+    ["Due now", stats.dueDisplay],
     ["HSK 1 complete", `${stats.hsk1Completion}%`]
   ].forEach(([label, value]) => {
     const card = document.createElement("div");
