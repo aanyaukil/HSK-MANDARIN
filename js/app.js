@@ -1051,21 +1051,41 @@ function navigatePracticeChar(direction) {
 // CIRCULAR GOALS DIAL LOGIC ⭕
 // ==========================================
 
-class CircularSlider {
+class ArcSlider {
   constructor(config) {
     this.wrapper = document.getElementById(config.wrapperId);
+    this.track = document.getElementById(config.trackId);
     this.progress = document.getElementById(config.progressId);
     this.handle = document.getElementById(config.handleId);
     this.valueDisplay = document.getElementById(config.valueId);
+    this.tagDisplay = document.getElementById(config.tagId);
+
     this.min = config.min;
     this.max = config.max;
     this.step = config.step;
     this.val = config.initialValue;
-    this.radius = 80;
-    this.circumference = 2 * Math.PI * this.radius;
 
+    // 270-degree arc parameters (Bottom open)
+    this.startAngle = 135; // Bottom-left
+    this.totalAngle = 270;
+    this.radius = 80;
+    this.arcLength = (this.totalAngle / 360) * (2 * Math.PI * this.radius); // ~376.99px
+
+    this.setupTrackArcs();
     this.initEvents();
     this.updateUI();
+  }
+
+  setupTrackArcs() {
+    const fullCircumference = 2 * Math.PI * this.radius;
+    // Set base stroke dash for 270 deg arc
+    this.track.style.strokeDasharray = `${this.arcLength} ${fullCircumference}`;
+    this.track.style.transformOrigin = "center";
+    this.track.style.transform = `rotate(${this.startAngle}deg)`;
+
+    this.progress.style.strokeDasharray = `${this.arcLength} ${fullCircumference}`;
+    this.progress.style.transformOrigin = "center";
+    this.progress.style.transform = `rotate(${this.startAngle}deg)`;
   }
 
   setValue(newVal) {
@@ -1073,20 +1093,35 @@ class CircularSlider {
     this.updateUI();
   }
 
+  getIntensityTag(percent) {
+    if (percent <= 0.25) return "Light";
+    if (percent <= 0.60) return "Moderate";
+    if (percent <= 0.85) return "Intense";
+    return "Heroic";
+  }
+
   initEvents() {
     const onMove = (e) => {
       if (!this.isDragging) return;
       const rect = this.wrapper.getBoundingClientRect();
       const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height / 2;
+      const centerY = rect.top + rect.width / 2; // Keep center square
       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
       const clientY = e.touches ? e.touches[0].clientY : e.clientY;
 
-      // Calculate angle from 12 o'clock position
-      let angle = Math.atan2(clientY - centerY, clientX - centerX) * (180 / Math.PI) + 90;
+      let angle = Math.atan2(clientY - centerY, clientX - centerX) * (180 / Math.PI);
       if (angle < 0) angle += 360;
 
-      const percent = angle / 360;
+      // Adjust relative angle to startAngle (135 deg)
+      let relAngle = angle - this.startAngle;
+      if (relAngle < 0) relAngle += 360;
+
+      // Clamp to 0..270 degrees
+      if (relAngle > this.totalAngle) {
+        relAngle = relAngle - this.totalAngle < 45 ? this.totalAngle : 0;
+      }
+
+      const percent = relAngle / this.totalAngle;
       const rawVal = this.min + percent * (this.max - this.min);
       const roundedVal = Math.round(rawVal / this.step) * this.step;
 
@@ -1112,14 +1147,14 @@ class CircularSlider {
   updateUI() {
     const percent = (this.val - this.min) / (this.max - this.min);
     
-    // Stroke offset starts from top (12 o'clock)
-    const offset = this.circumference - (percent * this.circumference);
+    // Fill offset along 270 deg arc
+    const offset = this.arcLength - (percent * this.arcLength);
     this.progress.style.strokeDashoffset = offset;
-    this.progress.style.transformOrigin = "center";
-    this.progress.style.transform = "rotate(-90deg)"; // Rotates arc visual to 12 o'clock
 
-    // Convert angle to match 12 o'clock start position cleanly
-    const angleRad = (percent * 360 - 90) * (Math.PI / 180);
+    // Calculate handle knob X/Y along arc
+    const currentAngleDeg = this.startAngle + (percent * this.totalAngle);
+    const angleRad = currentAngleDeg * (Math.PI / 180);
+
     const cx = 100 + this.radius * Math.cos(angleRad);
     const cy = 100 + this.radius * Math.sin(angleRad);
     
@@ -1127,33 +1162,38 @@ class CircularSlider {
     this.handle.setAttribute("cy", cy);
 
     if (this.valueDisplay) this.valueDisplay.textContent = this.val;
+    if (this.tagDisplay) this.tagDisplay.textContent = this.getIntensityTag(percent);
   }
 }
 
 let timeSlider, wordsSlider;
 
 function initGoalSliders() {
-  // Goal 1: Max 60 mins (1 hour max), step of 5 mins
-  timeSlider = new CircularSlider({
+  // Goal 1: 1 to 60 mins (step of 1 minute)
+  timeSlider = new ArcSlider({
     wrapperId: "timeRadial",
+    trackId: "timeTrack",
     progressId: "timeProgress",
     handleId: "timeHandle",
     valueId: "timeVal",
-    min: 5,
-    max: 60,  // 👈 Max 1 hour per day
-    step: 5,
+    tagId: "timeTag",
+    min: 1,    // Starts at 1 min
+    max: 60,   // Max 60 mins
+    step: 1,   // 1-minute increments
     initialValue: Math.min(state.goals.time || 15, 60)
   });
 
-  // Goal 2: 1 to 40 words max, step of 1 word
-  wordsSlider = new CircularSlider({
+  // Goal 2: 1 to 40 words (step of 1 word)
+  wordsSlider = new ArcSlider({
     wrapperId: "wordsRadial",
+    trackId: "wordsTrack",
     progressId: "wordsProgress",
     handleId: "wordsHandle",
     valueId: "wordsVal",
-    min: 1,   // 👈 Minimum 1 word
-    max: 40,  // 👈 Maximum 40 words
-    step: 1,  // 👈 Step increment of 1 word
+    tagId: "wordsTag",
+    min: 1,
+    max: 40,
+    step: 1,
     initialValue: Math.min(state.goals.words || 20, 40)
   });
 }
