@@ -838,9 +838,11 @@ kbd {
   background: rgba(255, 255, 255, 0.04);
 }
 
+/* Ensure smaller stat values and text scale cleanly */
 .stat-number {
-  font-size: 2rem;
+  font-size: clamp(1.25rem, 3vw, 2rem);
   font-weight: 800;
+  white-space: nowrap;
 }
 
 .streak-hero {
