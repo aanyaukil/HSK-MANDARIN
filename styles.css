@@ -1295,7 +1295,7 @@ canvas {
   justify-content: center;
 }
 
-/* Vertical Stack & Clean Layout */
+/* Vertical Stack & Container */
 .goals-container {
   display: flex;
   flex-direction: column;
@@ -1306,76 +1306,89 @@ canvas {
 
 .radial-card {
   width: 100%;
-  max-width: 380px; /* Made cards wider to fit bigger dials */
-  padding: 1.75rem;
+  max-width: 380px;
+  padding: 1.75rem 1.5rem 1.25rem;
   border-radius: 1.75rem;
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.02);
+  background: radial-gradient(circle at top, rgba(255, 255, 255, 0.05), transparent 70%), var(--panel);
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
 }
 
 .radial-card h3 {
-  margin: 0 0 1.25rem;
+  margin: 0 0 1rem;
   font-size: 1.2rem;
   font-weight: 800;
   color: var(--text);
 }
 
-/* Bigger Dial Wrapper */
+/* Gauge Wrapper */
 .radial-wrapper {
   position: relative;
-  width: 260px; /* Increased from 200px */
-  height: 260px;
+  width: 270px;
+  height: 220px; /* Cut off bottom visually */
   touch-action: none;
   cursor: pointer;
   user-select: none;
+  overflow: visible;
 }
 
 .radial-svg {
   width: 100%;
-  height: 100%;
-  /* Removed CSS rotate transform to fix alignment bugs */
+  height: 270px; /* SVG stays square for math precision */
 }
 
-/* Hollow Thin Track & Smooth Stroke */
+/* Decorative Outer Dash Ring */
+.radial-outer-ring {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.12);
+  stroke-width: 2;
+  stroke-dasharray: 4 8;
+}
+
+/* Track & Active Progress Line */
 .radial-track {
   fill: none;
   stroke: rgba(255, 255, 255, 0.06);
-  stroke-width: 10; /* Thinner stroke = more hollow center */
+  stroke-width: 12;
+  stroke-linecap: round;
 }
 
 .radial-progress {
   fill: none;
   stroke: var(--accent);
-  stroke-width: 10;
+  stroke-width: 12;
   stroke-linecap: round;
-  stroke-dasharray: 502.65; /* 2 * PI * 80 */
-  stroke-dashoffset: 502.65;
-  transition: stroke-dashoffset 0.08s cubic-bezier(0, 0, 0.2, 1);
+  stroke-dasharray: 376.99; /* 270 degree arc length */
+  stroke-dashoffset: 376.99;
+  transition: stroke-dashoffset 0.06s ease-out, stroke 0.3s ease;
 }
 
-/* Crisp Handle Point */
+/* Knob Handle */
 .radial-handle {
   fill: #ffffff;
   stroke: var(--accent);
   stroke-width: 4;
   cursor: grab;
-  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
-  transition: r 0.15s ease;
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.6));
+  transition: r 0.15s ease, stroke 0.3s ease;
 }
 
 .radial-handle:active {
   cursor: grabbing;
-  r: 14; /* Slightly expands when dragging */
+  r: 13;
 }
 
-/* Central Value Typography */
+/* Central Gauge Labels */
 .radial-display {
   position: absolute;
-  inset: 0;
+  top: 30px;
+  left: 0;
+  right: 0;
+  bottom: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1384,18 +1397,31 @@ canvas {
 }
 
 .radial-num {
-  font-size: 3.25rem;
+  font-size: 3.5rem;
   font-weight: 900;
   line-height: 1;
   color: var(--text);
-  letter-spacing: -0.03em;
+  letter-spacing: -0.04em;
 }
 
 .radial-unit {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: var(--muted);
-  margin-top: 0.35rem;
+  margin-top: 0.25rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+}
+
+/* Dynamic Intensity Badge */
+.radial-tag {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border);
+  color: var(--accent);
 }
