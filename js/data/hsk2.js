@@ -2,7 +2,7 @@ export const hsk2 = {
   id: "hsk2",
   title: "HSK 2",
   level: "Elementary",
-  description: "Locked until HSK 1 is fully mastered.",
+  description: "Continue mastering vocabulary!",
   words: [
     ["啊", "a", "auxiliary", "ah, oh", "啊，知道了。~a, zhīdào le.\nAh, I see."],
     ["爱好", "àihào", "verb, noun", "to like; hobby", "我的爱好是看书。~wǒ de àihào shì kànshū.\nMy hobby is reading."],
