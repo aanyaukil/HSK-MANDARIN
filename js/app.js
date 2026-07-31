@@ -127,11 +127,11 @@ function loadGoals() {
       console.error("Error loading goals:", e);
       state.goals = { time: 15, words: 20 };
     }
-  } else if (!state.goals) {
-    state.goals = { time: 15, words: 20 };
+  } else {
+    // Default fallback
+    state.goals = state.goals || { time: 15, words: 20 };
   }
 }
-
 
 
 function buildCard(word, setId) {
@@ -1713,13 +1713,15 @@ function updateGoalsButtonText() {
 
 // --- 3. Goal Sliders Initializer (Locks Minimum to Completed Floor) ---
 function initGoalSliders() {
+  // Always reload goals from storage first before rendering sliders
+  loadGoals();
+
   const timeHit = state.dailyProgress?.timeGoalHit;
   const wordsHit = state.dailyProgress?.wordsGoalHit;
 
   const currentMins = Math.floor((state.dailyProgress?.secondsStudied || 0) / 60);
   const currentWords = state.dailyProgress?.wordsMasteredToday?.length || 0;
 
-  // Set floor to accomplished level if goal was hit, otherwise 1
   const timeMin = timeHit ? Math.max(currentMins, state.goals?.time || 1) : 1;
   const wordsMin = wordsHit ? Math.max(currentWords, state.goals?.words || 1) : 1;
 
@@ -1734,7 +1736,7 @@ function initGoalSliders() {
     min: timeMin,
     max: 60,
     step: 1,
-    initialValue: Math.max(state.goals?.time || 15, timeMin)
+    initialValue: state.goals?.time || 15 // 👈 Pulls exact saved goal
   });
 
   wordsSlider = new ArcSlider({
@@ -1748,10 +1750,9 @@ function initGoalSliders() {
     min: wordsMin,
     max: 40,
     step: 1,
-    initialValue: Math.max(state.goals?.words || 20, wordsMin)
+    initialValue: state.goals?.words || 20 // 👈 Pulls exact saved goal
   });
 }
-
 // --- 4. Event Listeners ---
 function bindGoalSystemEvents() {
   // Celebration Modal Buttons
@@ -1834,9 +1835,10 @@ function bindGoalSystemEvents() {
 }
 
 function initialize() {
-  loadGoals(); // 👈 ADD THIS FIRST
   setRawSetsState(hydrateSets());
   loadSettings();
+  loadGoals(); // 👈 Put loadGoals HERE (after loadSettings)
+  
   renderLobby();
   renderStats();
   renderStreak();
@@ -1844,6 +1846,5 @@ function initialize() {
 
   bindGoalSystemEvents();
 }
-
 bindEvents();
 initialize();
