@@ -1872,17 +1872,8 @@ function bindGoalSystemEvents() {
 function initialize() {
   setRawSetsState(hydrateSets());
   loadSettings();
-  loadGoals(); // 1. Load saved targets (e.g. 5 mins / 10 words)
-  
-  // 2. Load daily progress from localStorage
-  const savedProgress = localStorage.getItem("hsk_daily_progress");
-  if (savedProgress) {
-    try {
-      state.dailyProgress = JSON.parse(savedProgress);
-    } catch (e) {
-      console.error("Error parsing daily progress", e);
-    }
-  }
+  loadGoals();          // 1. Load saved targets (e.g. 5 mins / 10 words)
+  loadDailyProgress(); // 2. Load today's progress safely (checks date stamp)
 
   // 3. Re-check progress state silently so banner & button stay active
   reevaluateDailyGoals();
