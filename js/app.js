@@ -117,6 +117,21 @@ function loadSettings() {
   updateFrontModeButtons();
 }
 
+// --- LOAD PERSISTENT GOALS ON STARTUP ---
+function loadGoals() {
+  const savedGoals = localStorage.getItem("hsk_goals_v2");
+  if (savedGoals) {
+    try {
+      state.goals = JSON.parse(savedGoals);
+    } catch (e) {
+      console.error("Error loading goals:", e);
+    }
+  } else {
+    // Default initial goals if none saved yet
+    state.goals = state.goals || { time: 15, words: 20 };
+  }
+}
+
 function buildCard(word, setId) {
   return {
     id: `${setId}:${word[0]}`,
@@ -1244,13 +1259,26 @@ function bindEvents() {
     if (!timeSlider) initGoalSliders();
   });
 
-  document.getElementById("saveGoalsBtn")?.addEventListener("click", () => {
-    if (timeSlider && wordsSlider) {
-      state.goals = { time: timeSlider.val, words: wordsSlider.val };
-      localStorage.setItem("hsk_goals_v2", JSON.stringify(state.goals));
-    }
-    closeModal("goalsModal");
-  });
+  // Save Goals Listener (Triggers Two-Step Popup)
+  const saveBtn = document.getElementById("saveGoalsBtn");
+  if (saveBtn) {
+    const newSaveBtn = saveBtn.cloneNode(true);
+    saveBtn.parentNode.replaceChild(newSaveBtn, saveBtn);
+
+    newSaveBtn.addEventListener("click", () => {
+      const newTime = timeSlider ? timeSlider.val : (state.goals?.time || 15);
+      const newWords = wordsSlider ? wordsSlider.val : (state.goals?.words || 20);
+
+      // Store selection temporarily
+      pendingGoalSelection = {
+        time: newTime,
+        words: newWords
+      };
+
+      closeModal("goalsModal");
+      openModal("goalResetConfirmModal"); // 👈 Opens the second confirmation modal!
+    });
+  }
 
   // --- Flashcard Controls ---
   document.getElementById("prevBtn")?.addEventListener("click", () => {
@@ -1741,23 +1769,33 @@ function bindGoalSystemEvents() {
     initGoalSliders();
   });
 
-  // Save Goals -> Opens Second Confirmation Modal
-  document.getElementById("saveGoalsBtn")?.addEventListener("click", () => {
-    if (timeSlider && wordsSlider) {
+  // Save Goals -> Opens Second Confirmation Modal (with Event Listener Reset)
+  const saveBtn = document.getElementById("saveGoalsBtn");
+  if (saveBtn) {
+    // Replace element to purge old event listeners that might bypass the modal
+    const newSaveBtn = saveBtn.cloneNode(true);
+    saveBtn.parentNode.replaceChild(newSaveBtn, saveBtn);
+
+    newSaveBtn.addEventListener("click", () => {
+      const newTime = typeof timeSlider !== "undefined" && timeSlider ? timeSlider.val : (state.goals?.time || 15);
+      const newWords = typeof wordsSlider !== "undefined" && wordsSlider ? wordsSlider.val : (state.goals?.words || 20);
+
       pendingGoalSelection = {
-        time: timeSlider.val,
-        words: wordsSlider.val
+        time: newTime,
+        words: newWords
       };
+
       closeModal("goalsModal");
       openModal("goalResetConfirmModal");
-    }
-  });
+    });
+  }
 
   // Choice 1: Reset Just for Today
   document.getElementById("resetTodayOnlyBtn")?.addEventListener("click", () => {
     if (pendingGoalSelection) {
       state.goals = { ...pendingGoalSelection };
       
+      // Reset daily completion flags so higher targets can trigger celebrations again
       if (state.dailyProgress) {
         state.dailyProgress.timeGoalHit = false;
         state.dailyProgress.wordsGoalHit = false;
@@ -1773,6 +1811,8 @@ function bindGoalSystemEvents() {
   document.getElementById("resetForeverBtn")?.addEventListener("click", () => {
     if (pendingGoalSelection) {
       state.goals = { ...pendingGoalSelection };
+      
+      // Save permanently across page reloads
       localStorage.setItem("hsk_goals_v2", JSON.stringify(state.goals));
 
       if (state.dailyProgress) {
@@ -1786,11 +1826,13 @@ function bindGoalSystemEvents() {
     updateGoalsButtonText();
   });
 
+  // Refresh UI states on load
   updateDashboardBanner();
   updateGoalsButtonText();
 }
 
 function initialize() {
+  loadGoals(); // 👈 ADD THIS FIRST
   setRawSetsState(hydrateSets());
   loadSettings();
   renderLobby();
