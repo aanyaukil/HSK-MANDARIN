@@ -1564,9 +1564,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 // 1. Daily Tracking State Initialization
-const progressTodayKey = new Date().toISOString().split("T")[0];
+function loadDailyProgress() {
+  const progressTodayKey = new Date().toISOString().split("T")[0];
+  const saved = localStorage.getItem("hsk_daily_progress");
 
-if (!state.dailyProgress || state.dailyProgress.date !== progressTodayKey) {
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      // If saved data is from TODAY, keep it!
+      if (parsed && parsed.date === progressTodayKey) {
+        state.dailyProgress = parsed;
+        return;
+      }
+    } catch (e) {
+      console.error("Error reading saved daily progress", e);
+    }
+  }
+
+  // Otherwise (new day or first run), initialize fresh for today
   state.dailyProgress = {
     date: progressTodayKey,
     secondsStudied: 0,
@@ -1574,7 +1589,7 @@ if (!state.dailyProgress || state.dailyProgress.date !== progressTodayKey) {
     timeGoalHit: false,
     wordsGoalHit: false
   };
-  localStorage.setItem("hsk_daily_progress", JSON.stringify(state.dailyProgress));
+  saveDailyProgress();
 }
 
 let studyTimerInterval = null;
