@@ -125,12 +125,14 @@ function loadGoals() {
       state.goals = JSON.parse(savedGoals);
     } catch (e) {
       console.error("Error loading goals:", e);
+      state.goals = { time: 15, words: 20 };
     }
-  } else {
-    // Default initial goals if none saved yet
-    state.goals = state.goals || { time: 15, words: 20 };
+  } else if (!state.goals) {
+    state.goals = { time: 15, words: 20 };
   }
 }
+
+
 
 function buildCard(word, setId) {
   return {
