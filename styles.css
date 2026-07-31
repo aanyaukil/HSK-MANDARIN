@@ -78,16 +78,20 @@ body[data-theme="light"] {
    LIGHT MODE OVERRIDES
    ========================================================= */
 
-/* 1. Subtitle Text: Black */
+/* =========================================================
+   LIGHT MODE OVERRIDES
+   ========================================================= */
+
+/* 1. TOP BANNER SUBTITLE TEXT: SOLID BLACK */
 body[data-theme="light"] .hero-subtitle,
 body[data-theme="light"] .banner-subtitle,
 body[data-theme="light"] .top-banner p,
-body[data-theme="light"] .goal-banner p {
+body[data-theme="light"] .goal-banner p,
+body[data-theme="light"] .eyebrow-description {
   color: #000000 !important;
   font-weight: 500 !important;
 }
 
-/* 2. HSK 3.0 STUDY SYSTEM Tag: Bold & Black (No Highlight) */
 body[data-theme="light"] .eyebrow,
 body[data-theme="light"] .badge,
 body[data-theme="light"] .system-tag {
@@ -97,7 +101,7 @@ body[data-theme="light"] .system-tag {
   border: none !important;
 }
 
-/* 3. Settings Page: Unhighlighted Cards & White Text */
+/* 2. SETTINGS PAGE: UNHIGHLIGHTED CARDS & WHITE TEXT */
 body[data-theme="light"] .settings-modal-apple,
 body[data-theme="light"] .settings-modal-apple *,
 body[data-theme="light"] .settings-sidebar .sidebar-label,
@@ -120,33 +124,33 @@ body[data-theme="light"] .settings-sidebar .sidebar-item.active {
   color: #ffffff !important;
 }
 
-/* 4. Rating Buttons: Bright & Dark Tones */
+/* 3. ACTION BUTTONS (UNIFIED STYLE: Bright Border + Light Fill + Bright Text) */
 
-/* Review Button: Bright Dark Orange */
+/* Review Button: Orange */
 body[data-theme="light"] .btn-review,
 body[data-theme="light"] button[data-rating="review"] {
-  background: transparent !important;
-  color: #c2410c !important; /* Deep vibrant orange */
-  border: 2px solid #ea580c !important;
+  background-color: #fff7ed !important; /* Soft Light Orange Fill */
+  border: 2px solid #f97316 !important; /* Bright Orange Border */
+  color: #ea580c !important;        /* Bright Orange Lettering */
   font-weight: 800 !important;
 }
 
-/* Undo Button: Bright Dark Blue */
+/* Undo Button: Blue */
 body[data-theme="light"] .btn-undo,
 body[data-theme="light"] #undoBtn,
 body[data-theme="light"] button[data-action="undo"] {
-  background: transparent !important;
-  color: #1d4ed8 !important; /* Deep vibrant blue */
-  border: 2px solid #2563eb !important;
+  background-color: #eff6ff !important; /* Soft Light Blue Fill */
+  border: 2px solid #3b82f6 !important; /* Bright Blue Border */
+  color: #2563eb !important;        /* Bright Blue Lettering */
   font-weight: 800 !important;
 }
 
-/* Mastered Button: Bright Dark Green */
+/* Mastered Button: Green */
 body[data-theme="light"] .btn-master,
 body[data-theme="light"] button[data-rating="master"] {
-  background: transparent !important;
-  color: #15803d !important; /* Deep vibrant green */
-  border: 2px solid #16a34a !important;
+  background-color: #f0fdf4 !important; /* Soft Light Green Fill */
+  border: 2px solid #22c55e !important; /* Bright Green Border */
+  color: #16a34a !important;        /* Bright Green Lettering */
   font-weight: 800 !important;
 }
 
