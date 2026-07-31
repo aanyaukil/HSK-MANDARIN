@@ -1521,12 +1521,6 @@ function bindEvents() {
 }
 
 
-const btn = document.getElementById("openSettingsBtn");
-
-btn.addEventListener("click", () => {
-  console.log("CLICK WORKS");
-});
-
 document.addEventListener("DOMContentLoaded", () => {
   const intro = document.getElementById("introBanner");
   const closeBtn = document.getElementById("closeIntro");
