@@ -493,7 +493,6 @@ function triggerCelebration() {
   }
 }
 
-// 2. Clean applyRating function
 function applyRating(quality) {
   const word = currentWord();
   if (!word) return;
@@ -506,6 +505,12 @@ function applyRating(quality) {
     previousConsecutive: word.consecutiveCorrect,
     previousIndex: state.studyIndex
   };
+
+  // --- GOAL TRACKING HOOK ---
+  // If rated as Mastered (quality === 3), count it towards today's daily goal
+  if (quality === 3 && (word.id || word.hanzi)) {
+    trackWordMastered(word.id || word.hanzi);
+  }
 
   calculateNextReview(word, quality);
   persistProgress();
@@ -1523,6 +1528,8 @@ function initialize() {
   renderStats();
   renderStreak();
   if (state.activeSetId) renderStudy();
+
+  bindGoalSystemEvents();
 }
 
 bindEvents();
@@ -1665,13 +1672,22 @@ function updateDashboardBanner() {
   }
 }
 
-// 7. Bind Screen Navigation & Modal Buttons
 function bindGoalSystemEvents() {
-  // Celebration Popup Buttons
+  // 1. Celebration Popup Buttons
   document.getElementById("celebrationDashboardBtn")?.addEventListener("click", () => {
     closeModal("goalCelebrationModal");
     showScreen("lobbyScreen");
   });
+
+  document.getElementById("celebrationContinueBtn")?.addEventListener("click", () => {
+    closeModal("goalCelebrationModal");
+    startStudyTimer(); // Resume timing when continuing study
+  });
+
+  // 2. Initial Dashboard Banner Check
+  updateDashboardBanner();
+}
+
 
   document.getElementById("celebrationContinueBtn")?.addEventListener("click", () => {
     closeModal("goalCelebrationModal");
