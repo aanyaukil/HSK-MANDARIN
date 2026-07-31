@@ -75,19 +75,44 @@ body[data-theme="light"] {
     linear-gradient(180deg, #f6fbff 0%, var(--bg) 100%);
 }
 
-/* 1. FIX: SETTINGS SIDEBAR LABELS & BUTTONS */
+/* =========================================================
+   LIGHT MODE OVERRIDES (Clean Text Colors, No Highlights)
+   ========================================================= */
+
+body[data-theme="light"] {
+  /* Core Variables */
+  --bg: #eef4fb;
+  --bg-secondary: rgba(255, 255, 255, 0.7);
+  --panel: rgba(255, 255, 255, 0.98);
+  --panel-strong: #ffffff;
+  --text: #0f172a;
+  --muted: #475569;
+  --accent: #2563eb;
+  --border: #cbd5e1;
+  --shadow: 0 28px 60px rgba(37, 99, 235, 0.1);
+  --input-bg: #ffffff;
+  --input-text: #0f172a;
+
+  /* Background Gradient */
+  background:
+    radial-gradient(circle at top left, rgba(14, 165, 233, 0.12), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(217, 119, 6, 0.1), transparent 30%),
+    linear-gradient(180deg, #f6fbff 0%, var(--bg) 100%);
+}
+
+/* 1. SETTINGS SIDEBAR LABELS & ITEMS */
 body[data-theme="light"] .settings-sidebar {
-  background-color: #f1f5f9 !important;
+  background-color: #f8fafc !important;
   border-right: 1px solid #cbd5e1 !important;
 }
 
 body[data-theme="light"] .sidebar-label {
-  color: #334155 !important; /* "GENERAL" & "SUPPORT & INFO" section titles */
+  color: #334155 !important;
   font-weight: 800 !important;
 }
 
 body[data-theme="light"] .sidebar-item {
-  color: #0f172a !important; /* All sidebar links */
+  color: #0f172a !important;
   font-weight: 600 !important;
 }
 
@@ -100,7 +125,7 @@ body[data-theme="light"] .sidebar-item.active {
   color: #ffffff !important;
 }
 
-/* 2. FIX: TOP BANNER TEXT & "HSK 3.0 STUDY SYSTEM" TITLE COLOR */
+/* 2. TOP BANNER & HSK TAG (No Highlight Fill) */
 body[data-theme="light"] .hero-banner,
 body[data-theme="light"] .goal-banner,
 body[data-theme="light"] .top-banner {
@@ -113,72 +138,55 @@ body[data-theme="light"] .hero-subtitle,
 body[data-theme="light"] .banner-subtitle,
 body[data-theme="light"] .top-banner p,
 body[data-theme="light"] .goal-banner p {
-  color: #334155 !important; /* Makes subtitle description sharp & readable */
+  color: #334155 !important;
   font-weight: 500 !important;
 }
 
-/* Changes "HSK 3.0 STUDY SYSTEM" tag from plain blue to high-contrast dark indigo */
 body[data-theme="light"] .eyebrow,
 body[data-theme="light"] .badge,
 body[data-theme="light"] .system-tag {
-  color: #1e1b4b !important;
-  background: #e0e7ff !important;
-  border: 1px solid #c7d2fe !important;
-  font-weight: 700 !important;
+  color: #1e293b !important;
+  background: transparent !important;
+  border: none !important;
+  font-weight: 800 !important;
 }
 
-/* 3. FIX: ACTION BUTTONS (Review, Undo, Mastered) BRIGHT & BOLD */
+/* 3. ACTION BUTTONS (Pure Text Colors - No Highlight Box) */
 body[data-theme="light"] .btn-review,
 body[data-theme="light"] button[data-rating="review"] {
-  background-color: #fef2f2 !important;
-  color: #dc2626 !important; /* Bright Red */
-  border: 1px solid #fca5a5 !important;
+  background: transparent !important;
+  color: #dc2626 !important; /* Bold Red Text */
+  border: 1px solid #dc2626 !important;
   font-weight: 700 !important;
 }
 
 body[data-theme="light"] .btn-undo,
 body[data-theme="light"] #undoBtn,
 body[data-theme="light"] button[data-action="undo"] {
-  background-color: #fefce8 !important;
-  color: #ca8a04 !important; /* Bright Amber/Yellow */
-  border: 1px solid #fde047 !important;
+  background: transparent !important;
+  color: #d97706 !important; /* Bold Amber/Yellow Text */
+  border: 1px solid #d97706 !important;
   font-weight: 700 !important;
 }
 
 body[data-theme="light"] .btn-master,
 body[data-theme="light"] button[data-rating="master"] {
-  background-color: #f0fdf4 !important;
-  color: #16a34a !important; /* Bright Green */
-  border: 1px solid #86efac !important;
+  background: transparent !important;
+  color: #16a34a !important; /* Bold Green Text */
+  border: 1px solid #16a34a !important;
   font-weight: 700 !important;
 }
 
-/* Hover effects for action buttons */
-body[data-theme="light"] .btn-review:hover { background-color: #fee2e2 !important; }
-body[data-theme="light"] .btn-undo:hover   { background-color: #fef9c3 !important; }
-body[data-theme="light"] .btn-master:hover { background-color: #dcfce7 !important; }
 
-/* --- LIGHT MODE DROPDOWN & TEXT CONTRAST FIXES --- */
 
-.apple-select,
-.settings-select,
-.apple-textarea,
-select {
-  background-color: var(--input-bg) !important;
-  color: var(--input-text) !important;
-  border: 1px solid var(--border) !important;
-}
 
-/* Fixes unreadable option choices in browser popups */
-option {
-  background-color: var(--input-bg) !important;
-  color: var(--input-text) !important;
-}
 
-body[data-theme="light"] option {
-  background-color: #ffffff !important;
-  color: #142033 !important;
-}
+
+
+
+
+
+
 
 /* Cards & Banners using your variables */
 .apple-card,
