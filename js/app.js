@@ -524,7 +524,7 @@ function applyRating(quality) {
   const word = currentWord();
   if (!word) return;
 
-  // Save state before changing it so we can undo:
+  // Save state before changing it so we can undo
   state.lastRatedCard = {
     wordId: word.id,
     previousStatus: word.status,
@@ -534,27 +534,47 @@ function applyRating(quality) {
   };
 
   // --- GOAL TRACKING HOOK ---
-  // If rated as Mastered (quality === 3), count it towards today's daily goal
   if (quality === 3 && (word.id || word.hanzi)) {
     trackWordMastered(word.id || word.hanzi);
   }
 
+  // Record deck length BEFORE updating card status
+  const previousDeckLength = state.currentDeck.length;
+
   calculateNextReview(word, quality);
   persistProgress();
   updateStreak();
+
+  // Re-calculate deck (this removes the card if filtering by 'due', 'normal', etc.)
+  updateStudyDeck();
+
+  // FIX: If the deck shrunk (e.g. card left "Due" or "Normal" filter), 
+  // do NOT increment studyIndex! The next card naturally slid into state.studyIndex.
+  const deckShrank = state.currentDeck.length < previousDeckLength;
+
+  if (!deckShrank) {
+    if (state.studyIndex < state.currentDeck.length - 1) {
+      state.studyIndex += 1;
+    }
+  }
+
+  // Ensure index stays within bounds
+  if (state.studyIndex >= state.currentDeck.length) {
+    state.studyIndex = Math.max(0, state.currentDeck.length - 1);
+  }
+
   renderLobby();
 
-  if (state.studyIndex < state.currentDeck.length - 1) {
-    state.studyIndex += 1;
-    renderStudy();
-  } else {
+  // Check completion
+  if (state.currentDeck.length === 0) {
     renderStudy();
     if (elements.completionCopy) {
       elements.completionCopy.textContent = `You finished ${getSetById(state.activeSetId)?.title || "this set"}. ${isSetUnlocked("hsk2") ? "HSK 2 is now unlocked." : "Keep mastering HSK 1 to unlock HSK 2."}`;
     }
-    
     triggerCelebration(); // Confetti blast! 🎉
     openModal("completionModal");
+  } else {
+    renderStudy();
   }
 }
 
