@@ -1214,7 +1214,7 @@ wordsSlider = new ArcSlider({
   step: 1,
   initialValue: Math.min(state.goals.words || 20, 40)
 }); 
-}
+
 
 function bindEvents() {
   // --- Navigation & Headers ---
