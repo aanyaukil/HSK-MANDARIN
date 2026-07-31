@@ -1201,19 +1201,19 @@ let timeSlider, wordsSlider;
 
 
 
-  wordsSlider = new ArcSlider({
-    wrapperId: "wordsRadial",
-    ticksId: "wordsTicks",
-    trackId: "wordsTrack",
-    progressId: "wordsProgress",
-    handleId: "wordsHandle",
-    valueId: "wordsVal",
-    tagId: "wordsTag",
-    min: 1,
-    max: 40,
-    step: 1,
-    initialValue: Math.min(state.goals.words || 20, 40)
-  });
+wordsSlider = new ArcSlider({
+  wrapperId: "wordsRadial",
+  ticksId: "wordsTicks",
+  trackId: "wordsTrack",
+  progressId: "wordsProgress",
+  handleId: "wordsHandle",
+  valueId: "wordsVal",
+  tagId: "wordsTag",
+  min: 1,
+  max: 40,
+  step: 1,
+  initialValue: Math.min(state.goals.words || 20, 40)
+}); 
 }
 
 function bindEvents() {
