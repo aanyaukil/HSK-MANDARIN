@@ -1429,6 +1429,18 @@ function bindEvents() {
     saveSettings();
   });
 
+  document.querySelectorAll(".settings-sidebar .sidebar-item").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".settings-sidebar .sidebar-item").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+  
+      const targetTab = btn.dataset.tab;
+      document.querySelectorAll(".settings-content .settings-panel").forEach((panel) => {
+        panel.classList.toggle("active", panel.id === targetTab);
+      });
+    });
+  });
+
   // --- Canvas Practice ---
   document.getElementById("clearCanvasBtn")?.addEventListener("click", clearCanvas);
   document.getElementById("undoCanvasBtn")?.addEventListener("click", undoCanvas); // 👈 ADD THIS LINE
