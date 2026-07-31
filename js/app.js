@@ -1431,6 +1431,7 @@ function bindEvents() {
 
   // --- Canvas Practice ---
   document.getElementById("clearCanvasBtn")?.addEventListener("click", clearCanvas);
+  document.getElementById("undoCanvasBtn")?.addEventListener("click", undoCanvas); // 👈 ADD THIS LINE
   document.getElementById("toggleAllCharsBtn")?.addEventListener("click", toggleAllCharacters);
   window.addEventListener("resize", resizeCanvas);
 
