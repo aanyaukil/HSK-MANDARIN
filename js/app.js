@@ -1521,20 +1521,6 @@ function bindEvents() {
 }
 
 
-function initialize() {
-  setRawSetsState(hydrateSets());
-  loadSettings();
-  renderLobby();
-  renderStats();
-  renderStreak();
-  if (state.activeSetId) renderStudy();
-
-  bindGoalSystemEvents();
-}
-
-bindEvents();
-initialize();
-
 const btn = document.getElementById("openSettingsBtn");
 
 btn.addEventListener("click", () => {
@@ -1689,12 +1675,16 @@ function bindGoalSystemEvents() {
   updateDashboardBanner();
 }
 
+function initialize() {
+  setRawSetsState(hydrateSets());
+  loadSettings();
+  renderLobby();
+  renderStats();
+  renderStreak();
+  if (state.activeSetId) renderStudy();
 
-  document.getElementById("celebrationContinueBtn")?.addEventListener("click", () => {
-    closeModal("goalCelebrationModal");
-    startStudyTimer(); // Resume timing
-  });
-
-  // Call updateDashboardBanner when loading lobby screen
-  updateDashboardBanner();
+  bindGoalSystemEvents();
 }
+
+bindEvents();
+initialize();
