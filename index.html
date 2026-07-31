@@ -25,7 +25,16 @@
         </p>
       </div>
     </header>
-    
+
+    <div id="goalCompletionBanner" class="goal-banner hidden">
+      <div class="goal-banner-content">
+        <span class="goal-banner-icon">🔥</span>
+        <div>
+          <h4 id="goalBannerTitle">Goal Achieved!</h4>
+          <p id="goalBannerText">You have completed your daily goal, but you can keep studying if you want.</p>
+        </div>
+      </div>
+    </div>
 
     <main class="layout">
       <section id="lobbyScreen" class="screen active">
@@ -294,6 +303,24 @@
         </div>
       </div>
       <div id="streakCalendar" class="streak-calendar"></div>
+    </div>
+  </div>
+
+  <div id="goalCelebrationModal" class="modal hidden">
+    <div class="modal-card celebration-card">
+      <div class="fire-wrapper">
+        <div class="fire-emoji">🔥</div>
+        <div class="fire-glow"></div>
+      </div>
+  
+      <p class="eyebrow">Milestone Reached</p>
+      <h2 id="celebrationTitle">Well Done!</h2>
+      <p id="celebrationMessage" class="muted">You reached your daily goal!</p>
+  
+      <div class="celebration-actions">
+        <button id="celebrationDashboardBtn" class="secondary-btn full-width">Go to Dashboard</button>
+        <button id="celebrationContinueBtn" class="primary-btn full-width">Keep Studying</button>
+      </div>
     </div>
   </div>
 
