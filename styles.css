@@ -122,7 +122,7 @@ body[data-theme="light"] .settings-sidebar .sidebar-item.active {
 body[data-theme="light"] .btn-review,
 body[data-theme="light"] button[data-rating="review"] {
   background-color: #fff7ed !important;
-  border: 2px solid #ad4b07 !important;
+  border: 4px solid #ad4b07 !important;
   color: #ea580c !important;
   font-weight: 800 !important;
 }
@@ -141,7 +141,7 @@ body[data-theme="light"] button[data-action="undo"] {
 body[data-theme="light"] .btn-master,
 body[data-theme="light"] button[data-rating="master"] {
   background-color: #a7d9b6 !important;
-  border: 2px solid #093318 !important;
+  border: 4px solid #093318 !important;
   color: #199e4a !important;
   font-weight: 800 !important;
 }
