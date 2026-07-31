@@ -1634,6 +1634,26 @@ function checkGoalMilestones() {
   }
 }
 
+function reevaluateDailyGoals() {
+  if (!state.dailyProgress || !state.goals) return;
+
+  const timeGoalMins = state.goals.time || 15;
+  const wordsGoalCount = state.goals.words || 20;
+
+  const currentMins = Math.floor((state.dailyProgress.secondsStudied || 0) / 60);
+  const currentWords = state.dailyProgress.wordsMasteredToday?.length || 0;
+
+  // Mark hit flags as true if targets are met, without popping up the modal
+  if (currentMins >= timeGoalMins) {
+    state.dailyProgress.timeGoalHit = true;
+  }
+  if (currentWords >= wordsGoalCount) {
+    state.dailyProgress.wordsGoalHit = true;
+  }
+
+  saveDailyProgress();
+}
+
 // 5. Celebration Modal Handler
 function triggerGoalCelebration(type, targetVal) {
   stopStudyTimer(); // Pause timer while popup is open
@@ -1837,14 +1857,29 @@ function bindGoalSystemEvents() {
 function initialize() {
   setRawSetsState(hydrateSets());
   loadSettings();
-  loadGoals(); // 👈 Put loadGoals HERE (after loadSettings)
+  loadGoals(); // 1. Load saved targets (e.g. 5 mins / 10 words)
   
+  // 2. Load daily progress from localStorage
+  const savedProgress = localStorage.getItem("hsk_daily_progress");
+  if (savedProgress) {
+    try {
+      state.dailyProgress = JSON.parse(savedProgress);
+    } catch (e) {
+      console.error("Error parsing daily progress", e);
+    }
+  }
+
+  // 3. Re-check progress state silently so banner & button stay active
+  reevaluateDailyGoals();
+
   renderLobby();
   renderStats();
   renderStreak();
   if (state.activeSetId) renderStudy();
 
+  // 4. Bind events & sync UI
   bindGoalSystemEvents();
 }
+
 bindEvents();
 initialize();
