@@ -15,22 +15,6 @@
   --input-text: #ebf2ff;
 }
 
-body[data-theme="light"] {
-  --bg: #eef4fb;
-  --bg-secondary: rgba(255, 255, 255, 0.7);
-  --panel: rgba(255, 255, 255, 0.88);
-  --panel-strong: rgba(255, 255, 255, 0.98);
-  --text: #142033;
-  --muted: #53647f;
-  --accent: #0f766e;
-  --accent-2: #d97706;
-  --accent-3: #2563eb;
-  --border: rgba(15, 23, 42, 0.1);
-  --shadow: 0 28px 60px rgba(37, 99, 235, 0.1);
-  --input-bg: #ffffff;
-  --input-text: #142033;
-}
-
 body[data-theme="midnight"] {
   --bg: #050816;
   --bg-secondary: rgba(8, 11, 24, 0.78);
@@ -67,10 +51,53 @@ body {
 }
 
 body[data-theme="light"] {
+  /* Core Variables */
+  --bg: #eef4fb;
+  --bg-secondary: rgba(255, 255, 255, 0.7);
+  --panel: rgba(255, 255, 255, 0.98);
+  --panel-strong: #ffffff;
+  --text: #0f172a;
+  --muted: #475569;
+  --accent: #2563eb;
+  --accent-2: #d97706;
+  --accent-3: #0f766e;
+  --border: #cbd5e1;
+  --shadow: 0 28px 60px rgba(37, 99, 235, 0.1);
+  --input-bg: #f8fafc;
+  --input-text: #0f172a;
+  /* Background Gradient */
   background:
     radial-gradient(circle at top left, rgba(14, 165, 233, 0.12), transparent 34%),
     radial-gradient(circle at bottom right, rgba(217, 119, 6, 0.1), transparent 30%),
     linear-gradient(180deg, #f6fbff 0%, var(--bg) 100%);
+}
+
+/* Light Mode Component Overrides */
+body[data-theme="light"] .settings-title,
+body[data-theme="light"] .settings-panel h4,
+body[data-theme="light"] .setting-row strong,
+body[data-theme="light"] .sidebar-item,
+body[data-theme="light"] .sidebar-label {
+  color: #0f172a;
+}
+
+body[data-theme="light"] .sidebar-item.active {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+body[data-theme="light"] .practice-mini-card,
+body[data-theme="light"] .practice-writer,
+body[data-theme="light"] #characterTarget,
+body[data-theme="light"] #charRefDisplay {
+  background-color: #f1f5f9;
+  border-radius: 12px;
+}
+
+body[data-theme="light"] .secondary-btn {
+  background-color: #e2e8f0;
+  color: #0f172a;
+  border: 1px solid #cbd5e1;
 }
 
 /* --- LIGHT MODE DROPDOWN & TEXT CONTRAST FIXES --- */
