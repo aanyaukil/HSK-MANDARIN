@@ -1,3 +1,4 @@
+/* --- YOUR THEME VARIABLES --- */
 :root {
   --bg: #0b1220;
   --bg-secondary: rgba(17, 24, 39, 0.72);
@@ -10,6 +11,8 @@
   --accent-3: #60a5fa;
   --border: rgba(148, 163, 184, 0.18);
   --shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+  --input-bg: rgba(15, 23, 42, 0.6);
+  --input-text: #ebf2ff;
 }
 
 body[data-theme="light"] {
@@ -24,6 +27,8 @@ body[data-theme="light"] {
   --accent-3: #2563eb;
   --border: rgba(15, 23, 42, 0.1);
   --shadow: 0 28px 60px rgba(37, 99, 235, 0.1);
+  --input-bg: #ffffff;
+  --input-text: #142033;
 }
 
 body[data-theme="midnight"] {
@@ -37,6 +42,8 @@ body[data-theme="midnight"] {
   --accent-2: #f97316;
   --accent-3: #a78bfa;
   --border: rgba(148, 163, 184, 0.16);
+  --input-bg: rgba(8, 11, 24, 0.8);
+  --input-text: #f8fafc;
 }
 
 * {
@@ -64,6 +71,71 @@ body[data-theme="light"] {
     radial-gradient(circle at top left, rgba(14, 165, 233, 0.12), transparent 34%),
     radial-gradient(circle at bottom right, rgba(217, 119, 6, 0.1), transparent 30%),
     linear-gradient(180deg, #f6fbff 0%, var(--bg) 100%);
+}
+
+/* --- LIGHT MODE DROPDOWN & TEXT CONTRAST FIXES --- */
+
+.apple-select,
+.settings-select,
+.apple-textarea,
+select {
+  background-color: var(--input-bg) !important;
+  color: var(--input-text) !important;
+  border: 1px solid var(--border) !important;
+}
+
+/* Fixes unreadable option choices in browser popups */
+option {
+  background-color: var(--input-bg) !important;
+  color: var(--input-text) !important;
+}
+
+body[data-theme="light"] option {
+  background-color: #ffffff !important;
+  color: #142033 !important;
+}
+
+/* Cards & Banners using your variables */
+.apple-card,
+.goal-banner,
+.set-card,
+.stat-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+.muted,
+p.muted {
+  color: var(--muted) !important;
+}
+
+/* --- PERFECTLY CENTERED SETTINGS MODAL --- */
+
+.modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;     /* Centers vertically */
+  justify-content: center; /* Centers horizontally */
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+}
+
+.settings-modal-apple {
+  position: relative;
+  z-index: 1001;
+  margin: 0;               /* Prevents lower offset */
+  background: var(--panel-strong);
+  color: var(--text);
+  border: 1px solid var(--border);
 }
 
 button,
