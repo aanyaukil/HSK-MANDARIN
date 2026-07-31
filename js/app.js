@@ -77,7 +77,17 @@ const elements = {
   completionCopy: document.getElementById("completionCopy")
 };
 
-const modals = ["settingsModal", "statsModal", "streakModal", "infoModal", "drawModal", "completionModal", "goalsModal"];
+const modals = [
+  "settingsModal",
+  "statsModal",
+  "streakModal",
+  "infoModal",
+  "drawModal",
+  "completionModal",
+  "goalsModal",
+  "goalCelebrationModal",
+  "goalResetConfirmModal"
+];
 
 function saveSettings() {
   localStorage.setItem(STORAGE_KEYS.settings, JSON.stringify({
