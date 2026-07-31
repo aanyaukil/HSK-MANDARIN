@@ -1189,20 +1189,7 @@ class ArcSlider {
 
 let timeSlider, wordsSlider;
 
-function initGoalSliders() {
-  timeSlider = new ArcSlider({
-    wrapperId: "timeRadial",
-    ticksId: "timeTicks",
-    trackId: "timeTrack",
-    progressId: "timeProgress",
-    handleId: "timeHandle",
-    valueId: "timeVal",
-    tagId: "timeTag",
-    min: 1,
-    max: 60,
-    step: 1,
-    initialValue: Math.min(state.goals.time || 15, 60)
-  });
+
 
   wordsSlider = new ArcSlider({
     wrapperId: "wordsRadial",
@@ -1653,20 +1640,144 @@ function updateDashboardBanner() {
   }
 }
 
+// Variable to store temporary slider selection before confirmation modal choice
+let pendingGoalSelection = null;
+
+// --- 1. Dashboard Navigation Helper ---
+function goToDashboard() {
+  closeAllModals();
+  stopStudyTimer();
+
+  document.querySelectorAll(".screen").forEach((s) => s.classList.remove("active"));
+  const lobby = document.getElementById("lobbyScreen");
+  if (lobby) lobby.classList.add("active");
+
+  updateDashboardBanner();
+  updateGoalsButtonText();
+}
+
+// --- 2. Dynamic Goals / Reset Goal Button Label ---
+function updateGoalsButtonText() {
+  const btn = document.getElementById("openGoalsBtn");
+  if (!btn) return;
+
+  const timeHit = state.dailyProgress?.timeGoalHit;
+  const wordsHit = state.dailyProgress?.wordsGoalHit;
+
+  if (timeHit || wordsHit) {
+    btn.textContent = "Reset Goal";
+  } else {
+    btn.textContent = "Goals";
+  }
+}
+
+// --- 3. Goal Sliders Initializer (Locks Minimum to Completed Floor) ---
+function initGoalSliders() {
+  const timeHit = state.dailyProgress?.timeGoalHit;
+  const wordsHit = state.dailyProgress?.wordsGoalHit;
+
+  const currentMins = Math.floor((state.dailyProgress?.secondsStudied || 0) / 60);
+  const currentWords = state.dailyProgress?.wordsMasteredToday?.length || 0;
+
+  // Set floor to accomplished level if goal was hit, otherwise 1
+  const timeMin = timeHit ? Math.max(currentMins, state.goals?.time || 1) : 1;
+  const wordsMin = wordsHit ? Math.max(currentWords, state.goals?.words || 1) : 1;
+
+  timeSlider = new ArcSlider({
+    wrapperId: "timeRadial",
+    ticksId: "timeTicks",
+    trackId: "timeTrack",
+    progressId: "timeProgress",
+    handleId: "timeHandle",
+    valueId: "timeVal",
+    tagId: "timeTag",
+    min: timeMin,
+    max: 60,
+    step: 1,
+    initialValue: Math.max(state.goals?.time || 15, timeMin)
+  });
+
+  wordsSlider = new ArcSlider({
+    wrapperId: "wordsRadial",
+    ticksId: "wordsTicks",
+    trackId: "wordsTrack",
+    progressId: "wordsProgress",
+    handleId: "wordsHandle",
+    valueId: "wordsVal",
+    tagId: "wordsTag",
+    min: wordsMin,
+    max: 40,
+    step: 1,
+    initialValue: Math.max(state.goals?.words || 20, wordsMin)
+  });
+}
+
+// --- 4. Event Listeners ---
 function bindGoalSystemEvents() {
-  // 1. Celebration Popup Buttons
+  // Celebration Modal Buttons
   document.getElementById("celebrationDashboardBtn")?.addEventListener("click", () => {
     closeModal("goalCelebrationModal");
-    showScreen("lobbyScreen");
+    goToDashboard();
   });
 
   document.getElementById("celebrationContinueBtn")?.addEventListener("click", () => {
     closeModal("goalCelebrationModal");
-    startStudyTimer(); // Resume timing when continuing study
+    startStudyTimer();
   });
 
-  // 2. Initial Dashboard Banner Check
+  // Open Goals Modal (Loads fresh sliders with limits)
+  document.getElementById("openGoalsBtn")?.addEventListener("click", () => {
+    openModal("goalsModal");
+    initGoalSliders();
+  });
+
+  // Save Goals -> Opens Second Confirmation Modal
+  document.getElementById("saveGoalsBtn")?.addEventListener("click", () => {
+    if (timeSlider && wordsSlider) {
+      pendingGoalSelection = {
+        time: timeSlider.val,
+        words: wordsSlider.val
+      };
+      closeModal("goalsModal");
+      openModal("goalResetConfirmModal");
+    }
+  });
+
+  // Choice 1: Reset Just for Today
+  document.getElementById("resetTodayOnlyBtn")?.addEventListener("click", () => {
+    if (pendingGoalSelection) {
+      state.goals = { ...pendingGoalSelection };
+      
+      if (state.dailyProgress) {
+        state.dailyProgress.timeGoalHit = false;
+        state.dailyProgress.wordsGoalHit = false;
+        saveDailyProgress();
+      }
+    }
+    closeModal("goalResetConfirmModal");
+    updateDashboardBanner();
+    updateGoalsButtonText();
+  });
+
+  // Choice 2: Change Goal Forever
+  document.getElementById("resetForeverBtn")?.addEventListener("click", () => {
+    if (pendingGoalSelection) {
+      state.goals = { ...pendingGoalSelection };
+      localStorage.setItem("hsk_goals_v2", JSON.stringify(state.goals));
+
+      if (state.dailyProgress) {
+        state.dailyProgress.timeGoalHit = false;
+        state.dailyProgress.wordsGoalHit = false;
+        saveDailyProgress();
+      }
+    }
+    closeModal("goalResetConfirmModal");
+    updateDashboardBanner();
+    updateGoalsButtonText();
+  });
+
   updateDashboardBanner();
+  updateGoalsButtonText();
 }
 
 function initialize() {
