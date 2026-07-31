@@ -1557,10 +1557,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 // 1. Daily Tracking State Initialization
-const todayKey = new Date().toISOString().split("T")[0];
-if (!state.dailyProgress || state.dailyProgress.date !== todayKey) {
+const progressTodayKey = new Date().toISOString().split("T")[0];
+
+if (!state.dailyProgress || state.dailyProgress.date !== progressTodayKey) {
   state.dailyProgress = {
-    date: todayKey,
+    date: progressTodayKey,
     secondsStudied: 0,
     wordsMasteredToday: [],
     timeGoalHit: false,
