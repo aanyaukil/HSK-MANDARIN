@@ -616,10 +616,6 @@ function renderStats() {
   });
 }
 
-function todayKey(ts = Date.now()) {
-  return new Date(ts).toISOString().slice(0, 10);
-}
-
 function loadStreakData() {
   return JSON.parse(localStorage.getItem(STORAGE_KEYS.streak) || '{"days":[],"best":0}');
 }
@@ -1583,15 +1579,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-// 1. Daily Tracking State Initialization
+// Local timezone date helper (Format: YYYY-MM-DD)
+function getLocalDateKey(ts = Date.now()) {
+  return new Date(ts).toLocaleDateString("en-CA");
+}
+
+function todayKey(ts = Date.now()) {
+  return getLocalDateKey(ts);
+}
+
+// 1. Daily Tracking State Initialization (Resets at local 00:00)
 function loadDailyProgress() {
-  const progressTodayKey = new Date().toISOString().split("T")[0];
+  const progressTodayKey = getLocalDateKey();
   const saved = localStorage.getItem("hsk_daily_progress");
 
   if (saved) {
     try {
       const parsed = JSON.parse(saved);
-      // If saved data is from TODAY, keep it!
+      // Keeps progress if it belongs to TODAY in the user's local timezone
       if (parsed && parsed.date === progressTodayKey) {
         state.dailyProgress = parsed;
         return;
@@ -1601,7 +1606,7 @@ function loadDailyProgress() {
     }
   }
 
-  // Otherwise (new day or first run), initialize fresh for today
+  // Resets daily stats & goals clean at local midnight
   state.dailyProgress = {
     date: progressTodayKey,
     secondsStudied: 0,
