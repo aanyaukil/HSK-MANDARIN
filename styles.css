@@ -84,7 +84,7 @@ body[data-theme="light"] {
 
 /* 1. TOP BANNER SUBTITLE TEXT: SOLID BLACK */
 body[data-theme="light"] .hero-subtitle,
-body[data-theme="light"] .banner-subtitle,
+body[data-theme="light"] .hero-copy,
 body[data-theme="light"] .top-banner p,
 body[data-theme="light"] .goal-banner p,
 body[data-theme="light"] .eyebrow-description {
