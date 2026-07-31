@@ -180,87 +180,238 @@
   </div>
 
 <div id="settingsModal" class="modal hidden">
-  <div class="modal-card wide"> <div class="modal-head">
-      <div>
-        <p class="eyebrow">PREFERENCES</p>
-        <h2>Study Settings</h2>
-      </div>
-      <button class="close-btn" data-close-modal="settingsModal">&times;</button>
+  <div class="modal-backdrop" data-close-modal="settingsModal"></div>
+  <div class="modal-card settings-modal-apple">
+    
+    <div class="settings-header">
+      <h3 class="settings-title">Preferences</h3>
+      <button class="icon-btn close-modal-btn" data-close-modal="settingsModal">✕</button>
     </div>
 
-    <div class="settings-grid">
-      <div class="settings-box">
-        <h3>Appearance</h3>
-        <div class="setting-item">
-          <label>Theme</label>
-          <select id="themeSelect" class="settings-select">
-            <option value="midnight">Midnight</option>
-            <option value="dark">Dark Mode</option>
-            <option value="light">Light Mode</option>
-            <option value="aurora">Aurora</option>
-          </select>
+    <div class="settings-body">
+      <nav class="settings-sidebar">
+        <div class="sidebar-group">
+          <p class="sidebar-label">General</p>
+          <button class="sidebar-item active" data-tab="accountTab">👤 Account & Sync</button>
+          <button class="sidebar-item" data-tab="appearanceTab">🎨 Appearance</button>
+          <button class="sidebar-item" data-tab="studyTab">📚 Study Modes</button>
+          <button class="sidebar-item" data-tab="controlsTab">⌨️ Controls & Shortcuts</button>
         </div>
-        <div class="setting-item">
-          <label>Font Size</label>
-          <input id="fontSizeRange" type="range" min="10" max="25" value="16" class="settings-slider" />
-        </div>
-        <p class="settings-note">Scales the interface for better readability.</p>
-      </div>
 
-      <div class="settings-box">
-        <h3>Study Mode</h3>
-        <div class="setting-item">
-          <label>Default card front</label>
-          <select id="defaultFrontSelect" class="settings-select">
-            <option value="hanzi">Mandarin</option>
-            <option value="pinyin">Pinyin</option>
-            <option value="english">Translation</option>
-          </select>
+        <div class="sidebar-group">
+          <p class="sidebar-label">Support & Info</p>
+          <button class="sidebar-item" data-tab="feedbackTab">💬 Send Feedback</button>
+          <button class="sidebar-item" data-tab="featureTab">💡 Suggest a Feature</button>
+          <button class="sidebar-item" data-tab="helpTab">❓ Help & Tutorials</button>
+          <button class="sidebar-item" data-tab="privacyTab">📜 Privacy Policy</button>
+          <button class="sidebar-item" data-tab="aboutTab">ℹ️ About</button>
         </div>
-        <div class="setting-item">
-          <label>Speech speed</label>
-          <input id="speechSpeedRange" type="range" min="0.5" max="1.5" step="0.1" value="0.8" class="settings-slider" />
-        </div>
-        <div class="setting-item checkbox-item">
-          <label>Auto-flip next card</label>
-          <input id="autoResetFlipToggle" type="checkbox" checked />
-        </div>
-      </div>
+      </nav>
 
-      <div class="settings-box">
-        <h3>Progress Gating</h3>
-        <p class="settings-note">
-          HSK 2 unlocks only when every HSK 1 card is marked as mastered. Mark cards as <b>Mastered</b> to progress.
-        </p>
-      </div>
-    </div>
+      <main class="settings-content">
+        
+        <section id="accountTab" class="settings-panel active">
+          <h4>Account & Cloud Sync</h4>
+          <div class="apple-card">
+            <div class="setting-row">
+              <div>
+                <strong>User Profile</strong>
+                <p class="muted">Signed in as Guest</p>
+              </div>
+              <button class="secondary-btn" id="loginBtn">Sign In</button>
+            </div>
+            <hr class="divider" />
+            <div class="setting-row">
+              <div>
+                <strong>Cloud Backup ☁️</strong>
+                <p class="muted">Sync cards and daily progress across devices</p>
+              </div>
+              <button class="secondary-btn" id="syncNowBtn">Sync Now</button>
+            </div>
+          </div>
 
-    <hr class="settings-divider" />
+          <h4>Data Transfer</h4>
+          <div class="apple-card">
+            <div class="setting-row">
+              <div>
+                <strong>Export Progress</strong>
+                <p class="muted">Save a JSON backup of your flashcards</p>
+              </div>
+              <button class="secondary-btn" id="exportBtn">Export</button>
+            </div>
+            <hr class="divider" />
+            <div class="setting-row">
+              <div>
+                <strong>Import Progress</strong>
+                <p class="muted">Restore progress from a JSON file</p>
+              </div>
+              <input type="file" id="importFile" accept=".json" style="display: none;" />
+              <button class="secondary-btn" onclick="document.getElementById('importFile').click()">Import File</button>
+            </div>
+          </div>
+        </section>
 
-    <div class="shortcuts-section">
-      <div class="shortcuts-group">
-        <h3>Flashcard Controls</h3>
-        <div class="shortcuts-grid">
-          <div class="shortcut-pill"><kbd>Space</kbd> Flip</div>
-          <div class="shortcut-pill"><kbd>←</kbd> <kbd>→</kbd> Navigate</div>
-          <div class="shortcut-pill"><kbd>1</kbd> Review</div>
-          <div class="shortcut-pill"><kbd>2</kbd> Master</div>
-          <div class="shortcut-pill"><kbd>3</kbd> Star</div>
-          <div class="shortcut-pill"><kbd>Z</kbd> Undo</div>
-          <div class="shortcut-pill"><kbd>S</kbd> Settings</div>
-        </div>
-      </div>
+        <section id="appearanceTab" class="settings-panel">
+          <h4>Appearance & Display</h4>
+          <div class="apple-card">
+            <div class="setting-row">
+              <div>
+                <strong>Theme</strong>
+                <p class="muted">Choose your interface colors</p>
+              </div>
+              <select id="themeSelect" class="apple-select">
+                <option value="aurora">Aurora Dark</option>
+                <option value="dark">Dark Mode</option>
+                <option value="light">Light Mode</option>
+              </select>
+            </div>
+            <hr class="divider" />
+            <div class="setting-row">
+              <div>
+                <strong>Font Size</strong>
+                <p class="muted">Adjust base text readability</p>
+              </div>
+              <input type="range" id="fontSizeRange" min="12" max="22" step="1" />
+            </div>
+          </div>
+        </section>
 
-      <div class="shortcuts-group">
-        <h3>Drawing Pad Controls</h3>
-        <div class="shortcuts-grid">
-          <div class="shortcut-pill"><kbd>C</kbd> Clear Canvas</div>
-          <div class="shortcut-pill"><kbd>Z</kbd> Undo Stroke</div>
-          <div class="shortcut-pill"><kbd>R</kbd> Replay Animation</div>
-          <div class="shortcut-pill"><kbd>←</kbd> <kbd>→</kbd> Switch Character</div>
-          <div class="shortcut-pill"><kbd>Esc</kbd> Close</div>
-        </div>
-      </div>
+        <section id="studyTab" class="settings-panel">
+          <h4>Flashcard & Audio Settings</h4>
+          <div class="apple-card">
+            <div class="setting-row">
+              <div>
+                <strong>Default Front Mode</strong>
+                <p class="muted">Choose default face on card load</p>
+              </div>
+              <select id="defaultFrontSelect" class="apple-select">
+                <option value="hanzi">Mandarin (Hanzi)</option>
+                <option value="pinyin">Pinyin</option>
+                <option value="english">Translation</option>
+              </select>
+            </div>
+            <hr class="divider" />
+            <div class="setting-row">
+              <div>
+                <strong>Speech Speed</strong>
+                <p class="muted">Pacing for character pronunciation</p>
+              </div>
+              <input type="range" id="speechSpeedRange" min="0.5" max="1.5" step="0.1" />
+            </div>
+            <hr class="divider" />
+            <div class="setting-row">
+              <div>
+                <strong>Auto-reset Flip</strong>
+                <p class="muted">Automatically flip front on next card</p>
+              </div>
+              <label class="apple-switch">
+                <input type="checkbox" id="autoResetFlipToggle" />
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <h4>Progress Gating</h4>
+          <div class="apple-card">
+            <p class="muted">HSK 2 unlocks only when every HSK 1 card is marked as mastered. Mark cards as <strong>Mastered</strong> during study to progress.</p>
+          </div>
+        </section>
+
+        <section id="controlsTab" class="settings-panel">
+          <h4>Flashcard Shortcuts</h4>
+          <div class="apple-card grid-shortcuts">
+            <div class="shortcut-item"><kbd>Space</kbd> <span>Flip Card</span></div>
+            <div class="shortcut-item"><kbd>← / →</kbd> <span>Navigate Deck</span></div>
+            <div class="shortcut-item"><kbd>1</kbd> <span>Mark Needs Review</span></div>
+            <div class="shortcut-item"><kbd>2</kbd> <span>Mark Mastered</span></div>
+            <div class="shortcut-item"><kbd>3</kbd> <span>Star Word</span></div>
+            <div class="shortcut-item"><kbd>Z</kbd> <span>Undo Rating</span></div>
+            <div class="shortcut-item"><kbd>S</kbd> <span>Open Settings</span></div>
+          </div>
+
+          <h4>Drawing Pad Shortcuts</h4>
+          <div class="apple-card grid-shortcuts">
+            <div class="shortcut-item"><kbd>C</kbd> <span>Clear Canvas</span></div>
+            <div class="shortcut-item"><kbd>Z</kbd> <span>Undo Stroke</span></div>
+            <div class="shortcut-item"><kbd>R</kbd> <span>Replay Animation</span></div>
+            <div class="shortcut-item"><kbd>← / →</kbd> <span>Switch Character</span></div>
+            <div class="shortcut-item"><kbd>Esc</kbd> <span>Close Overlay</span></div>
+          </div>
+        </section>
+
+        <section id="feedbackTab" class="settings-panel">
+          <h4>Send Feedback</h4>
+          <div class="apple-card">
+            <p class="muted" style="margin-bottom: 0.75rem;">Found a bug or have thoughts on the study experience?</p>
+            <textarea id="feedbackText" class="apple-textarea" placeholder="Write your feedback here..."></textarea>
+            <div style="margin-top: 0.75rem; text-align: right;">
+              <button class="primary-btn" id="sendFeedbackBtn">Submit Feedback</button>
+            </div>
+          </div>
+        </section>
+
+        <section id="featureTab" class="settings-panel">
+          <h4>Suggest a Feature</h4>
+          <div class="apple-card">
+            <p class="muted" style="margin-bottom: 0.75rem;">What features would help you learn Mandarin faster?</p>
+            <textarea id="featureText" class="apple-textarea" placeholder="Describe your feature idea..."></textarea>
+            <div style="margin-top: 0.75rem; text-align: right;">
+              <button class="primary-btn" id="sendFeatureBtn">Send Suggestion</button>
+            </div>
+          </div>
+        </section>
+
+        <section id="helpTab" class="settings-panel">
+          <h4>Help & Interactive Tutorials</h4>
+          <div class="apple-card">
+            <div class="setting-row">
+              <div>
+                <strong>Interactive App Tour</strong>
+                <p class="muted">Launch guided walkthrough animation</p>
+              </div>
+              <button class="primary-btn" id="appTourBtn">Start Tour 🚀</button>
+            </div>
+            <hr class="divider" />
+            <div class="setting-row">
+              <div>
+                <strong>Show Tips on Boot</strong>
+                <p class="muted">Display daily study tips when launching</p>
+              </div>
+              <label class="apple-switch">
+                <input type="checkbox" id="showTipsToggle" checked />
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <section id="privacyTab" class="settings-panel">
+          <h4>Privacy Policy</h4>
+          <div class="apple-card">
+            <p style="margin-bottom: 0.5rem;"><strong>100% Local & Private</strong></p>
+            <p class="muted">Your flashcard progress, custom goals, and stroke drawings are stored locally inside your web browser via <code>localStorage</code>. No personal study metrics are sent to remote tracking servers without your explicit consent.</p>
+          </div>
+        </section>
+
+        <section id="aboutTab" class="settings-panel">
+          <h4>About Mandarin Study Hub</h4>
+          <div class="apple-card">
+            <p style="margin-bottom: 0.5rem;"><strong>Mandarin HSK Flashcards v2.0</strong></p>
+            <p class="muted" style="margin-bottom: 1rem;">An interactive study platform featuring spaced repetition, animated Hanzi stroke orders, and customizable daily goals.</p>
+            <div class="setting-row">
+              <div>
+                <strong>Show Quick App Intro</strong>
+                <p class="muted">Display intro banner on dashboard</p>
+              </div>
+              <label class="apple-switch">
+                <input type="checkbox" id="showIntroToggle" checked />
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+        </section>
+
+      </main>
     </div>
   </div>
 </div>
