@@ -1544,3 +1544,140 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
+
+
+
+
+
+// 1. Daily Tracking State Initialization
+const todayKey = new Date().toISOString().split("T")[0];
+if (!state.dailyProgress || state.dailyProgress.date !== todayKey) {
+  state.dailyProgress = {
+    date: todayKey,
+    secondsStudied: 0,
+    wordsMasteredToday: [],
+    timeGoalHit: false,
+    wordsGoalHit: false
+  };
+  localStorage.setItem("hsk_daily_progress", JSON.stringify(state.dailyProgress));
+}
+
+let studyTimerInterval = null;
+
+// 2. Timer Control Functions
+function startStudyTimer() {
+  if (studyTimerInterval) return;
+  studyTimerInterval = setInterval(() => {
+    state.dailyProgress.secondsStudied += 1;
+    saveDailyProgress();
+    checkGoalMilestones();
+  }, 1000);
+}
+
+function stopStudyTimer() {
+  if (studyTimerInterval) {
+    clearInterval(studyTimerInterval);
+    studyTimerInterval = null;
+  }
+}
+
+function saveDailyProgress() {
+  localStorage.setItem("hsk_daily_progress", JSON.stringify(state.dailyProgress));
+}
+
+// 3. Track Words Mastered (Call this inside your Flashcard "Mastered" button handler)
+function trackWordMastered(wordId) {
+  if (!state.dailyProgress.wordsMasteredToday.includes(wordId)) {
+    state.dailyProgress.wordsMasteredToday.push(wordId);
+    saveDailyProgress();
+    checkGoalMilestones();
+  }
+}
+
+// 4. Milestone Check & Popup Trigger
+function checkGoalMilestones() {
+  const timeGoalMins = state.goals?.time || 15;
+  const wordsGoalCount = state.goals?.words || 20;
+
+  const currentMins = Math.floor(state.dailyProgress.secondsStudied / 60);
+  const currentWords = state.dailyProgress.wordsMasteredToday.length;
+
+  // Check Time Goal
+  if (currentMins >= timeGoalMins && !state.dailyProgress.timeGoalHit) {
+    state.dailyProgress.timeGoalHit = true;
+    saveDailyProgress();
+    triggerGoalCelebration("time", timeGoalMins);
+    updateDashboardBanner();
+  }
+
+  // Check Words Goal
+  if (currentWords >= wordsGoalCount && !state.dailyProgress.wordsGoalHit) {
+    state.dailyProgress.wordsGoalHit = true;
+    saveDailyProgress();
+    triggerGoalCelebration("words", wordsGoalCount);
+    updateDashboardBanner();
+  }
+}
+
+// 5. Celebration Modal Handler
+function triggerGoalCelebration(type, targetVal) {
+  stopStudyTimer(); // Pause timer while popup is open
+
+  const titleEl = document.getElementById("celebrationTitle");
+  const msgEl = document.getElementById("celebrationMessage");
+
+  if (type === "time") {
+    titleEl.textContent = "Time Goal Completed!";
+    msgEl.textContent = `Well done! You've studied for ${targetVal} minutes today. You can keep studying if you want.`;
+  } else {
+    titleEl.textContent = "Word Target Achieved!";
+    msgEl.textContent = `Awesome job! You mastered ${targetVal} words today. You can keep studying if you want.`;
+  }
+
+  openModal("goalCelebrationModal");
+}
+
+// 6. Update Banner on Dashboard
+function updateDashboardBanner() {
+  const banner = document.getElementById("goalCompletionBanner");
+  const bannerTitle = document.getElementById("goalBannerTitle");
+  const bannerText = document.getElementById("goalBannerText");
+
+  const timeHit = state.dailyProgress.timeGoalHit;
+  const wordsHit = state.dailyProgress.wordsGoalHit;
+
+  if (!timeHit && !wordsHit) {
+    banner?.classList.add("hidden");
+    return;
+  }
+
+  banner?.classList.remove("hidden");
+
+  if (timeHit && wordsHit) {
+    bannerTitle.textContent = "All Daily Goals Completed! 🔥";
+    bannerText.textContent = "You completed both your study time and word targets for today! Feel free to keep studying.";
+  } else if (timeHit) {
+    bannerTitle.textContent = "Time Goal Completed! 🔥";
+    bannerText.textContent = "You reached your daily study time goal. You can keep studying if you want.";
+  } else if (wordsHit) {
+    bannerTitle.textContent = "Word Target Completed! 🔥";
+    bannerText.textContent = "You reached your daily mastered words goal. You can keep studying if you want.";
+  }
+}
+
+// 7. Bind Screen Navigation & Modal Buttons
+function bindGoalSystemEvents() {
+  // Celebration Popup Buttons
+  document.getElementById("celebrationDashboardBtn")?.addEventListener("click", () => {
+    closeModal("goalCelebrationModal");
+    showScreen("lobbyScreen");
+  });
+
+  document.getElementById("celebrationContinueBtn")?.addEventListener("click", () => {
+    closeModal("goalCelebrationModal");
+    startStudyTimer(); // Resume timing
+  });
+
+  // Call updateDashboardBanner when loading lobby screen
+  updateDashboardBanner();
+}
