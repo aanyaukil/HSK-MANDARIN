@@ -766,8 +766,8 @@ function openDraw() {
         padding: 10,
         showOutline: true,
         showStroke: true,
-        strokeColor: "#ffffff", // White character stroke
-        outlineColor: "rgba(255, 255, 255, 0.2)"
+        strokeColor: state.theme === "light" ? "#0f172a" : "#ffffff",
+        outlineColor: state.theme === "light" ? "rgba(15, 23, 42, 0.2)" : "rgba(255, 255, 255, 0.2)"
       });
       window.hanziWriterInstance.animateCharacter();
     } catch (err) {
